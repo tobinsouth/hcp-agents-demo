@@ -143,8 +143,8 @@ export function AgentNegotiation() {
         </Card>
 
         {/* Negotiation Messages */}
-        <Card className="flex-1 p-4">
-          <ScrollArea className="h-full">
+        <Card className="flex-1 p-4 min-h-0">
+          <ScrollArea className="h-full max-h-[400px]">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">

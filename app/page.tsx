@@ -6,17 +6,16 @@ import { AgentNegotiation } from "@/components/agent-negotiation"
 
 export default function HomePage() {
   return (
-    <div className="h-screen overflow-hidden bg-background p-6">
-      <div className="h-full max-w-7xl mx-auto flex flex-col">
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center space-y-2 flex-shrink-0 mb-6">
+        <div className="text-center space-y-2 mb-6">
           <h1 className="text-4xl font-bold text-foreground">AI Agent Negotiation Demo</h1>
           <p className="text-muted-foreground text-lg">Chat to generate preferences, then watch AI agents negotiate</p>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden">
-          <div className="space-y-8 pb-8">
+        <div className="space-y-8 pb-8">
             {/* Top Row: Chat and Preferences */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
               <Card className="p-6 flex flex-col overflow-hidden">
@@ -41,7 +40,6 @@ export default function HomePage() {
                 <AgentNegotiation />
               </div>
             </Card>
-          </div>
         </div>
       </div>
     </div>
