@@ -20,8 +20,8 @@ const OPENROUTER_MODELS = [
 ]
 
 export function AgentNegotiation() {
-  const [leftCollapsed, setLeftCollapsed] = useState(false)
-  const [rightCollapsed, setRightCollapsed] = useState(false)
+  const [leftCollapsed, setLeftCollapsed] = useState(true)
+  const [rightCollapsed, setRightCollapsed] = useState(true)
   const [contextInput, setContextInput] = useState(
     "Negotiate a software licensing deal where the buyer wants affordable pricing and good support, while the seller needs profitable terms and reasonable support commitments.",
   )
@@ -65,8 +65,8 @@ export function AgentNegotiation() {
     <div className="flex h-[600px] gap-4">
       {/* Left Sidebar - My Agent */}
       <Collapsible open={!leftCollapsed} onOpenChange={(open) => setLeftCollapsed(!open)}>
-        <div className="flex">
-          <CollapsibleContent className="w-80">
+        <div className="flex h-full">
+          <CollapsibleContent className="w-80 h-full">
             <Card className="h-full p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
@@ -78,7 +78,11 @@ export function AgentNegotiation() {
             </Card>
           </CollapsibleContent>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-full px-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-full w-6 px-0 hover:bg-accent"
+            >
               {leftCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             </Button>
           </CollapsibleTrigger>
@@ -162,13 +166,17 @@ export function AgentNegotiation() {
 
       {/* Right Sidebar - Opponent Agent */}
       <Collapsible open={!rightCollapsed} onOpenChange={(open) => setRightCollapsed(!open)}>
-        <div className="flex">
+        <div className="flex h-full">
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-full px-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-full w-6 px-0 hover:bg-accent"
+            >
               {rightCollapsed ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="w-80">
+          <CollapsibleContent className="w-80 h-full">
             <Card className="h-full p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">

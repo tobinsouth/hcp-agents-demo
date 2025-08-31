@@ -5,9 +5,6 @@
  * managing the conversation flow and turn-taking logic.
  */
 
-import { myAgent } from "./my-agent"
-import { opponentAgent } from "./opponent-agent"
-
 export interface NegotiationMessage {
   agent: "my_agent" | "opponent_agent"
   content: string
@@ -35,17 +32,22 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
 
   try {
     // Opponent agent's opening move
-    const opponentResponse = await opponentAgent({
-      context,
-      systemPrompt: opponentSystemPrompt,
-      model: opponentModel,
-      conversationHistory: [
-        {
-          role: "user",
-          content: `Let's begin negotiating this scenario: ${context}. Please make your opening position.`,
-        },
-      ],
-    })
+    const opponentResponse = await fetch("/api/negotiate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        agent: "opponent_agent",
+        context,
+        systemPrompt: opponentSystemPrompt,
+        model: opponentModel,
+        conversationHistory: [
+          {
+            role: "user",
+            content: `Let's begin negotiating this scenario: ${context}. Please make your opening position.`,
+          },
+        ],
+      }),
+    }).then(res => res.json()).then(data => data.text)
 
     const initialMessage: NegotiationMessage = {
       agent: "opponent_agent",
@@ -67,24 +69,38 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
 
       if (isMyAgentTurn) {
         // My agent's turn
-        response = await myAgent({
-          context,
-          conversationHistory: conversationHistory.map((m) => ({
-            role: m.agent === "opponent_agent" ? "user" : "assistant",
-            content: m.content,
-          })),
+        const res = await fetch("/api/negotiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent: "my_agent",
+            context,
+            conversationHistory: conversationHistory.map((m) => ({
+              role: m.agent === "opponent_agent" ? "user" : "assistant",
+              content: m.content,
+            })),
+          }),
         })
+        const data = await res.json()
+        response = data.text
       } else {
         // Opponent agent's turn
-        response = await opponentAgent({
-          context,
-          systemPrompt: opponentSystemPrompt,
-          model: opponentModel,
-          conversationHistory: conversationHistory.map((m) => ({
-            role: m.agent === "my_agent" ? "user" : "assistant",
-            content: m.content,
-          })),
+        const res = await fetch("/api/negotiate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent: "opponent_agent",
+            context,
+            systemPrompt: opponentSystemPrompt,
+            model: opponentModel,
+            conversationHistory: conversationHistory.map((m) => ({
+              role: m.agent === "my_agent" ? "user" : "assistant",
+              content: m.content,
+            })),
+          }),
         })
+        const data = await res.json()
+        response = data.text
       }
 
       const message: NegotiationMessage = {
