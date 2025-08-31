@@ -37,9 +37,9 @@ export function PreferenceDatabaseUI() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full space-y-4">
       {/* Header with last updated */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
           <Database className="w-4 h-4" />
           <span className="text-sm font-medium">Live Database</span>
@@ -53,7 +53,7 @@ export function PreferenceDatabaseUI() {
       </div>
 
       {/* JSON Display */}
-      <ScrollArea className="h-[350px]">
+      <ScrollArea className="flex-1 min-h-0">
         <Card className="p-4 bg-muted/50">
           <pre className="text-xs text-foreground whitespace-pre-wrap font-mono">
             {JSON.stringify(preferences, null, 2)}

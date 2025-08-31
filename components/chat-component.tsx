@@ -96,10 +96,10 @@ export function ChatComponent() {
   }
 
   return (
-    <div className="flex flex-col h-[500px]">
+    <div className="flex flex-col h-full">
       {/* Messages */}
-      <ScrollArea className="flex-1 mb-4">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 mb-4 min-h-0">
+        <div className="space-y-4 pr-4">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Bot className="w-12 h-12 mx-auto mb-2 opacity-50" />
