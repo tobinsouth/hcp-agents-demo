@@ -17,7 +17,7 @@ interface Message {
 
 export function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState("What are the key styles of dining room chairs?")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,8 +103,8 @@ export function ChatComponent() {
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Bot className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>Start chatting to generate preferences...</p>
-              <p className="text-xs mt-2">Try: "I prefer direct communication and value quality over price"</p>
+              <p>Start chatting to learn about furniture...</p>
+              <p className="text-xs mt-2">Try: "What are the key styles of dining room chairs?"</p>
             </div>
           ) : (
             messages.map((message) => (
@@ -147,7 +147,7 @@ export function ChatComponent() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Tell me about your preferences..."
+          placeholder="Ask about furniture or share your preferences..."
           disabled={isLoading}
           className="flex-1"
         />

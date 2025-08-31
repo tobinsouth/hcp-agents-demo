@@ -14,9 +14,14 @@ export async function POST(req: NextRequest) {
     let finalSystemPrompt: string
 
     if (agent === "my_agent") {
-      // Build system prompt based on user preferences
-      const preferences = getPreferences()
-      finalSystemPrompt = buildMyAgentPrompt(preferences, context)
+      // Use provided system prompt or build from preferences
+      if (systemPrompt) {
+        const preferences = getPreferences()
+        finalSystemPrompt = `${systemPrompt}\n\nCurrent Preferences Database:\n${JSON.stringify(preferences, null, 2)}\n\nNegotiation Context: ${context}`
+      } else {
+        const preferences = getPreferences()
+        finalSystemPrompt = buildMyAgentPrompt(preferences, context)
+      }
     } else {
       // Use provided system prompt for opponent
       finalSystemPrompt = `${systemPrompt}\n\nNegotiation Context: ${context}\n\nRespond as the other party in this negotiation. Keep responses concise but substantive.`
@@ -94,6 +99,28 @@ function buildMyAgentPrompt(preferences: any, context: string): string {
     if (timeline) prompt += `- Timeline: ${timeline}\n`
     if (technical_requirements?.length) {
       prompt += `- Technical requirements: ${technical_requirements.join(", ")}\n`
+    }
+    prompt += "\n"
+  }
+
+  // Domain-specific preferences (e.g., furniture)
+  if (preferences.domains?.furniture) {
+    const furniture = preferences.domains.furniture
+    prompt += `Furniture Preferences:\n`
+    if (furniture.style_preferences?.length) {
+      prompt += `- Preferred styles: ${furniture.style_preferences.join(", ")}\n`
+    }
+    if (furniture.material_preferences?.length) {
+      prompt += `- Preferred materials: ${furniture.material_preferences.join(", ")}\n`
+    }
+    if (furniture.color_preferences?.length) {
+      prompt += `- Preferred colors: ${furniture.color_preferences.join(", ")}\n`
+    }
+    if (furniture.functionality_priorities?.length) {
+      prompt += `- Functionality priorities: ${furniture.functionality_priorities.join(", ")}\n`
+    }
+    if (furniture.room_types?.length) {
+      prompt += `- Room types: ${furniture.room_types.join(", ")}\n`
     }
     prompt += "\n"
   }

@@ -14,8 +14,8 @@ export default function HomePage() {
           <p className="text-muted-foreground text-lg">Chat to generate preferences, then watch AI agents negotiate</p>
         </div>
 
-        {/* Main Content with Scrolling */}
-        <div className="flex-1 overflow-y-auto">
+        {/* Main Content */}
+        <div className="flex-1 overflow-hidden">
           <div className="space-y-8 pb-8">
             {/* Top Row: Chat and Preferences */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">

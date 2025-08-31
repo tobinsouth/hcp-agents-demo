@@ -12,8 +12,8 @@ import { ChevronLeft, ChevronRight, Play, Square, Settings, User } from "lucide-
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 
 const OPENROUTER_MODELS = [
+  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini (Default)" },
   { id: "openai/gpt-4o", name: "GPT-4o" },
-  { id: "openai/gpt-4o-mini", name: "GPT-4o Mini" },
   { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet" },
   { id: "anthropic/claude-3-haiku", name: "Claude 3 Haiku" },
   { id: "meta-llama/llama-3.1-70b-instruct", name: "Llama 3.1 70B" },
@@ -23,12 +23,15 @@ export function AgentNegotiation() {
   const [leftCollapsed, setLeftCollapsed] = useState(true)
   const [rightCollapsed, setRightCollapsed] = useState(true)
   const [contextInput, setContextInput] = useState(
-    "Negotiate a software licensing deal where the buyer wants affordable pricing and good support, while the seller needs profitable terms and reasonable support commitments.",
+    "Negotiate the purchase of dining room chairs. The buyer is looking for modern, sustainable chairs in earthy tones with green accents for their home office. They value quality and sustainability but are price-conscious.",
   )
-  const [systemPrompt, setSystemPrompt] = useState(
-    "You are a skilled business negotiator representing a software company. You want to close deals at profitable prices while maintaining good customer relationships. Be strategic but fair, and look for win-win solutions.",
+  const [opponentSystemPrompt, setOpponentSystemPrompt] = useState(
+    "You are a furniture salesperson specializing in dining room furniture. Your goal is to upsell the customer by highlighting premium features, extended warranties, and complementary items like cushions or chair sets. Emphasize quality, craftsmanship, and long-term value. Be persuasive but not pushy.",
   )
-  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o")
+  const [myAgentSystemPrompt, setMyAgentSystemPrompt] = useState(
+    "You are negotiating on behalf of a buyer looking for dining room chairs. Use the preference database to guide your negotiation - the buyer values sustainability, natural materials, and earthy colors with green accents. Find the best price while ensuring the furniture meets the preferences for quality, style, and eco-friendliness. Be firm on requirements but flexible on price within reason.",
+  )
+  const [selectedModel, setSelectedModel] = useState("openai/gpt-4o-mini")
   const [isNegotiating, setIsNegotiating] = useState(false)
   const [messages, setMessages] = useState<NegotiationMessage[]>([])
 
@@ -41,8 +44,9 @@ export function AgentNegotiation() {
     try {
       await startNegotiation({
         context: contextInput,
-        opponentSystemPrompt: systemPrompt,
+        opponentSystemPrompt: opponentSystemPrompt,
         opponentModel: selectedModel,
+        myAgentSystemPrompt: myAgentSystemPrompt,
         onMessage: (message) => {
           setMessages((prev) => [...prev, message])
         },
@@ -74,7 +78,22 @@ export function AgentNegotiation() {
                   My Agent
                 </h3>
               </div>
-              <PreferenceDatabaseUI />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">System Prompt</label>
+                  <Textarea
+                    value={myAgentSystemPrompt}
+                    onChange={(e) => setMyAgentSystemPrompt(e.target.value)}
+                    disabled={isNegotiating}
+                    rows={6}
+                    className="text-xs mb-4"
+                  />
+                </div>
+                <div className="border-t pt-4">
+                  <label className="text-sm font-medium mb-2 block">Preference Database</label>
+                  <PreferenceDatabaseUI />
+                </div>
+              </div>
             </Card>
           </CollapsibleContent>
           <CollapsibleTrigger asChild>
@@ -97,7 +116,7 @@ export function AgentNegotiation() {
             <div>
               <label className="text-sm font-medium mb-2 block">Negotiation Context</label>
               <Textarea
-                placeholder="Describe the negotiation scenario (e.g., 'Negotiate the terms of a software licensing deal where both parties want fair pricing and good support terms')"
+                placeholder="Describe the negotiation scenario (e.g., 'Negotiate the purchase of dining room chairs...')"
                 value={contextInput}
                 onChange={(e) => setContextInput(e.target.value)}
                 disabled={isNegotiating}
@@ -203,8 +222,8 @@ export function AgentNegotiation() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">System Prompt</label>
                   <Textarea
-                    value={systemPrompt}
-                    onChange={(e) => setSystemPrompt(e.target.value)}
+                    value={opponentSystemPrompt}
+                    onChange={(e) => setOpponentSystemPrompt(e.target.value)}
                     disabled={isNegotiating}
                     rows={8}
                     className="text-xs"

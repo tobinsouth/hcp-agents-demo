@@ -97,7 +97,34 @@ export interface PreferenceData {
 
 // In-memory storage for demo purposes
 // In production, this would be replaced with a proper database
-let preferences: PreferenceData = {}
+let preferences: PreferenceData = {
+  domains: {
+    furniture: {
+      style_preferences: ["modern", "minimalist", "scandinavian"],
+      material_preferences: ["sustainable wood", "bamboo", "reclaimed materials"],
+      color_preferences: ["natural wood", "earthy tones", "greens", "forest green", "sage"],
+      functionality_priorities: ["ergonomic", "space-saving", "multi-functional"],
+      room_types: ["office", "dining room"]
+    }
+  },
+  values: {
+    sustainability: "high",
+    innovation: "proven",
+    transparency: "full"
+  },
+  negotiation_priorities: {
+    price_sensitivity: "medium",
+    quality_importance: "critical",
+    relationship_focus: "partnership"
+  },
+  communication_style: {
+    formality: "casual",
+    directness: "direct",
+    tone: "friendly"
+  },
+  version: "1.0.0",
+  last_updated: new Date().toISOString()
+}
 
 // Subscribers for real-time updates
 type PreferenceSubscriber = (preferences: PreferenceData) => void

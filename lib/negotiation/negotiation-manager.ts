@@ -16,6 +16,7 @@ export interface NegotiationConfig {
   context: string
   opponentSystemPrompt: string
   opponentModel: string
+  myAgentSystemPrompt?: string
   maxTurns?: number
   onMessage: (message: NegotiationMessage) => void
   onComplete: () => void
@@ -25,7 +26,7 @@ export interface NegotiationConfig {
  * Starts a negotiation between two AI agents
  */
 export async function startNegotiation(config: NegotiationConfig): Promise<void> {
-  const { context, opponentSystemPrompt, opponentModel, maxTurns = 10, onMessage, onComplete } = config
+  const { context, opponentSystemPrompt, opponentModel, myAgentSystemPrompt, maxTurns = 10, onMessage, onComplete } = config
 
   const conversationHistory: NegotiationMessage[] = []
   let currentTurn = 1
@@ -75,6 +76,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
           body: JSON.stringify({
             agent: "my_agent",
             context,
+            systemPrompt: myAgentSystemPrompt,
             conversationHistory: conversationHistory.map((m) => ({
               role: m.agent === "opponent_agent" ? "user" : "assistant",
               content: m.content,
