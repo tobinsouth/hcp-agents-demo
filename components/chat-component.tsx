@@ -72,22 +72,12 @@ export function ChatComponent() {
 
         if (value) {
           const chunk = decoder.decode(value, { stream: true })
-          const lines = chunk.split("\n")
-
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              try {
-                const content = line.slice(2)
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === assistantMessage.id ? { ...msg, content: msg.content + content } : msg,
-                  ),
-                )
-              } catch (error) {
-                console.error("Error parsing chunk:", error)
-              }
-            }
-          }
+          console.log("Received chunk:", chunk)
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessage.id ? { ...msg, content: msg.content + chunk } : msg,
+            ),
+          )
         }
       }
     } catch (error) {
