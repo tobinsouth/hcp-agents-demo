@@ -191,7 +191,7 @@ export default function HomePage() {
             animate={{ opacity: 1 }}
             transition={{ 
               duration: 0.5, 
-              delay: 11.5,
+              delay: 6.5,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="inline-block mb-8 sm:mb-10"
@@ -199,7 +199,7 @@ export default function HomePage() {
             <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
               <TypewriterText 
                 text="PROTECTING DIGNITY IN THE AI AGE" 
-                delay={11500}
+                delay={6500}
                 speed={50}
               />
               <motion.span
@@ -208,7 +208,7 @@ export default function HomePage() {
                   duration: 0.8,
                   repeat: Infinity,
                   repeatType: "reverse",
-                  delay: 11.5
+                  delay: 6.5
                 }}
                 className="ml-1 inline-block w-0.5 h-3 bg-muted-foreground/60"
               />
@@ -226,8 +226,8 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30, filter: "blur(5px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
-                  duration: 2.0, 
-                  delay: 0.5,
+                  duration: 1.0, 
+                  delay: 0.25,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
@@ -239,7 +239,7 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
                   duration: 0.8, 
-                  delay: 1.5,
+                  delay: 0.9,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
@@ -253,8 +253,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20, filter: "blur(3px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ 
-              duration: 2.0, 
-              delay: 6.0,
+              duration: 1.0, 
+              delay: 3.0,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
@@ -284,7 +284,7 @@ export default function HomePage() {
                     transition: {
                       duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 9.0
+                      delay: 4.5
                     }
                   }
                 }}
@@ -360,7 +360,7 @@ export default function HomePage() {
                     transition: {
                       duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 9.4
+                      delay: 4.9
                     }
                   }
                 }}
@@ -550,7 +550,7 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 3.8 }}
+          transition={{ duration: 1.2, delay: 8.0 }}
           className="text-center pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-20"
         >
           <p className="text-xs text-muted-foreground/40 font-mono tracking-wide">
