@@ -4,42 +4,58 @@ import { Card } from "@/components/ui/card"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
+import { OnboardingModal } from "@/components/onboarding-modal"
+import { motion, AnimatePresence, LayoutGroup, Easing } from "framer-motion"
 import { ChevronDown, MessageSquare, Database, Users } from "lucide-react"
 
 export default function HomePage() {
   const [showChat, setShowChat] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
   const [showNegotiation, setShowNegotiation] = useState(false)
-  const [hasAnimated, setHasAnimated] = useState(false)
+  const [currentModal, setCurrentModal] = useState<'chat' | 'preferences' | 'negotiation' | null>(null)
+  const [hasOpenedChat, setHasOpenedChat] = useState(false)
+  const [hasOpenedPreferences, setHasOpenedPreferences] = useState(false)
+  const [hasOpenedNegotiation, setHasOpenedNegotiation] = useState(false)
 
-  useEffect(() => {
-    if (!hasAnimated) {
-      const timer1 = setTimeout(() => setShowChat(true), 500)
-      const timer2 = setTimeout(() => setShowPreferences(true), 1000)
-      const timer3 = setTimeout(() => {
+  const handleModalClose = (modal: 'chat' | 'preferences' | 'negotiation') => {
+    setCurrentModal(null)
+    
+    setTimeout(() => {
+      if (modal === 'chat') {
+        setShowChat(true)
+        setHasOpenedChat(true)
+      } else if (modal === 'preferences') {
+        setShowPreferences(true)
+        setHasOpenedPreferences(true)
+      } else if (modal === 'negotiation') {
         setShowNegotiation(true)
-        setHasAnimated(true)
-      }, 1500)
-      
-      return () => {
-        clearTimeout(timer1)
-        clearTimeout(timer2)
-        clearTimeout(timer3)
+        setHasOpenedNegotiation(true)
       }
-    }
-  }, [hasAnimated])
+    }, 300)
+  }
 
   const toggleComponent = (component: string) => {
     switch(component) {
       case 'chat':
-        setShowChat(!showChat)
+        if (!showChat && !hasOpenedChat) {
+          setCurrentModal('chat')
+        } else {
+          setShowChat(!showChat)
+        }
         break
       case 'preferences':
-        setShowPreferences(!showPreferences)
+        if (!showPreferences && !hasOpenedPreferences) {
+          setCurrentModal('preferences')
+        } else {
+          setShowPreferences(!showPreferences)
+        }
         break
       case 'negotiation':
-        setShowNegotiation(!showNegotiation)
+        if (!showNegotiation && !hasOpenedNegotiation) {
+          setCurrentModal('negotiation')
+        } else {
+          setShowNegotiation(!showNegotiation)
+        }
         break
     }
   }
@@ -66,7 +82,7 @@ export default function HomePage() {
       height: 0,
       opacity: 0,
       transition: {
-        height: { duration: 0.4, ease: "easeOut" },
+        height: { duration: 0.4, ease: "easeOut" as Easing },
         opacity: { duration: 0.3 }
       }
     },
@@ -74,15 +90,54 @@ export default function HomePage() {
       height: "auto",
       opacity: 1,
       transition: {
-        height: { duration: 0.4, ease: "easeOut" },
+        height: { duration: 0.4, ease: "easeOut" as Easing },
         opacity: { duration: 0.3, delay: 0.1 }
       }
     }
   }
 
+  const modalContent = {
+    chat: {
+      title: "Chatbots are becoming our friends.",
+      content: "Every day when you talk with Claude or ChatGPT, they are implicitly storing and remembering information about you and your preferences. This is how they achieve market lock-in."
+    },
+    preferences: {
+      title: "Your accumulated context forms a rich preference database.",
+      content: "This data represents your unique digital fingerprint - your interests, values, and decision patterns. This is what creates vendor lock-in, but it could also enable personalized AI experiences across platforms."
+    },
+    negotiation: {
+      title: "AI Agents will soon take action on your behalf.",
+      content: "With portable human context, AI agents can negotiate on your behalf with deep understanding of your preferences. This enables a future where multiple AI systems can collaborate while respecting your individual needs and values."
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 p-6">
-      <div className="max-w-7xl mx-auto">
+    <>
+      {/* Onboarding Modals */}
+      <OnboardingModal
+        isOpen={currentModal === 'chat'}
+        onClose={() => handleModalClose('chat')}
+        title={modalContent.chat.title}
+        content={modalContent.chat.content}
+        actionLabel="Open Chat Interface"
+      />
+      <OnboardingModal
+        isOpen={currentModal === 'preferences'}
+        onClose={() => handleModalClose('preferences')}
+        title={modalContent.preferences.title}
+        content={modalContent.preferences.content}
+        actionLabel="View Preferences"
+      />
+      <OnboardingModal
+        isOpen={currentModal === 'negotiation'}
+        onClose={() => handleModalClose('negotiation')}
+        title={modalContent.negotiation.title}
+        content={modalContent.negotiation.content}
+        actionLabel="See Negotiation"
+      />
+      
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-background/95 p-6">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
@@ -117,7 +172,7 @@ export default function HomePage() {
                   >
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-6 h-6 text-primary" />
-                      <h2 className="text-2xl font-semibold">AI Chat Tools</h2>
+                      <h2 className="text-2xl font-semibold">Like talking to your friend...</h2>
                     </div>
                     <motion.div
                       animate={{ rotate: showChat ? 180 : 0 }}
@@ -176,7 +231,7 @@ export default function HomePage() {
                   >
                     <div className="flex items-center gap-3">
                       <Database className="w-6 h-6 text-primary" />
-                      <h2 className="text-2xl font-semibold">Preference Database</h2>
+                      <h2 className="text-2xl font-semibold">that remembers everything about you...</h2>
                     </div>
                     <motion.div
                       animate={{ rotate: showPreferences ? 180 : 0 }}
@@ -235,7 +290,7 @@ export default function HomePage() {
                   >
                     <div className="flex items-center gap-3">
                       <Users className="w-6 h-6 text-primary" />
-                      <h2 className="text-2xl font-semibold">Agent-to-Agent Negotiation</h2>
+                      <h2 className="text-2xl font-semibold">... who will soon take action on your behalf.</h2>
                     </div>
                     <motion.div
                       animate={{ rotate: showNegotiation ? 180 : 0 }}
@@ -264,7 +319,8 @@ export default function HomePage() {
               </motion.div>
           </motion.div>
         </LayoutGroup>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
