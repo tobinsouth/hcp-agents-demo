@@ -97,27 +97,27 @@ export function ChatComponent() {
   }
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full p-3 sm:p-4 md:p-6">
       {/* Messages */}
-      <ScrollArea className="flex-1 mb-4 min-h-0">
-        <div className="space-y-4 pr-4">
+      <ScrollArea className="flex-1 mb-3 sm:mb-4 min-h-0">
+        <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
           {messages.length === 0 ? (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-center py-12"
+              className="text-center py-8 sm:py-12"
             >
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.5, delay: 0.2 }}
               >
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
-                  <Sparkles className="w-8 h-8 text-primary" />
+                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                 </div>
               </motion.div>
-              <p className="text-muted-foreground text-base leading-relaxed max-w-sm mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xs sm:max-w-sm mx-auto">
                 Imagine this is your favorite chatbot interface—ChatGPT, Claude, or Gemini
               </p>
             </motion.div>
@@ -132,29 +132,29 @@ export function ChatComponent() {
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                   className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className={`flex gap-3 max-w-[85%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                  <div className={`flex gap-2 sm:gap-3 max-w-[90%] sm:max-w-[85%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     <motion.div 
                       whileHover={{ scale: 1.05 }}
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
                         message.role === "user" 
                           ? "bg-primary/10" 
                           : "bg-muted"
-                      }`}
+                      }`}>
                     >
                       {message.role === "user" ? (
-                        <User className="w-4 h-4 text-primary" />
+                        <User className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                       ) : (
-                        <Sparkles className="w-4 h-4 text-muted-foreground" />
+                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-muted-foreground" />
                       )}
                     </motion.div>
                     <Card
-                      className={`px-4 py-3 border-0 shadow-sm ${
+                      className={`px-3 py-2 sm:px-4 sm:py-3 border-0 shadow-sm ${
                         message.role === "user" 
                           ? "bg-primary text-primary-foreground" 
                           : "bg-card/50 backdrop-blur-sm"
-                      }`}
+                      }`}>
                     >
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </Card>
                   </div>
                 </motion.div>
@@ -194,7 +194,7 @@ export function ChatComponent() {
       {/* Input */}
       <motion.form 
         onSubmit={handleSubmit} 
-        className="flex gap-2 p-3 bg-muted/30 rounded-xl backdrop-blur-sm"
+        className="flex gap-2 p-2 sm:p-3 bg-muted/30 rounded-xl backdrop-blur-sm"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.2 }}
@@ -204,14 +204,14 @@ export function ChatComponent() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about furniture or share your preferences..."
           disabled={isLoading}
-          className="flex-1 border-0 bg-background/50 focus:bg-background transition-colors"
+          className="flex-1 border-0 bg-background/50 focus:bg-background transition-colors text-sm sm:text-base h-[44px]"
         />
         <Button 
           type="submit" 
           disabled={isLoading || !input.trim()}
-          className="rounded-lg"
+          className="rounded-lg h-[44px] w-[44px] flex items-center justify-center flex-shrink-0"
         >
-          <Send className="w-4 h-4" />
+          <Send className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
       </motion.form>
     </div>

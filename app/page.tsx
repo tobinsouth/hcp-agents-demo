@@ -63,16 +63,16 @@ export default function HomePage() {
   const containerVariants = {
     hidden: { 
       opacity: 0,
-      y: 40,
-      filter: "blur(10px)"
+      y: 60,
+      filter: "blur(15px)"
     },
     visible: { 
       opacity: 1,
       y: 0,
       filter: "blur(0px)",
       transition: {
-        duration: 0.8,
-        ease: "easeOut" as const
+        duration: 1.2,
+        ease: [0.25, 0.46, 0.45, 0.94]
       }
     }
   }
@@ -148,19 +148,19 @@ export default function HomePage() {
           }}
         />
         
-        <div className="max-w-6xl mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto px-3 py-10 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12 lg:py-20">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, ease: "easeOut" as const }}
-          className="text-center mb-20"
+          className="text-center mb-16 sm:mb-16 md:mb-20 lg:mb-24"
         >
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-block mb-6"
+            className="inline-block mb-6 sm:mb-6"
           >
             <span className="text-xs font-mono tracking-[0.2em] text-muted-foreground uppercase">
               Protecting dignity in the AI age
@@ -171,11 +171,11 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-6xl md:text-7xl font-light mb-6 tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-6 sm:mb-6 tracking-tight"
             style={{ fontFamily: 'var(--font-crimson)' }}
           >
             <span className="block">Human Context</span>
-            <span className="block text-3xl md:text-4xl mt-2 text-muted-foreground font-normal">
+            <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-3 text-muted-foreground font-normal">
               to Agent Behavior
             </span>
           </motion.h1>
@@ -184,7 +184,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-muted-foreground max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
           >
             A demonstration of how personal context shapes AI interactions
           </motion.p>
@@ -192,7 +192,7 @@ export default function HomePage() {
 
         {/* Main Content */}
         <LayoutGroup>
-          <motion.div layout className="space-y-6 pb-8">
+          <motion.div layout className="space-y-6 sm:space-y-8 md:space-y-10 pb-8 sm:pb-12 md:pb-16">
               {/* Chat Interface */}
               <motion.div
                 layout
@@ -203,23 +203,23 @@ export default function HomePage() {
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                   <motion.div 
-                    className="p-8 flex items-center justify-between cursor-pointer group"
+                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
                     onClick={() => toggleComponent('chat')}
                     whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                       <motion.div 
-                        className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"
+                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <Sparkles className="w-6 h-6 text-primary" />
+                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </motion.div>
                       <div>
-                        <h2 className="text-2xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                           Like talking to your friend
                         </h2>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm sm:text-base text-muted-foreground">
                         Chatbots are the most natural interaction pattern for the modern age.
                         </p>
                       </div>
@@ -227,9 +227,9 @@ export default function HomePage() {
                     <motion.div
                       animate={{ rotate: showChat ? 180 : 0 }}
                       transition={{ duration: 0.4, ease: "easeInOut" as const }}
-                      className="group-hover:bg-accent/10 rounded-full p-2 transition-colors"
+                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
                     >
-                      <ArrowDown className="w-5 h-5 text-muted-foreground" />
+                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     </motion.div>
                   </motion.div>
                   
@@ -242,8 +242,8 @@ export default function HomePage() {
                         variants={contentVariants}
                         className="overflow-hidden"
                       >
-                        <div className="px-8 pb-8">
-                          <div className="h-[450px] rounded-lg bg-muted/5 p-1">
+                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
                             <ChatComponent />
                           </div>
                         </div>
@@ -279,23 +279,23 @@ export default function HomePage() {
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                   <motion.div 
-                    className="p-8 flex items-center justify-between cursor-pointer group"
+                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
                     onClick={() => toggleComponent('preferences')}
                     whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                       <motion.div 
-                        className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"
+                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <Archive className="w-6 h-6 text-primary" />
+                        <Archive className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </motion.div>
                       <div>
-                        <h2 className="text-2xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                           That remembers everything about you
                         </h2>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm sm:text-base text-muted-foreground">
                           Your preferences become your digital fingerprint
                         </p>
                       </div>
@@ -303,9 +303,9 @@ export default function HomePage() {
                     <motion.div
                       animate={{ rotate: showPreferences ? 180 : 0 }}
                       transition={{ duration: 0.4, ease: "easeInOut" as const }}
-                      className="group-hover:bg-accent/10 rounded-full p-2 transition-colors"
+                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
                     >
-                      <ArrowDown className="w-5 h-5 text-muted-foreground" />
+                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     </motion.div>
                   </motion.div>
                   
@@ -318,8 +318,8 @@ export default function HomePage() {
                         variants={contentVariants}
                         className="overflow-hidden"
                       >
-                        <div className="px-8 pb-8">
-                          <div className="h-[450px] rounded-lg bg-muted/5 p-1">
+                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
                             <PreferenceDatabaseUI />
                           </div>
                         </div>
@@ -355,23 +355,23 @@ export default function HomePage() {
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                   <motion.div 
-                    className="p-8 flex items-center justify-between cursor-pointer group"
+                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
                     onClick={() => toggleComponent('negotiation')}
                     whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
                       <motion.div 
-                        className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"
+                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 400 }}
                       >
-                        <Network className="w-6 h-6 text-primary" />
+                        <Network className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </motion.div>
                       <div>
-                        <h2 className="text-2xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                           Who will soon act on your behalf
                         </h2>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm sm:text-base text-muted-foreground">
                           AI agents negotiating with your values in mind
                         </p>
                       </div>
@@ -379,9 +379,9 @@ export default function HomePage() {
                     <motion.div
                       animate={{ rotate: showNegotiation ? 180 : 0 }}
                       transition={{ duration: 0.4, ease: "easeInOut" as const }}
-                      className="group-hover:bg-accent/10 rounded-full p-2 transition-colors"
+                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
                     >
-                      <ArrowDown className="w-5 h-5 text-muted-foreground" />
+                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                     </motion.div>
                   </motion.div>
                   
@@ -394,8 +394,8 @@ export default function HomePage() {
                         variants={contentVariants}
                         className="overflow-hidden"
                       >
-                        <div className="px-8 pb-8">
-                          <div className="min-h-[400px] rounded-lg bg-muted/5 p-1">
+                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                          <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
                             <AgentNegotiation />
                           </div>
                         </div>
@@ -412,9 +412,9 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.8 }}
-          className="mt-24 mb-12"
+          className="mt-16 sm:mt-20 md:mt-24 lg:mt-32 mb-8 sm:mb-10 md:mb-12"
         >
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-2xl sm:max-w-3xl mx-auto px-4 sm:px-6">
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
@@ -426,7 +426,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.2 }}
-              className="text-lg leading-[1.8] text-center text-muted-foreground"
+              className="text-base sm:text-lg md:text-xl leading-[1.7] sm:leading-[1.8] text-center text-muted-foreground"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
               If we want an open AI ecosystem where{" "}
@@ -440,7 +440,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.4 }}
-              className="text-lg leading-[1.8] text-center text-muted-foreground mt-6"
+              className="text-base sm:text-lg md:text-xl leading-[1.7] sm:leading-[1.8] text-center text-muted-foreground mt-4 sm:mt-6"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
               This isn't just about preventing vendor lock-in—it's about ensuring{" "}

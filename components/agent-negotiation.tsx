@@ -77,14 +77,14 @@ export function AgentNegotiation() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="h-full p-4 bg-card/80 backdrop-blur-md">
-                <div className="flex items-center gap-3 mb-4">
+              <Card className="h-full flex flex-col bg-card/80 backdrop-blur-md">
+                <div className="flex items-center gap-3 p-4 pb-0 flex-shrink-0">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <User className="w-4 h-4 text-primary" />
                   </div>
                   <h3 className="font-semibold" style={{ fontFamily: 'var(--font-crimson)' }}>Your Agent</h3>
                 </div>
-                <ScrollArea className="h-full">
+                <ScrollArea className="flex-1 min-h-0 p-4 pt-4">
                   <div className="space-y-4 pr-2">
                     <div>
                       <label className="text-sm font-medium mb-2 block">System Prompt</label>
@@ -303,14 +303,14 @@ export function AgentNegotiation() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Card className="h-full p-4 bg-card/80 backdrop-blur-md">
-                <div className="flex items-center gap-3 mb-4">
+              <Card className="h-full flex flex-col bg-card/80 backdrop-blur-md">
+                <div className="flex items-center gap-3 p-4 pb-0 flex-shrink-0">
                   <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
                     <Bot className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <h3 className="font-semibold" style={{ fontFamily: 'var(--font-crimson)' }}>Opponent Agent</h3>
                 </div>
-                <ScrollArea className="h-full">
+                <ScrollArea className="flex-1 min-h-0 p-4 pt-4">
                   <div className="space-y-4 pr-2">
                     <div>
                       <label className="text-sm font-medium mb-2 block">AI Model</label>
