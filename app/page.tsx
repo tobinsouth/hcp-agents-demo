@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
@@ -145,13 +145,9 @@ export default function HomePage() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="text-center space-y-2 mb-8"
         >
-          <div className="text-center space-y-2 mb-6">
-          <h1 className="text-4xl font-bold text-foreground">Human Context to Agent Behavior</h1>
-          <p className="text-muted-foreground text-lg">This is a proof of concept for how human context can be used to influence agent behavior.</p>
-          <p className="text-muted-foreground text-lg">Human context is the informational exhaust that is generated as we interact with our favorite chatbots. It's being used by AI companies to create vendor lock-in.</p>
-          <p className="text-muted-foreground text-lg">Making this human context interoperable is essential to an open market of AI tools.</p>
-          <p className="text-muted-foreground text-lg">Extending this: Rich understanding of consumer preferences via their context is important to facilitate robust agent-negotiation.</p>
-        </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Human Context to Agent Behavior
+          </h1>
         </motion.div>
 
         {/* Main Content */}
@@ -319,6 +315,23 @@ export default function HomePage() {
               </motion.div>
           </motion.div>
         </LayoutGroup>
+        
+        {/* Manifesto */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          className="mt-12 mb-8 px-6"
+        >
+          <div className="max-w-4xl mx-auto p-6 rounded-lg bg-muted/30 backdrop-blur-sm border border-border/30">
+            <p className="text-muted-foreground text-center leading-relaxed">
+              If we want an open AI ecosystem where chat interfaces don't lock users into proprietary preference silos, 
+              we need an interoperable protocol for transferring human context between AI systems. 
+              This isn't just about preventing vendor lock-in—it's about ensuring user preferences can flow freely 
+              in a competitive marketplace while enabling AI agents to truly act on our behalf with full understanding of our needs.
+            </p>
+          </div>
+        </motion.div>
         </div>
       </div>
     </>
