@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
@@ -7,6 +7,38 @@ import { AgentNegotiation } from "@/components/agent-negotiation"
 import { OnboardingModal } from "@/components/onboarding-modal"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { ArrowDown, Sparkles, Archive, Network } from "lucide-react"
+
+// Typewriter component
+function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?: number; speed?: number }) {
+  const [displayedText, setDisplayedText] = useState("")
+  const [startTyping, setStartTyping] = useState(false)
+
+  useEffect(() => {
+    const startTimer = setTimeout(() => {
+      setStartTyping(true)
+    }, delay)
+
+    return () => clearTimeout(startTimer)
+  }, [delay])
+
+  useEffect(() => {
+    if (!startTyping) return
+
+    let i = 0
+    const timer = setInterval(() => {
+      if (i < text.length) {
+        setDisplayedText(text.slice(0, i + 1))
+        i++
+      } else {
+        clearInterval(timer)
+      }
+    }, speed)
+
+    return () => clearInterval(timer)
+  }, [text, speed, startTyping])
+
+  return <span>{displayedText}</span>
+}
 
 export default function HomePage() {
   const [showChat, setShowChat] = useState(false)
@@ -153,42 +185,49 @@ export default function HomePage() {
         <motion.div 
           className="text-center mb-16 sm:mb-16 md:mb-20 lg:mb-24"
         >
-          {/* Subtle tagline appears first */}
+          {/* Typewriter tagline appears after all other animations */}
           <motion.div
-            initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ 
-              duration: 1.2, 
-              delay: 0.2,
+              duration: 0.5, 
+              delay: 11.5,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="inline-block mb-8 sm:mb-10"
           >
             <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
-              Protecting dignity in the AI age
+              <TypewriterText 
+                text="PROTECTING DIGNITY IN THE AI AGE" 
+                delay={11500}
+                speed={50}
+              />
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ 
+                  duration: 0.8,
+                  repeat: Infinity,
+                  repeatType: "reverse",
+                  delay: 11.5
+                }}
+                className="ml-1 inline-block w-0.5 h-3 bg-muted-foreground/60"
+              />
             </span>
           </motion.div>
           
           {/* Main title emerges with elegant stagger */}
           <motion.div className="mb-10 sm:mb-12">
             <motion.h1 
-              initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ 
-                duration: 1.5, 
-                delay: 0.6,
-                ease: [0.16, 1, 0.3, 1]
-              }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
               <motion.span 
                 className="block"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 30, filter: "blur(5px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
-                  duration: 1.0, 
-                  delay: 0.9,
+                  duration: 2.0, 
+                  delay: 0.5,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
@@ -196,11 +235,11 @@ export default function HomePage() {
               </motion.span>
               <motion.span 
                 className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-4 text-muted-foreground font-normal"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20, filter: "blur(3px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
-                  duration: 1.0, 
-                  delay: 1.1,
+                  duration: 0.8, 
+                  delay: 1.5,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
@@ -211,11 +250,11 @@ export default function HomePage() {
           
           {/* Subtitle fades in gracefully */}
           <motion.p
-            initial={{ opacity: 0, y: 30, filter: "blur(5px)" }}
+            initial={{ opacity: 0, y: 20, filter: "blur(3px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ 
-              duration: 1.2, 
-              delay: 1.3,
+              duration: 2.0, 
+              delay: 6.0,
               ease: [0.16, 1, 0.3, 1]
             }}
             className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
@@ -243,9 +282,9 @@ export default function HomePage() {
                     y: 0,
                     filter: "blur(0px)",
                     transition: {
-                      duration: 1.2,
+                      duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 1.8
+                      delay: 9.0
                     }
                   }
                 }}
@@ -319,9 +358,9 @@ export default function HomePage() {
                     y: 0,
                     filter: "blur(0px)",
                     transition: {
-                      duration: 1.2,
+                      duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 2.4
+                      delay: 9.4
                     }
                   }
                 }}
@@ -395,9 +434,9 @@ export default function HomePage() {
                     y: 0,
                     filter: "blur(0px)",
                     transition: {
-                      duration: 1.2,
+                      duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 3.0
+                      delay: 5.3
                     }
                   }
                 }}
