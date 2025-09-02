@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { ChevronLeft, ChevronRight, Play, Square, Settings, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Square, Handshake, User, UserCheck } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 
 const OPENROUTER_MODELS = [
@@ -148,9 +148,8 @@ export function AgentNegotiation() {
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 <div className="text-center">
-                  <Settings className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No negotiation in progress</p>
-                  <p className="text-sm">Enter context and click "Start Negotiation"</p>
+                  <Handshake className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Let's simulate a consumer transaction based negotiation.</p>
                 </div>
               </div>
             ) : (
@@ -199,7 +198,7 @@ export function AgentNegotiation() {
             <Card className="h-full p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
+                  <UserCheck className="w-4 h-4" />
                   Opponent Agent
                 </h3>
               </div>
