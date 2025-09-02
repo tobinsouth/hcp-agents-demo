@@ -140,7 +140,6 @@ export function ChatComponent() {
                           ? "bg-primary/10" 
                           : "bg-muted"
                       }`}>
-                    >
                       {message.role === "user" ? (
                         <User className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                       ) : (
@@ -153,7 +152,6 @@ export function ChatComponent() {
                           ? "bg-primary text-primary-foreground" 
                           : "bg-card/50 backdrop-blur-sm"
                       }`}>
-                    >
                       <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </Card>
                   </div>

@@ -30,10 +30,6 @@ export async function myAgent(input: MyAgentInput): Promise<string> {
   const openaiClient = createOpenAI({
     apiKey: process.env.OPENROUTER_API_KEY,
     baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-      "X-Title": "AI Negotiation Demo",
-    },
   })
 
   try {

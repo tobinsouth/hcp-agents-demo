@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { getPreferences, subscribeToPreferences, type PreferenceData } from "@/lib/preferences"
+import { subscribeToPreferences, type PreferenceData } from "@/lib/preferences"
 import { Archive, RefreshCw, CircleDot } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -29,7 +29,7 @@ export function PreferenceDatabaseUI() {
       clearInterval(interval)
       unsubscribe()
     }
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPreferences = async () => {
     try {

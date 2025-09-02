@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    // Run ESLint during production builds for better code quality
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Enable TypeScript checking during production builds
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: true,

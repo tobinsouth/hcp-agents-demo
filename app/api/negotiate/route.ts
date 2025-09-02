@@ -32,7 +32,6 @@ export async function POST(req: NextRequest) {
       system: finalSystemPrompt,
       messages: conversationHistory,
       temperature: 0.7,
-      maxTokens: 500,
     })
 
     return NextResponse.json({ text })

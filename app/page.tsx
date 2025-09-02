@@ -519,7 +519,7 @@ export default function HomePage() {
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
               If we want an open AI ecosystem where{" "}
-              <span className="text-foreground font-medium">chat interfaces don't lock users</span>{" "}
+              <span className="text-foreground font-medium">chat interfaces don&apos;t lock users</span>{" "}
               into proprietary preference silos, we need an{" "}
               <span className="text-foreground font-medium">interoperable protocol</span>{" "}
               for transferring human context between AI systems.
@@ -532,7 +532,7 @@ export default function HomePage() {
               className="text-base sm:text-lg md:text-xl leading-[1.7] sm:leading-[1.8] text-center text-muted-foreground mt-4 sm:mt-6"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
-              This isn't just about preventing vendor lock-in—it's about ensuring{" "}
+              This isn&apos;t just about preventing vendor lock-in—it&apos;s about ensuring{" "}
               <span className="text-foreground font-medium">user preferences can flow freely</span>{" "}
               in a competitive marketplace while enabling AI agents to truly act on our behalf.
             </motion.p>

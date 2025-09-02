@@ -30,10 +30,6 @@ export async function opponentAgent(input: OpponentAgentInput): Promise<string> 
   const openai = createOpenAI({
     apiKey: process.env.OPENROUTER_API_KEY,
     baseURL: "https://openrouter.ai/api/v1",
-    defaultHeaders: {
-      "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-      "X-Title": "AI Negotiation Demo",
-    },
   })
 
   try {
@@ -42,7 +38,6 @@ export async function opponentAgent(input: OpponentAgentInput): Promise<string> 
       system: fullSystemPrompt,
       messages: conversationHistory,
       temperature: 0.7,
-      maxTokens: 500,
     })
 
     return text

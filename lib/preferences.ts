@@ -78,7 +78,7 @@ export interface PreferenceData {
       brand_loyalty?: string[]
     }
     // Dynamic - new domains can be added as conversations evolve
-    [key: string]: Record<string, any>
+    [key: string]: Record<string, any> | undefined
   }
 
   // Conversation insights and patterns
