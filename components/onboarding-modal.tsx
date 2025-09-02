@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowRight, Sparkles, Archive, Network } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 interface StoryStep {
   title: string
@@ -127,6 +127,23 @@ export function OnboardingModal({
     setCurrentStep(0)
     onClose()
   }
+
+  // Handle Esc key to close modal
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        handleClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen])
   
   const getVisualIcon = (visual: string) => {
     switch (visual) {
