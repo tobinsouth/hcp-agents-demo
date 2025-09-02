@@ -168,7 +168,7 @@ export function OnboardingModal({
               layout
             >
               {/* Header */}
-              <div className="relative p-4 pb-3 sm:p-8 sm:pb-6 md:p-10 md:pb-8"
+              <div className="relative p-4 pb-3 sm:p-8 sm:pb-6 md:p-10 md:pb-8">
                 <motion.button
                   onClick={handleClose}
                   className="absolute top-4 right-4 sm:top-6 sm:right-6 rounded-full p-1.5 sm:p-2 md:p-2.5 hover:bg-accent/20 transition-colors group"
