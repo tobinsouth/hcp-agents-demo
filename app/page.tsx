@@ -119,21 +119,24 @@ export default function HomePage() {
         onClose={() => handleModalClose('chat')}
         title={modalContent.chat.title}
         content={modalContent.chat.content}
-        actionLabel="Open Chat Interface"
+        actionLabel="Start Chatting"
+        modalType="chat"
       />
       <OnboardingModal
         isOpen={currentModal === 'preferences'}
         onClose={() => handleModalClose('preferences')}
         title={modalContent.preferences.title}
         content={modalContent.preferences.content}
-        actionLabel="View Preferences"
+        actionLabel="View Database"
+        modalType="preferences"
       />
       <OnboardingModal
         isOpen={currentModal === 'negotiation'}
         onClose={() => handleModalClose('negotiation')}
         title={modalContent.negotiation.title}
         content={modalContent.negotiation.content}
-        actionLabel="See Negotiation"
+        actionLabel="See Agents"
+        modalType="negotiation"
       />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden">
@@ -217,7 +220,7 @@ export default function HomePage() {
                           Like talking to your friend
                         </h2>
                         <p className="text-sm text-muted-foreground">
-                          Natural conversations that understand you
+                        Chatbots are the most natural interaction pattern for the modern age.
                         </p>
                       </div>
                     </div>
