@@ -151,40 +151,74 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-3 py-10 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12 lg:py-20">
         {/* Header */}
         <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, ease: "easeOut" as const }}
           className="text-center mb-16 sm:mb-16 md:mb-20 lg:mb-24"
         >
+          {/* Subtle tagline appears first */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-block mb-6 sm:mb-6"
+            initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ 
+              duration: 1.2, 
+              delay: 0.2,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+            className="inline-block mb-8 sm:mb-10"
           >
-            <span className="text-xs font-mono tracking-[0.2em] text-muted-foreground uppercase">
+            <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
               Protecting dignity in the AI age
             </span>
           </motion.div>
           
-          <motion.h1 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-6 sm:mb-6 tracking-tight"
-            style={{ fontFamily: 'var(--font-crimson)' }}
-          >
-            <span className="block">Human Context</span>
-            <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-3 text-muted-foreground font-normal">
-              to Agent Behavior
-            </span>
-          </motion.h1>
+          {/* Main title emerges with elegant stagger */}
+          <motion.div className="mb-10 sm:mb-12">
+            <motion.h1 
+              initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ 
+                duration: 1.5, 
+                delay: 0.6,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight"
+              style={{ fontFamily: 'var(--font-crimson)' }}
+            >
+              <motion.span 
+                className="block"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 1.0, 
+                  delay: 0.9,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+              >
+                Human Context
+              </motion.span>
+              <motion.span 
+                className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-4 text-muted-foreground font-normal"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  duration: 1.0, 
+                  delay: 1.1,
+                  ease: [0.16, 1, 0.3, 1]
+                }}
+              >
+                to Agent Behavior
+              </motion.span>
+            </motion.h1>
+          </motion.div>
           
+          {/* Subtitle fades in gracefully */}
           <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-base sm:text-lg text-muted-foreground max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 30, filter: "blur(5px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ 
+              duration: 1.2, 
+              delay: 1.3,
+              ease: [0.16, 1, 0.3, 1]
+            }}
+            className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
           >
             A demonstration of how personal context shapes AI interactions
           </motion.p>
@@ -198,7 +232,23 @@ export default function HomePage() {
                 layout
                 initial="hidden"
                 animate="visible"
-                variants={containerVariants}
+                variants={{
+                  hidden: { 
+                    opacity: 0,
+                    y: 60,
+                    filter: "blur(15px)"
+                  },
+                  visible: { 
+                    opacity: 1,
+                    y: 0,
+                    filter: "blur(0px)",
+                    transition: {
+                      duration: 1.2,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                      delay: 1.8
+                    }
+                  }
+                }}
                 className="w-full"
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
@@ -261,17 +311,17 @@ export default function HomePage() {
                 variants={{
                   hidden: { 
                     opacity: 0,
-                    scale: 0.95,
-                    y: 20
+                    y: 60,
+                    filter: "blur(15px)"
                   },
                   visible: { 
                     opacity: 1,
-                    scale: 1,
                     y: 0,
+                    filter: "blur(0px)",
                     transition: {
-                      duration: 0.5,
-                      ease: "easeOut",
-                      delay: 0.2
+                      duration: 1.2,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                      delay: 2.4
                     }
                   }
                 }}
@@ -337,17 +387,17 @@ export default function HomePage() {
                 variants={{
                   hidden: { 
                     opacity: 0,
-                    scale: 0.95,
-                    y: 20
+                    y: 60,
+                    filter: "blur(15px)"
                   },
                   visible: { 
                     opacity: 1,
-                    scale: 1,
                     y: 0,
+                    filter: "blur(0px)",
                     transition: {
-                      duration: 0.5,
-                      ease: "easeOut",
-                      delay: 0.4
+                      duration: 1.2,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                      delay: 3.0
                     }
                   }
                 }}
@@ -455,6 +505,20 @@ export default function HomePage() {
               className="h-px bg-gradient-to-r from-transparent via-border to-transparent mt-12"
             />
           </div>
+        </motion.div>
+        
+        {/* Attribution Footer */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 3.8 }}
+          className="text-center pt-16 sm:pt-20 md:pt-24 pb-12 sm:pb-16 md:pb-20"
+        >
+          <p className="text-xs text-muted-foreground/40 font-mono tracking-wide">
+            Made with ❤️ by Tobin in collaboration with{" "}
+            <span className="text-muted-foreground/60">Stanford DEL</span> and{" "}
+            <span className="text-muted-foreground/60">Consumer Reports</span>
+          </p>
         </motion.div>
         </div>
       </div>
