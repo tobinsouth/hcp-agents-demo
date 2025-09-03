@@ -227,7 +227,7 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
                   duration: 1.0, 
-                  delay: 0.25,
+                  delay: 0.5,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
@@ -239,7 +239,7 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
                   duration: 0.8, 
-                  delay: 0.9,
+                  delay: 1.3,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >

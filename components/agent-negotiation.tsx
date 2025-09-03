@@ -64,7 +64,7 @@ export function AgentNegotiation() {
   }
 
   return (
-    <div className="h-full p-3 sm:p-4 md:p-6">
+    <div className="h-full py-3 px-1 sm:p-4 md:p-6">
       <Tabs defaultValue="negotiate" className="h-full flex flex-col">
         {/* Responsive TabsList */}
         <div className="flex items-center justify-center mb-4 lg:mb-6">
@@ -106,7 +106,7 @@ export function AgentNegotiation() {
               className="h-full max-w-6xl mx-auto"
             >
               <Card className="h-full bg-card/80 backdrop-blur-md border-primary/20">
-                <div className="p-4 lg:p-6 border-b border-border/50">
+                <div className="p-2 sm:p-4 lg:p-6 border-b border-border/50">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                       <User className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
@@ -117,7 +117,7 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 lg:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-4 lg:gap-6">
+                <div className="p-2 sm:p-4 lg:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-4 lg:gap-6">
                   <div className="flex-1 space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-2 lg:mb-3 block">System Prompt</label>
@@ -151,7 +151,7 @@ export function AgentNegotiation() {
               transition={{ duration: 0.3 }}
               className="h-full flex flex-col max-w-6xl mx-auto"
             >
-              <Card className="p-4 lg:p-6 mb-4 bg-card/80 backdrop-blur-md border-border/50">
+              <Card className="p-2 sm:p-4 lg:p-6 mb-4 bg-card/80 backdrop-blur-md border-border/50">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 lg:gap-4 mb-4">
                     <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -199,7 +199,7 @@ export function AgentNegotiation() {
                 </div>
               </Card>
 
-              <Card className="flex-1 p-4 lg:p-6 bg-card/50 backdrop-blur-sm border-border/50">
+              <Card className="flex-1 p-2 sm:p-4 lg:p-6 bg-card/50 backdrop-blur-sm border-border/50">
                 <ScrollArea className="h-full">
                   {messages.length === 0 ? (
                     <motion.div 
@@ -282,7 +282,7 @@ export function AgentNegotiation() {
               className="h-full max-w-6xl mx-auto"
             >
               <Card className="h-full bg-card/80 backdrop-blur-md border-border/50">
-                <div className="p-4 lg:p-6 border-b border-border/50">
+                <div className="p-2 sm:p-4 lg:p-6 border-b border-border/50">
                   <div className="flex items-center gap-3 lg:gap-4">
                     <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-muted flex items-center justify-center">
                       <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground" />
@@ -293,7 +293,7 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 lg:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-4 lg:gap-6">
+                <div className="p-2 sm:p-4 lg:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-4 lg:gap-6">
                   <div className="lg:w-80 space-y-4 lg:order-first">
                     <div>
                       <label className="text-sm font-medium mb-2 lg:mb-3 block">AI Model</label>
