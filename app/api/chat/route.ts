@@ -1,18 +1,27 @@
 import { streamText, generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { getPreferences, updatePreferences } from "@/lib/preferences"
+import { 
+  getFilteredHumanContext, 
+  updateHumanContext, 
+  extractContextFromConversation,
+  getContextSummary,
+  type HumanContext 
+} from "@/lib/human-context"
 
-async function extractPreferences(messages: any[]) {
+async function extractPreferencesAndContext(messages: any[]) {
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY!,
   })
 
   const currentPreferences = getPreferences()
+  const currentContext = getFilteredHumanContext("chat-system")
   
   try {
-    console.log("[Preferences] Starting preference extraction...")
+    console.log("[Context] Starting preference and context extraction...")
     
-    const result = await generateText({
+    // Extract preferences (existing logic)
+    const prefResult = await generateText({
       model: openrouter.chat("openai/gpt-4o-mini"),
       system: `You are a preference extraction specialist. Analyze the chat conversation and extract user preferences.
 
@@ -60,24 +69,88 @@ Extract only NEW preference information from this conversation. Return a valid J
       ]
     })
 
-    console.log("[Preferences] Extracted text:", result.text)
+    console.log("[Preferences] Extracted text:", prefResult.text)
     
     try {
-      // Parse the JSON response
-      const extractedPrefs = JSON.parse(result.text)
+      // Parse and update preferences
+      const extractedPrefs = JSON.parse(prefResult.text)
       
       if (Object.keys(extractedPrefs).length > 0) {
         updatePreferences(extractedPrefs)
         console.log("[Preferences] Updated preference database with:", extractedPrefs)
-      } else {
-        console.log("[Preferences] No new preferences found")
       }
     } catch (parseError) {
       console.error("[Preferences] Error parsing JSON:", parseError)
-      console.log("[Preferences] Raw response:", result.text)
     }
+
+    // Extract human context using AI
+    const contextResult = await generateText({
+      model: openrouter.chat("openai/gpt-4o-mini"),
+      system: `You are a human context analyst. Analyze the conversation to extract comprehensive human context information.
+
+Extract information about:
+1. Behavioral patterns (interaction style, learning style, work patterns)
+2. Cognitive preferences (problem-solving approach, detail orientation, planning horizon)
+3. Task preferences (automation comfort, delegation style, feedback preference)
+4. Communication patterns (response length preference, formality level)
+5. Topics of interest and expertise areas
+
+Return a JSON object with extracted context. Be specific and detailed.
+
+Example structure:
+{
+  "behavioral_patterns": {
+    "interaction_style": {
+      "response_length": "detailed",
+      "humor_appreciation": "moderate",
+      "formality_level": 7
+    }
+  },
+  "cognitive_preferences": {
+    "problem_solving_approach": "systematic",
+    "detail_orientation": "high"
+  },
+  "interaction_history": {
+    "topics_discussed": [
+      {"topic": "furniture", "frequency": 3, "sentiment": "positive"}
+    ]
+  }
+}`,
+      messages: [
+        {
+          role: "user",
+          content: `Current context: ${JSON.stringify(currentContext, null, 2)}
+
+Recent conversation: ${JSON.stringify(messages.slice(-6), null, 2)}
+
+Extract human context information from this conversation. Return a valid JSON object.`
+        }
+      ]
+    })
+
+    console.log("[Context] Extracted context:", contextResult.text)
+    
+    try {
+      // Parse and update human context
+      const extractedContext = JSON.parse(contextResult.text)
+      
+      if (Object.keys(extractedContext).length > 0) {
+        updateHumanContext(extractedContext, "chat-system", true)
+        console.log("[Context] Updated human context with:", extractedContext)
+      }
+    } catch (parseError) {
+      console.error("[Context] Error parsing context JSON:", parseError)
+    }
+
+    // Also do simple extraction from conversation patterns
+    const simpleContext = await extractContextFromConversation(messages, "chat-system")
+    if (Object.keys(simpleContext).length > 0) {
+      updateHumanContext(simpleContext, "chat-system", true)
+      console.log("[Context] Updated with simple extraction:", simpleContext)
+    }
+
   } catch (error) {
-    console.error("[Preferences] Error extracting preferences:", error)
+    console.error("[Context] Error extracting preferences and context:", error)
   }
 }
 
@@ -92,9 +165,29 @@ export async function POST(req: Request) {
     console.log("[Chat] Processing chat request with messages:", messages)
     console.log("[Chat] API Key present:", !!process.env.OPENROUTER_API_KEY)
     
-    const result = streamText({
-      model: openrouter.chat("openai/gpt-4o"),
-      system: `You are a helpful assistant that engages in natural conversation while being attentive to user preferences and needs.
+    // Get the current human context for the chat client
+    const humanContext = getFilteredHumanContext("claude-assistant")
+    const contextSummary = getContextSummary(humanContext)
+    
+    console.log("[Chat] Using human context:", contextSummary)
+    
+    // Build a context-aware system prompt
+    const systemPrompt = `You are a helpful assistant that engages in natural conversation while being attentive to user preferences and needs.
+
+IMPORTANT: You have access to the user's human context data, which helps you personalize responses.
+
+Current Human Context Summary:
+${contextSummary}
+
+Detailed Context:
+${JSON.stringify(humanContext, null, 2)}
+
+Use this context to:
+1. Adapt your communication style to match their preferences
+2. Reference their interests and past topics naturally
+3. Provide examples relevant to their domains of interest
+4. Respect their cognitive and task preferences
+5. Build on previous interactions to show continuity
 
 Be conversational and helpful. Ask follow-up questions when appropriate to better understand the user's preferences, needs, and decision-making style. Pay attention to:
 - What they like and dislike
@@ -103,17 +196,23 @@ Be conversational and helpful. Ask follow-up questions when appropriate to bette
 - Domain-specific preferences (furniture, food, travel, technology, etc.)
 - Past experiences and pain points
 
-Don't be too obvious about collecting preferences - just have natural conversations that reveal these insights.`,
+Don't be too obvious about collecting preferences - just have natural conversations that reveal these insights.
+
+When you learn something new about the user, acknowledge it subtly to show you're paying attention.`
+
+    const result = streamText({
+      model: openrouter.chat("openai/gpt-4o"),
+      system: systemPrompt,
       messages,
     })
 
-    // Extract preferences asynchronously after starting the stream
+    // Extract preferences and context asynchronously after starting the stream
     // This happens in parallel with the response streaming
-    extractPreferences(messages).catch(error => {
-      console.error("[Preferences] Background preference extraction failed:", error)
+    extractPreferencesAndContext(messages).catch(error => {
+      console.error("[Context] Background context extraction failed:", error)
     })
 
-    console.log("[Chat] StreamText result created, returning response")
+    console.log("[Chat] StreamText result created with human context, returning response")
     return result.toTextStreamResponse()
   } catch (error) {
     console.error("[Chat] API error:", error)
