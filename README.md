@@ -1,30 +1,45 @@
-# Preference generation app
+# Human Context Protocol Demo
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/tobin-5325s-projects/v0-preference-generation-app)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/projects/ntEcBxklFDZ)
+A Next.js demonstration of how personal context and delegated authority should work in AI systems.
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+This interactive demo tells the story of Human Context Protocol (HCP) through three progressive stages:
 
-## Deployment
+1. **Human Context** — The foundation of useful AI interactions
+2. **Grant of Authority** — Secure, granular control over context sharing  
+3. **Applications** — Real-world usage across AI systems
 
-Your project is live at:
+## Quick Start
 
-**[https://vercel.com/tobin-5325s-projects/v0-preference-generation-app](https://vercel.com/tobin-5325s-projects/v0-preference-generation-app)**
+```bash
+# Install dependencies
+pnpm install
 
-## Build your app
+# Start development server
+pnpm run dev
 
-Continue building your app on:
+# Open http://localhost:3000
+```
 
-**[https://v0.app/chat/projects/ntEcBxklFDZ](https://v0.app/chat/projects/ntEcBxklFDZ)**
+## Key Features
 
-## How It Works
+- **Progressive Narrative Flow** — Guided modals introduce each concept
+- **Real-time Context Extraction** — Chat interactions build preference database
+- **Granular Authority Management** — Control which AI services access what data
+- **API-First Architecture** — Ready for integration with external AI systems
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+## Technical Stack
+
+- **Next.js 15** with TypeScript
+- **Framer Motion** for animations
+- **Radix UI** components
+- **Tailwind CSS** styling
+
+## Purpose
+
+This demo communicates why user-controlled context portability is essential for a healthy AI ecosystem. Built for policymakers, technologists, and researchers exploring the future of AI safety and digital sovereignty.
+
+---
+
+*Stanford DEL × Consumer Reports collaboration*
