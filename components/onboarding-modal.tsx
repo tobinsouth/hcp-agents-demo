@@ -139,28 +139,9 @@ export function OnboardingModal({
                   <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </motion.button>
                 
-                {/* Progress indicator */}
-                <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                  {story.map((_, index) => (
-                    <motion.div
-                      key={index}
-                      className={`h-1 rounded-full flex-1 ${
-                        index <= currentStep ? 'bg-primary' : 'bg-muted'
-                      }`}
-                      initial={{ scaleX: 0 }}
-                      animate={{ 
-                        scaleX: index <= currentStep ? 1 : 0.3,
-                        backgroundColor: index <= currentStep ? 'oklch(0.385 0.127 265)' : 'oklch(0.925 0.01 83)'
-                      }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    />
-                  ))}
-                </div>
-                
                 {/* Visual icon */}
                 <motion.div 
                   className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center"
-                  key={currentStep}
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", duration: 0.6 }}
@@ -170,103 +151,83 @@ export function OnboardingModal({
               </div>
               
               {/* Content */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -20 : 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10"
-                >
-                  <div className="text-center mb-6 sm:mb-8">
-                    <motion.h2 
-                      className="text-2xl sm:text-3xl md:text-4xl mb-2 font-light"
-                      style={{ fontFamily: 'var(--font-crimson)' }}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      {step?.title}
-                    </motion.h2>
-                    {step?.subtitle && (
-                      <motion.p 
-                        className="text-sm sm:text-base text-primary/80 font-medium"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        {step.subtitle}
-                      </motion.p>
-                    )}
-                  </div>
-                  
-                  <motion.p 
-                    className="text-sm sm:text-base text-muted-foreground leading-[1.6] sm:leading-[1.7] text-center mb-6 sm:mb-8 max-w-sm sm:max-w-lg mx-auto"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10"
+              >
+                <div className="text-center mb-6 sm:mb-8">
+                  <motion.h2 
+                    className="text-2xl sm:text-3xl md:text-4xl mb-2 font-light"
+                    style={{ fontFamily: 'var(--font-crimson)' }}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    {step?.content}
-                  </motion.p>
-                  
-                  {/* Key insights - only show when VERBOSE_DISPLAY=true */}
-                  {showVerboseDisplay && (
-                    <motion.div 
-                      className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
-                      initial={{ opacity: 0, y: 20 }}
+                    {content?.title}
+                  </motion.h2>
+                  {content?.subtitle && (
+                    <motion.p 
+                      className="text-sm sm:text-base text-primary/80 font-medium"
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.3 }}
                     >
-                      <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Insights</h4>
-                      <div className="space-y-3">
-                        {step?.insights.map((insight, index) => (
-                          <motion.div
-                            key={index}
-                            className="flex items-start gap-3"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.6 + index * 0.1 }}
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
-                            <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
+                      {content.subtitle}
+                    </motion.p>
                   )}
+                </div>
+                
+                <motion.p 
+                  className="text-sm sm:text-base text-muted-foreground leading-[1.6] sm:leading-[1.7] text-center mb-6 sm:mb-8 max-w-sm sm:max-w-lg mx-auto"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {content?.content}
+                </motion.p>
+                
+                {/* Key points */}
+                <motion.div 
+                  className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Principles</h4>
+                  <div className="space-y-3">
+                    {content?.keyPoints.map((point, index) => (
+                      <motion.div
+                        key={index}
+                        className="flex items-start gap-3"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
+                        <p className="text-sm text-muted-foreground leading-relaxed">{point}</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 </motion.div>
-              </AnimatePresence>
+              </motion.div>
               
               {/* Actions */}
               <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                <div className="flex justify-between items-center gap-4">
-                  <motion.p 
-                    className="text-xs sm:text-sm text-muted-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                  >
-                    {currentStep + 1} of {story.length}
-                  </motion.p>
-                  
+                <div className="flex justify-center">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
                   >
                     <Button 
-                      onClick={handleNext}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
+                      onClick={handleClose}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 sm:px-8 sm:py-3 md:px-10 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
                     >
-                      {currentStep < story.length - 1 ? (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      ) : (
-                        actionLabel
-                      )}
+                      {actionLabel}
+                      <ArrowRight className="w-4 h-4" />
                     </Button>
                   </motion.div>
                 </div>

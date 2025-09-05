@@ -1,13 +1,14 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
 import { GrantAuthorityUI } from "@/components/grant-authority-ui"
 import { OnboardingModal } from "@/components/onboarding-modal"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { ArrowDown, Sparkles, Archive, Network, Shield } from "lucide-react"
+import { ArrowDown, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
 
 // Typewriter component
 function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?: number; speed?: number }) {
@@ -42,65 +43,61 @@ function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?:
 }
 
 export default function HomePage() {
-  const [showChat, setShowChat] = useState(false)
+  // Flow state management
+  const [currentStep, setCurrentStep] = useState<'initial' | 'preferences' | 'authority' | 'applications'>('initial')
   const [showPreferences, setShowPreferences] = useState(false)
-  const [showNegotiation, setShowNegotiation] = useState(false)
   const [showGrantAuthority, setShowGrantAuthority] = useState(false)
-  const [currentModal, setCurrentModal] = useState<'chat' | 'preferences' | 'negotiation' | 'authority' | null>(null)
-  const [hasOpenedChat, setHasOpenedChat] = useState(false)
-  const [hasOpenedPreferences, setHasOpenedPreferences] = useState(false)
-  const [hasOpenedNegotiation, setHasOpenedNegotiation] = useState(false)
-  const [hasOpenedAuthority, setHasOpenedAuthority] = useState(false)
+  const [showApplications, setShowApplications] = useState(false)
+  const [showChat, setShowChat] = useState(false)
+  const [showNegotiation, setShowNegotiation] = useState(false)
+  
+  // Modal state
+  const [currentModal, setCurrentModal] = useState<'preferences' | 'authority' | 'application' | null>(null)
+  
+  // Button click tracking
+  const [authorityButtonClicked, setAuthorityButtonClicked] = useState(false)
+  const [applicationButtonClicked, setApplicationButtonClicked] = useState(false)
 
-  const handleModalClose = (modal: 'chat' | 'preferences' | 'negotiation' | 'authority') => {
+  const handleModalClose = (modal: 'preferences' | 'authority' | 'application') => {
     setCurrentModal(null)
     
     setTimeout(() => {
-      if (modal === 'chat') {
-        setShowChat(true)
-        setHasOpenedChat(true)
-      } else if (modal === 'preferences') {
-        setShowPreferences(true)
-        setHasOpenedPreferences(true)
-      } else if (modal === 'negotiation') {
-        setShowNegotiation(true)
-        setHasOpenedNegotiation(true)
+      if (modal === 'preferences') {
+        setCurrentStep('preferences')
+        // Don't auto-expand preferences - let user click to open
       } else if (modal === 'authority') {
-        setShowGrantAuthority(true)
-        setHasOpenedAuthority(true)
+        setCurrentStep('authority')
+        // Don't auto-expand authority - let user click to open
+      } else if (modal === 'application') {
+        setCurrentStep('applications')
+        // Don't auto-expand applications - let user click to open
       }
     }, 300)
+  }
+  
+  const handleAddAuthority = () => {
+    setAuthorityButtonClicked(true)
+    setCurrentModal('authority')
+  }
+  
+  const handleSeeInUse = () => {
+    setApplicationButtonClicked(true)
+    setCurrentModal('application')
   }
 
   const toggleComponent = (component: string) => {
     switch(component) {
       case 'chat':
-        if (!showChat && !hasOpenedChat) {
-          setCurrentModal('chat')
-        } else {
-          setShowChat(!showChat)
-        }
+        setShowChat(!showChat)
         break
       case 'preferences':
-        if (!showPreferences && !hasOpenedPreferences) {
-          setCurrentModal('preferences')
-        } else {
-          setShowPreferences(!showPreferences)
-        }
+        setShowPreferences(!showPreferences)
         break
       case 'negotiation':
-        if (!showNegotiation && !hasOpenedNegotiation) {
-          setCurrentModal('negotiation')
-        } else {
-          setShowNegotiation(!showNegotiation)
-        }
+        setShowNegotiation(!showNegotiation)
         break
       case 'authority':
-        if (!showGrantAuthority && !hasOpenedAuthority) {
-          setCurrentModal('authority')
-        } else {
-          setShowGrantAuthority(!showGrantAuthority)
-        }
+        setShowGrantAuthority(!showGrantAuthority)
         break
     }
   }
@@ -117,7 +114,7 @@ export default function HomePage() {
       filter: "blur(0px)",
       transition: {
         duration: 1.2,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        ease: "easeOut" as const
       }
     }
   }
@@ -141,59 +138,33 @@ export default function HomePage() {
     }
   }
 
-  const modalContent = {
-    chat: {
-      title: "Chatbots are becoming our friends.",
-      content: "Every day when you talk with Claude or ChatGPT, they are implicitly storing and remembering information about you and your preferences. This is how they achieve market lock-in."
-    },
-    preferences: {
-      title: "Your accumulated context forms a rich preference database.",
-      content: "This data represents your unique digital fingerprint - your interests, values, and decision patterns. This is what creates vendor lock-in, but it could also enable personalized AI experiences across platforms."
-    },
-    negotiation: {
-      title: "AI Agents will soon take action on your behalf.",
-      content: "With portable human context, AI agents can negotiate on your behalf with deep understanding of your preferences. This enables a future where multiple AI systems can collaborate while respecting your individual needs and values."
-    },
-    authority: {
-      title: "You control who can access your context.",
-      content: "Grant of Authority lets you decide which AI agents and services can access your preferences, what data they can see, and how much autonomy they have when acting on your behalf. This ensures your digital sovereignty in an AI-powered world."
-    }
-  }
 
   return (
     <>
-      {/* Onboarding Modals */}
-      <OnboardingModal
-        isOpen={currentModal === 'chat'}
-        onClose={() => handleModalClose('chat')}
-        title={modalContent.chat.title}
-        content={modalContent.chat.content}
-        actionLabel="Start Chatting"
-        modalType="chat"
-      />
+      {/* Onboarding Modals - Progressive Flow */}
       <OnboardingModal
         isOpen={currentModal === 'preferences'}
         onClose={() => handleModalClose('preferences')}
-        title={modalContent.preferences.title}
-        content={modalContent.preferences.content}
-        actionLabel="View Database"
+        title="The Importance of Human Context"
+        content="To perform most interactions online, you need to know an individual's preferences and history. This 'human context' is what makes AI truly useful."
+        actionLabel="See what Human Context is"
         modalType="preferences"
-      />
-      <OnboardingModal
-        isOpen={currentModal === 'negotiation'}
-        onClose={() => handleModalClose('negotiation')}
-        title={modalContent.negotiation.title}
-        content={modalContent.negotiation.content}
-        actionLabel="See Agents"
-        modalType="negotiation"
       />
       <OnboardingModal
         isOpen={currentModal === 'authority'}
         onClose={() => handleModalClose('authority')}
-        title={modalContent.authority.title}
-        content={modalContent.authority.content}
-        actionLabel="Manage Authority"
+        title="Controlling Your Agent Authority"
+        content="Your context is sensitive. Grant of Authority lets you control how it's shared and used BY AI."
+        actionLabel="Grant Agentic Authorization"
         modalType="authority"
+      />
+      <OnboardingModal
+        isOpen={currentModal === 'application'}
+        onClose={() => handleModalClose('application')}
+        title="See It In Action"
+        content="Watch how context and authority work together across AI applications."
+        actionLabel="Explore Applications"
+        modalType="application"
       />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden">
@@ -210,35 +181,37 @@ export default function HomePage() {
         <motion.div 
           className="text-center mb-16 sm:mb-16 md:mb-20 lg:mb-24"
         >
-          {/* Typewriter tagline appears after all other animations */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ 
-              duration: 0.5, 
-              delay: 6.5,
-              ease: [0.16, 1, 0.3, 1]
-            }}
-            className="inline-block mb-8 sm:mb-10"
-          >
-            <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
-              <TypewriterText 
-                text="PROTECTING DIGNITY IN THE AI AGE" 
-                delay={6500}
-                speed={50}
-              />
-              <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ 
-                  duration: 0.8,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                  delay: 6.5
-                }}
-                className="ml-1 inline-block w-0.5 h-3 bg-muted-foreground/60"
-              />
-            </span>
-          </motion.div>
+          {/* Typewriter tagline - appears when no modal is open */}
+          {!currentModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.5,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              className="inline-block mb-8 sm:mb-10"
+            >
+              <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
+                <TypewriterText 
+                  text="HUMAN CONTEXT IN AI WORKFLOWS" 
+                  delay={500}
+                  speed={40}
+                />
+                <motion.span
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ 
+                    duration: 0.8,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    delay: 0.8
+                  }}
+                  className="ml-1 inline-block w-0.5 h-3 bg-muted-foreground/60"
+                />
+              </span>
+            </motion.div>
+          )}
           
           {/* Main title emerges with elegant stagger */}
           <motion.div className="mb-10 sm:mb-12">
@@ -249,26 +222,26 @@ export default function HomePage() {
               <motion.span 
                 className="block"
                 initial={{ opacity: 0, y: 30, filter: "blur(5px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                animate={{ opacity: currentModal ? 0.3 : 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
-                  duration: 1.0, 
-                  delay: 0.5,
+                  duration: 0.8, 
+                  delay: 0.2,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Human Context
+                Human Context &
               </motion.span>
               <motion.span 
                 className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-4 text-muted-foreground font-normal"
                 initial={{ opacity: 0, y: 20, filter: "blur(3px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                animate={{ opacity: currentModal ? 0.2 : 1, y: 0, filter: "blur(0px)" }}
                 transition={{ 
                   duration: 0.8, 
-                  delay: 1.3,
+                  delay: 0.4,
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                to Agent Behavior
+                Delegated Authority
               </motion.span>
             </motion.h1>
           </motion.div>
@@ -276,98 +249,47 @@ export default function HomePage() {
           {/* Subtitle fades in gracefully */}
           <motion.p
             initial={{ opacity: 0, y: 20, filter: "blur(3px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            animate={{ opacity: currentModal ? 0.2 : 1, y: 0, filter: "blur(0px)" }}
             transition={{ 
-              duration: 1.0, 
-              delay: 3.0,
+              duration: 0.8, 
+              delay: 0.6,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed mb-8"
           >
-            A demonstration of how personal context shapes AI interactions
+            Demonstrating the critical role of delegated authority in AI systems
           </motion.p>
+
+          {/* Start Demo Button */}
+          {currentStep === 'initial' && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 1.2,
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              className="flex justify-center"
+            >
+              <Button
+                onClick={() => setCurrentModal('preferences')}
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-lg text-lg font-medium transition-all duration-300 hover:scale-105"
+              >
+                See why context and delegation is important
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Main Content */}
         <LayoutGroup>
           <motion.div layout className="space-y-6 sm:space-y-8 md:space-y-10 pb-8 sm:pb-12 md:pb-16">
-              {/* Chat Interface */}
-              <motion.div
-                layout
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: { 
-                    opacity: 0,
-                    y: 60,
-                    filter: "blur(15px)"
-                  },
-                  visible: { 
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    transition: {
-                      duration: 0.8,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 4.5
-                    }
-                  }
-                }}
-                className="w-full"
-              >
-                <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
-                  <motion.div 
-                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
-                    onClick={() => toggleComponent('chat')}
-                    whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-                      <motion.div 
-                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
-                      </motion.div>
-                      <div>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
-                          Like talking to your friend
-                        </h2>
-                        <p className="text-sm sm:text-base text-muted-foreground">
-                        Chatbots are the most natural interaction pattern for the modern age.
-                        </p>
-                      </div>
-                    </div>
-                    <motion.div
-                      animate={{ rotate: showChat ? 180 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeInOut" as const }}
-                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
-                    >
-                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    </motion.div>
-                  </motion.div>
-                  
-                  <AnimatePresence>
-                    {showChat && (
-                      <motion.div
-                        initial="collapsed"
-                        animate="expanded"
-                        exit="collapsed"
-                        variants={contentVariants}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
-                            <ChatComponent />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Card>
-              </motion.div>
 
-              {/* Preference Database */}
+              {/* Step 1: Human Context (Preference Database) */}
+              {currentStep !== 'initial' && (
               <motion.div
                 layout
                 initial="hidden"
@@ -385,7 +307,7 @@ export default function HomePage() {
                     transition: {
                       duration: 0.8,
                       ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 4.9
+                      delay: 0.3
                     }
                   }
                 }}
@@ -407,10 +329,10 @@ export default function HomePage() {
                       </motion.div>
                       <div>
                         <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
-                          That remembers everything about you
+                          Human Context
                         </h2>
                         <p className="text-sm sm:text-base text-muted-foreground">
-                          Your preferences become your digital fingerprint
+                          Your preferences, values, and interaction history
                         </p>
                       </div>
                     </div>
@@ -441,106 +363,38 @@ export default function HomePage() {
                     )}
                   </AnimatePresence>
                 </Card>
-              </motion.div>
-
-              {/* Agent Negotiation */}
-              <motion.div
-                layout
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  hidden: { 
-                    opacity: 0,
-                    y: 60,
-                    filter: "blur(15px)"
-                  },
-                  visible: { 
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    transition: {
-                      duration: 0.8,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 5.3
-                    }
-                  }
-                }}
-                className="w-full"
-              >
-                <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
-                  <motion.div 
-                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
-                    onClick={() => toggleComponent('negotiation')}
-                    whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
-                      <motion.div 
-                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ type: "spring", stiffness: 400 }}
-                      >
-                        <Network className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
-                      </motion.div>
-                      <div>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
-                          Who will soon act on your behalf
-                        </h2>
-                        <p className="text-sm sm:text-base text-muted-foreground">
-                          AI agents negotiating with your values in mind
-                        </p>
-                      </div>
-                    </div>
+                
+                {/* Add Grant Authority Button */}
+                <AnimatePresence>
+                  {showPreferences && currentStep === 'preferences' && !authorityButtonClicked && (
                     <motion.div
-                      animate={{ rotate: showNegotiation ? 180 : 0 }}
-                      transition={{ duration: 0.4, ease: "easeInOut" as const }}
-                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: 0.8, duration: 0.3 }}
+                      className="flex justify-center mt-6"
                     >
-                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                    </motion.div>
-                  </motion.div>
-                  
-                  <AnimatePresence>
-                    {showNegotiation && (
-                      <motion.div
-                        initial="collapsed"
-                        animate="expanded"
-                        exit="collapsed"
-                        variants={contentVariants}
-                        className="overflow-hidden"
+                      <Button
+                        onClick={handleAddAuthority}
+                        size="lg"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg flex items-center gap-2"
                       >
-                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
-                            <AgentNegotiation />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </Card>
+                        Add Grant of Authority
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
+              )}
 
-              {/* Grant of Authority */}
+              {/* Step 2: Grant of Authority - Only show after preferences */}
+              {(currentStep === 'authority' || currentStep === 'applications') && (
               <motion.div
                 layout
                 initial="hidden"
                 animate="visible"
-                variants={{
-                  hidden: { 
-                    opacity: 0,
-                    y: 60,
-                    filter: "blur(15px)"
-                  },
-                  visible: { 
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    transition: {
-                      duration: 0.8,
-                      ease: [0.25, 0.46, 0.45, 0.94],
-                      delay: 5.7
-                    }
-                  }
-                }}
+                variants={containerVariants}
                 className="w-full"
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
@@ -559,10 +413,10 @@ export default function HomePage() {
                       </motion.div>
                       <div>
                         <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
-                          With you in control of the authority
+                          Grant of Authority
                         </h2>
                         <p className="text-sm sm:text-base text-muted-foreground">
-                          Define who can access your context and how they can use it
+                          Control how your context is shared and used
                         </p>
                       </div>
                     </div>
@@ -593,7 +447,169 @@ export default function HomePage() {
                     )}
                   </AnimatePresence>
                 </Card>
+                
+                {/* See in Use Button */}
+                <AnimatePresence>
+                  {showGrantAuthority && currentStep === 'authority' && !applicationButtonClicked && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: 0.8, duration: 0.3 }}
+                      className="flex justify-center mt-6"
+                    >
+                      <Button
+                        onClick={handleSeeInUse}
+                        size="lg"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg flex items-center gap-2"
+                      >
+                        See this in use
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
+              )}
+
+              {/* Step 3: Applications (Chat & Agent Negotiation) */}
+              {currentStep === 'applications' && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-center mb-8"
+                  >
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-2" style={{ fontFamily: 'var(--font-crimson)' }}>
+                      Applications in Action
+                    </h2>
+                    <p className="text-sm sm:text-base text-muted-foreground">
+                      See how human context and authority work together
+                    </p>
+                  </motion.div>
+                  
+                  {/* Chat Interface */}
+                  <motion.div
+                    layout
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="w-full"
+                  >
+                    <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
+                      <motion.div 
+                        className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                        onClick={() => toggleComponent('chat')}
+                        whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+                          <motion.div 
+                            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
+                          </motion.div>
+                          <div>
+                            <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                              Chat Interface
+                            </h2>
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                              Natural conversation with context awareness
+                            </p>
+                          </div>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: showChat ? 180 : 0 }}
+                          transition={{ duration: 0.4, ease: "easeInOut" as const }}
+                          className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
+                        >
+                          <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                        </motion.div>
+                      </motion.div>
+                      
+                      <AnimatePresence>
+                        {showChat && (
+                          <motion.div
+                            initial="collapsed"
+                            animate="expanded"
+                            exit="collapsed"
+                            variants={contentVariants}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                              <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
+                                <ChatComponent />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Card>
+                  </motion.div>
+                  
+                  {/* Agent Negotiation */}
+                  <motion.div
+                    layout
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="w-full"
+                  >
+                    <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
+                      <motion.div 
+                        className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                        onClick={() => toggleComponent('negotiation')}
+                        whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+                          <motion.div 
+                            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <Network className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
+                          </motion.div>
+                          <div>
+                            <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                              Agent Negotiation
+                            </h2>
+                            <p className="text-sm sm:text-base text-muted-foreground">
+                              AI agents working together on your behalf
+                            </p>
+                          </div>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: showNegotiation ? 180 : 0 }}
+                          transition={{ duration: 0.4, ease: "easeInOut" as const }}
+                          className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
+                        >
+                          <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                        </motion.div>
+                      </motion.div>
+                      
+                      <AnimatePresence>
+                        {showNegotiation && (
+                          <motion.div
+                            initial="collapsed"
+                            animate="expanded"
+                            exit="collapsed"
+                            variants={contentVariants}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                              <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
+                                <AgentNegotiation />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Card>
+                  </motion.div>
+                </>
+              )}
           </motion.div>
         </LayoutGroup>
         
@@ -619,11 +635,10 @@ export default function HomePage() {
               className="text-base sm:text-lg md:text-xl leading-[1.7] sm:leading-[1.8] text-center text-muted-foreground"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
-              If we want an open AI ecosystem where{" "}
-              <span className="text-foreground font-medium">chat interfaces don&apos;t lock users</span>{" "}
-              into proprietary preference silos, we need an{" "}
-              <span className="text-foreground font-medium">interoperable protocol</span>{" "}
-              for transferring human context between AI systems.
+              Human context is the foundation of AI utility. Without understanding{" "}
+              <span className="text-foreground font-medium">preferences and interaction history</span>,{" "}
+              AI cannot deliver personalized, meaningful experiences. This context must be{" "}
+              <span className="text-foreground font-medium">transparent, interoperable, and secure</span>.
             </motion.p>
             
             <motion.p
@@ -633,9 +648,11 @@ export default function HomePage() {
               className="text-base sm:text-lg md:text-xl leading-[1.7] sm:leading-[1.8] text-center text-muted-foreground mt-4 sm:mt-6"
               style={{ fontFamily: 'var(--font-crimson)' }}
             >
-              This isn&apos;t just about preventing vendor lock-in—it&apos;s about ensuring{" "}
-              <span className="text-foreground font-medium">user preferences can flow freely</span>{" "}
-              in a competitive marketplace while enabling AI agents to truly act on our behalf.
+              Grant of Authority is the key unlock for deploying agents at scale. By giving users{" "}
+              <span className="text-foreground font-medium">fine-grained control</span>{" "}
+              over how their context is shared and used, we enable a future where AI can{" "}
+              <span className="text-foreground font-medium">safely and reliably</span>{" "}
+              act on our behalf.
             </motion.p>
             
             <motion.div
