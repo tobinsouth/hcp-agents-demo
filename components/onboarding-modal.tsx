@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowRight, Sparkles, Archive, Network } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useCallback } from "react"
+import { useVerboseMode } from "@/lib/utils"
 
 interface StoryStep {
   title: string
@@ -105,8 +106,8 @@ export function OnboardingModal({
   const [currentStep, setCurrentStep] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   
-  // Check for verbose display environment variable
-  const showVerboseDisplay = process.env.NEXT_PUBLIC_VERBOSE_DISPLAY === 'true'
+  // Check for verbose display query parameter
+  const showVerboseDisplay = useVerboseMode()
   
   const story = storyContent[modalType]
   const step = story[currentStep]
