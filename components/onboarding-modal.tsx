@@ -11,17 +11,28 @@ interface OnboardingModalProps {
   title: string
   content: string
   actionLabel?: string
-  modalType: 'preferences' | 'authority' | 'application'
+  modalType: 'chat' | 'preferences' | 'authority' | 'application' | 'negotiation'
 }
 
 // Single card content for each modal type
-const modalContent: Record<'preferences' | 'authority' | 'application', {
+const modalContent: Record<'chat' | 'preferences' | 'authority' | 'application' | 'negotiation', {
   title: string
   subtitle: string
   content: string
   visual: 'data' | 'authority' | 'agents'
   keyPoints: string[]
 }> = {
+  chat: {
+    title: "Human Context in Action",
+    subtitle: "Experience personalized AI interactions",
+    content: "This chat interface demonstrates how human context enhances AI conversations. As you chat, the system learns your preferences, communication style, and interests - then uses this context to provide more relevant and personalized responses.",
+    visual: 'agents',
+    keyPoints: [
+      "Real-time context extraction from conversations",
+      "Adaptive responses based on your preferences",
+      "Transparent display of what's being learned"
+    ]
+  },
   preferences: {
     title: "The Importance of Human Context",
     subtitle: "Your preferences are the foundation of AI utility",
@@ -53,6 +64,17 @@ const modalContent: Record<'preferences' | 'authority' | 'application', {
       "Seamless AI experiences across all platforms",
       "Agents that truly represent your interests",
       "Transparent, controllable, and trustworthy"
+    ]
+  },
+  negotiation: {
+    title: "Agent Negotiation Demo",
+    subtitle: "Watch AI agents negotiate on your behalf",
+    content: "Experience how your human context enables AI agents to negotiate effectively while representing your interests. Two agents engage in real-time negotiation, with one using your preferences and constraints to achieve the best outcome for you.",
+    visual: 'agents',
+    keyPoints: [
+      "Context-aware negotiation strategies",
+      "Real-time decision making based on your values",
+      "Transparent display of negotiation progress"
     ]
   }
 }
@@ -139,6 +161,7 @@ export function OnboardingModal({
                   <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </motion.button>
                 
+                
                 {/* Visual icon */}
                 <motion.div 
                   className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center"
@@ -151,13 +174,7 @@ export function OnboardingModal({
               </div>
               
               {/* Content */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10"
-              >
+              <div className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10">
                 <div className="text-center mb-6 sm:mb-8">
                   <motion.h2 
                     className="text-2xl sm:text-3xl md:text-4xl mb-2 font-light"
@@ -189,34 +206,36 @@ export function OnboardingModal({
                   {content?.content}
                 </motion.p>
                 
-                {/* Key points */}
-                <motion.div 
-                  className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Principles</h4>
-                  <div className="space-y-3">
-                    {content?.keyPoints.map((point, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex items-start gap-3"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.6 + index * 0.1 }}
-                      >
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
-                        <p className="text-sm text-muted-foreground leading-relaxed">{point}</p>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              </motion.div>
+                {/* Key Points */}
+                {content?.keyPoints && (
+                  <motion.div 
+                    className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Points</h4>
+                    <div className="space-y-3">
+                      {content.keyPoints.map((point, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex items-start gap-3"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 + index * 0.1 }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
+                          <p className="text-sm text-muted-foreground leading-relaxed">{point}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
               
               {/* Actions */}
               <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                <div className="flex justify-center">
+                <div className="flex justify-end items-center gap-4">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -224,7 +243,7 @@ export function OnboardingModal({
                   >
                     <Button 
                       onClick={handleClose}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 sm:px-8 sm:py-3 md:px-10 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
                     >
                       {actionLabel}
                       <ArrowRight className="w-4 h-4" />
