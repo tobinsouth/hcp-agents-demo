@@ -2,12 +2,13 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, User, Sparkles } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Send, User, Sparkles, Brain, Database, CheckCircle, Activity } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
@@ -16,10 +17,79 @@ interface Message {
   content: string
 }
 
+interface HumanContext {
+  behavioral_patterns?: any
+  interaction_history?: {
+    topics_discussed?: Array<{ topic: string; frequency: number; sentiment: string }>
+  }
+  preferences?: {
+    domains?: Record<string, any>
+  }
+  metadata?: {
+    update_count?: number
+  }
+}
+
+// Helper function to calculate context completeness
+function getContextCompleteness(context: HumanContext): number {
+  if (!context) return 0
+  
+  const sections = [
+    context.behavioral_patterns,
+    context.interaction_history,
+    context.preferences,
+    context.metadata
+  ]
+  
+  const filledSections = sections.filter(s => s && Object.keys(s).length > 0).length
+  return Math.round((filledSections / sections.length) * 100)
+}
+
 export function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("What are the key styles of dining room chairs?")
   const [isLoading, setIsLoading] = useState(false)
+  const [humanContext, setHumanContext] = useState<HumanContext | null>(null)
+  const [contextCompleteness, setContextCompleteness] = useState(0)
+  const [showContextUpdate, setShowContextUpdate] = useState(false)
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
+  const [expandedContext, setExpandedContext] = useState(false)
+
+  useEffect(() => {
+    // Fetch initial context
+    const fetchContext = () => {
+      fetch("/api/human-context")
+        .then(res => res.json())
+        .then(data => {
+          setHumanContext(data)
+          setContextCompleteness(getContextCompleteness(data))
+        })
+        .catch(err => console.error("Failed to fetch human context:", err))
+    }
+    
+    fetchContext()
+    
+    // Poll for context updates every 5 seconds
+    const interval = setInterval(() => {
+      fetch("/api/human-context")
+        .then(res => res.json())
+        .then(data => {
+          // Check if context has changed
+          if (JSON.stringify(data) !== JSON.stringify(humanContext)) {
+            setHumanContext(data)
+            setContextCompleteness(getContextCompleteness(data))
+            setShowContextUpdate(true)
+            setLastUpdateTime(new Date())
+            
+            // Hide the update indicator after 3 seconds
+            setTimeout(() => setShowContextUpdate(false), 3000)
+          }
+        })
+        .catch(err => console.error("Failed to fetch human context:", err))
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [humanContext])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,6 +168,137 @@ export function ChatComponent() {
 
   return (
     <div className="flex flex-col h-full p-3 sm:p-4 md:p-6">
+      {/* Human Context Status Bar */}
+      <div className="mb-3 sm:mb-4">
+        <Card className="p-3 bg-card/50 backdrop-blur-sm border-border/40">
+          <div 
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => setExpandedContext(!expandedContext)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Human Context</span>
+              </div>
+              <Badge variant="outline" className="gap-1">
+                <Database className="h-3 w-3" />
+                {contextCompleteness}% Complete
+              </Badge>
+              <AnimatePresence>
+                {showContextUpdate && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="flex items-center gap-1"
+                  >
+                    <Badge variant="default" className="gap-1 bg-green-500/10 text-green-600 border-green-500/20">
+                      <CheckCircle className="h-3 w-3" />
+                      Context Updated
+                    </Badge>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Activity className="h-3 w-3" />
+              <span>Active</span>
+              {lastUpdateTime && (
+                <>
+                  <span>•</span>
+                  <span>Last update: {lastUpdateTime.toLocaleTimeString()}</span>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Context Summary */}
+          {humanContext && (
+            <div className="mt-2 pt-2 border-t border-border/40">
+              <div className="flex flex-wrap gap-2">
+                {humanContext.behavioral_patterns?.interaction_style && (
+                  <Badge variant="secondary" className="text-xs">
+                    {humanContext.behavioral_patterns.interaction_style.response_length} responses
+                  </Badge>
+                )}
+                {humanContext.interaction_history?.topics_discussed && humanContext.interaction_history.topics_discussed.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {humanContext.interaction_history.topics_discussed.length} topics tracked
+                  </Badge>
+                )}
+                {humanContext.preferences?.domains && Object.keys(humanContext.preferences.domains).length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {Object.keys(humanContext.preferences.domains).join(", ")}
+                  </Badge>
+                )}
+                {humanContext.metadata?.update_count && (
+                  <Badge variant="outline" className="text-xs">
+                    {humanContext.metadata.update_count} updates
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Expanded Context Details */}
+          <AnimatePresence>
+            {expandedContext && humanContext && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-3 pt-3 border-t border-border/40 space-y-3">
+                  {humanContext.behavioral_patterns && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">Behavioral Patterns</p>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        {humanContext.behavioral_patterns.interaction_style && (
+                          <div>• Response preference: {humanContext.behavioral_patterns.interaction_style.response_length}</div>
+                        )}
+                        {humanContext.behavioral_patterns.interaction_style?.formality_level && (
+                          <div>• Formality level: {humanContext.behavioral_patterns.interaction_style.formality_level}/10</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {humanContext.interaction_history?.topics_discussed && humanContext.interaction_history.topics_discussed.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">Topics Discussed</p>
+                      <div className="flex flex-wrap gap-1">
+                        {humanContext.interaction_history.topics_discussed.map((topic, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {topic.topic}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {humanContext.preferences?.domains && (
+                    <div>
+                      <p className="text-xs font-medium mb-1">Domain Preferences</p>
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        {Object.entries(humanContext.preferences.domains).map(([domain, prefs]) => (
+                          <div key={domain}>
+                            • {domain}: {Object.keys(prefs as any).length} preferences tracked
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="text-xs text-muted-foreground">
+                    <p>This context helps the AI understand your preferences and communication style, enabling more personalized and relevant responses.</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </div>
       {/* Messages */}
       <ScrollArea className="flex-1 mb-3 sm:mb-4 min-h-0">
         <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
@@ -153,6 +354,14 @@ export function ChatComponent() {
                           : "bg-card/50 backdrop-blur-sm"
                       }`}>
                       <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      {message.role === "assistant" && humanContext && (
+                        <div className="mt-2 pt-2 border-t border-border/20">
+                          <div className="flex items-center gap-2 text-xs opacity-60">
+                            <Brain className="h-3 w-3" />
+                            <span>Using human context</span>
+                          </div>
+                        </div>
+                      )}
                     </Card>
                   </div>
                 </motion.div>
