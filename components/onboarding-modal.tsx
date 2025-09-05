@@ -1,131 +1,74 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ArrowRight, Sparkles, Archive, Network } from "lucide-react"
+import { X, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect, useCallback } from "react"
 import { useVerboseMode } from "@/lib/utils"
 
-interface StoryStep {
-  title: string
-  subtitle?: string
-  content: string
-  visual: 'chat' | 'data' | 'agents'
-  insights: string[]
-}
-
 interface OnboardingModalProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
-  content?: string
+  title: string
+  content: string
   actionLabel?: string
-  modalType: 'chat' | 'preferences' | 'negotiation'
+  modalType: 'preferences' | 'authority' | 'application'
 }
 
-const storyContent: Record<'chat' | 'preferences' | 'negotiation', StoryStep[]> = {
-  chat: [
-    {
-      title: "The Conversation Begins",
-      subtitle: "Every chat shapes your digital identity",
-      content: "When you talk with AI assistants like ChatGPT, Claude, or Gemini, something important happens behind the scenes. Each conversation isn't just a one-time interaction—it's building a detailed profile of who you are.",
-      visual: 'chat',
-      insights: [
-        "Your communication style and preferences",
-        "The topics you care about most",
-        "How you make decisions and solve problems"
-      ]
-    },
-    {
-      title: "The Hidden Lock-In",
-      subtitle: "Your context becomes their competitive advantage",
-      content: "This accumulated understanding becomes incredibly valuable—both to you and to the AI company. The richer your conversation history, the more personalized and helpful the AI becomes. But it also creates a subtle form of vendor lock-in.",
-      visual: 'data',
-      insights: [
-        "Switching to a new AI means starting over",
-        "Your preferences don't transfer between platforms",
-        "Companies use this data to keep you engaged"
-      ]
-    }
-  ],
-  preferences: [
-    {
-      title: "Your Digital Fingerprint",
-      subtitle: "Every interaction adds to your profile",
-      content: "Behind every conversation lies a growing database of your preferences, values, and behavioral patterns. This isn't just data—it's your digital identity taking shape.",
-      visual: 'data',
-      insights: [
-        "Communication patterns and decision-making style",
-        "Domain-specific preferences (work, home, hobbies)",
-        "Values and priorities that guide your choices"
-      ]
-    },
-    {
-      title: "The Portability Problem",
-      subtitle: "Your context should belong to you",
-      content: "This rich context represents years of interaction and learning. Yet today, it's trapped within individual platforms. What if you could take your preferences with you—enabling better AI experiences across all platforms?",
-      visual: 'agents',
-      insights: [
-        "Context portability enables true AI competition",
-        "Better experiences when AIs understand you from day one",
-        "You control how your data is used and shared"
-      ]
-    }
-  ],
-  negotiation: [
-    {
-      title: "The Agent Future",
-      subtitle: "AI acting on your behalf with full context",
-      content: "Soon, AI agents will negotiate deals, make purchases, and handle tasks on your behalf. But for this to work well, they need deep understanding of your preferences, constraints, and values.",
-      visual: 'agents',
-      insights: [
-        "Agents negotiate with your unique preferences in mind",
-        "Complex multi-party decisions handled automatically",
-        "Your values and constraints guide every decision"
-      ]
-    },
-    {
-      title: "The Vision Realized",
-      subtitle: "A future of interoperable AI that serves you",
-      content: "Imagine a world where your AI agent can work with any service provider's agent—all with deep understanding of who you are and what you value. This is the promise of portable human context.",
-      visual: 'data',
-      insights: [
-        "Seamless AI collaboration across platforms",
-        "Negotiations that truly represent your interests",
-        "A competitive AI ecosystem that puts you first"
-      ]
-    }
-  ]
+// Single card content for each modal type
+const modalContent: Record<'preferences' | 'authority' | 'application', {
+  title: string
+  subtitle: string
+  content: string
+  visual: 'data' | 'authority' | 'agents'
+  keyPoints: string[]
+}> = {
+  preferences: {
+    title: "The Importance of Human Context",
+    subtitle: "Your preferences are the foundation of AI utility",
+    content: "To perform most interactions online, you need to know an individual's preferences and history of interactions with that service. This 'human context' - your values, communication style, and decision patterns - is what makes AI truly useful and personalized to you.",
+    visual: 'data',
+    keyPoints: [
+      "Transparent: You can see and control your data",
+      "Interoperable: Works across different AI services",
+      "Secure: Protected by design and encrypted"
+    ]
+  },
+  authority: {
+    title: "Controlling Your Digital Authority",
+    subtitle: "Your context is sensitive and powerful",
+    content: "Human context contains deeply personal information about how you think, decide, and interact. Controlling how it can be shared and under what contexts is critically important. Grant of Authority is the key to deploying agents at scale with safety and reliability.",
+    visual: 'authority',
+    keyPoints: [
+      "Define precise access rules for each AI service",
+      "Set autonomy levels based on trust and task",
+      "Maintain complete audit trail of all access"
+    ]
+  },
+  application: {
+    title: "Bringing It All Together",
+    subtitle: "Context + Authority = Powerful AI",
+    content: "When human context and grant of authority combine, they unlock a new paradigm of AI interaction. Your preferences guide AI behavior across native chat applications, MCP protocols, and agent-to-agent negotiations - all while maintaining your control and privacy.",
+    visual: 'agents',
+    keyPoints: [
+      "Seamless AI experiences across all platforms",
+      "Agents that truly represent your interests",
+      "Transparent, controllable, and trustworthy"
+    ]
+  }
 }
 
 export function OnboardingModal({ 
   isOpen, 
   onClose, 
-  actionLabel = "Explore",
+  actionLabel = "Continue",
   modalType
 }: OnboardingModalProps) {
-  const [currentStep, setCurrentStep] = useState(0)
-  const [isTransitioning, setIsTransitioning] = useState(false)
+  const content = modalContent[modalType]
   
   // Check for verbose display query parameter
   const showVerboseDisplay = useVerboseMode()
   
-  const story = storyContent[modalType]
-  const step = story[currentStep]
-  
-  const handleNext = async () => {
-    if (currentStep < story.length - 1) {
-      setIsTransitioning(true)
-      setTimeout(() => {
-        setCurrentStep(currentStep + 1)
-        setIsTransitioning(false)
-      }, 200)
-    } else {
-      onClose()
-    }
-  }
-  
   const handleClose = useCallback(() => {
-    setCurrentStep(0)
     onClose()
   }, [onClose])
 
@@ -148,14 +91,14 @@ export function OnboardingModal({
   
   const getVisualIcon = (visual: string) => {
     switch (visual) {
-      case 'chat': return Sparkles
       case 'data': return Archive
       case 'agents': return Network
-      default: return Sparkles
+      case 'authority': return Shield
+      default: return Archive
     }
   }
   
-  const VisualIcon = getVisualIcon(step?.visual)
+  const VisualIcon = getVisualIcon(content?.visual)
   
   return (
     <AnimatePresence>

@@ -4,9 +4,10 @@ import { Card } from "@/components/ui/card"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
+import { GrantAuthorityUI } from "@/components/grant-authority-ui"
 import { OnboardingModal } from "@/components/onboarding-modal"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { ArrowDown, Sparkles, Archive, Network } from "lucide-react"
+import { ArrowDown, Sparkles, Archive, Network, Shield } from "lucide-react"
 
 // Typewriter component
 function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?: number; speed?: number }) {
@@ -44,12 +45,14 @@ export default function HomePage() {
   const [showChat, setShowChat] = useState(false)
   const [showPreferences, setShowPreferences] = useState(false)
   const [showNegotiation, setShowNegotiation] = useState(false)
-  const [currentModal, setCurrentModal] = useState<'chat' | 'preferences' | 'negotiation' | null>(null)
+  const [showGrantAuthority, setShowGrantAuthority] = useState(false)
+  const [currentModal, setCurrentModal] = useState<'chat' | 'preferences' | 'negotiation' | 'authority' | null>(null)
   const [hasOpenedChat, setHasOpenedChat] = useState(false)
   const [hasOpenedPreferences, setHasOpenedPreferences] = useState(false)
   const [hasOpenedNegotiation, setHasOpenedNegotiation] = useState(false)
+  const [hasOpenedAuthority, setHasOpenedAuthority] = useState(false)
 
-  const handleModalClose = (modal: 'chat' | 'preferences' | 'negotiation') => {
+  const handleModalClose = (modal: 'chat' | 'preferences' | 'negotiation' | 'authority') => {
     setCurrentModal(null)
     
     setTimeout(() => {
@@ -62,6 +65,9 @@ export default function HomePage() {
       } else if (modal === 'negotiation') {
         setShowNegotiation(true)
         setHasOpenedNegotiation(true)
+      } else if (modal === 'authority') {
+        setShowGrantAuthority(true)
+        setHasOpenedAuthority(true)
       }
     }, 300)
   }
@@ -87,6 +93,13 @@ export default function HomePage() {
           setCurrentModal('negotiation')
         } else {
           setShowNegotiation(!showNegotiation)
+        }
+        break
+      case 'authority':
+        if (!showGrantAuthority && !hasOpenedAuthority) {
+          setCurrentModal('authority')
+        } else {
+          setShowGrantAuthority(!showGrantAuthority)
         }
         break
     }
@@ -140,6 +153,10 @@ export default function HomePage() {
     negotiation: {
       title: "AI Agents will soon take action on your behalf.",
       content: "With portable human context, AI agents can negotiate on your behalf with deep understanding of your preferences. This enables a future where multiple AI systems can collaborate while respecting your individual needs and values."
+    },
+    authority: {
+      title: "You control who can access your context.",
+      content: "Grant of Authority lets you decide which AI agents and services can access your preferences, what data they can see, and how much autonomy they have when acting on your behalf. This ensures your digital sovereignty in an AI-powered world."
     }
   }
 
@@ -169,6 +186,14 @@ export default function HomePage() {
         content={modalContent.negotiation.content}
         actionLabel="See Agents"
         modalType="negotiation"
+      />
+      <OnboardingModal
+        isOpen={currentModal === 'authority'}
+        onClose={() => handleModalClose('authority')}
+        title={modalContent.authority.title}
+        content={modalContent.authority.content}
+        actionLabel="Manage Authority"
+        modalType="authority"
       />
       
       <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20 relative overflow-hidden">
@@ -486,6 +511,82 @@ export default function HomePage() {
                         <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
                           <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
                             <AgentNegotiation />
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              </motion.div>
+
+              {/* Grant of Authority */}
+              <motion.div
+                layout
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { 
+                    opacity: 0,
+                    y: 60,
+                    filter: "blur(15px)"
+                  },
+                  visible: { 
+                    opacity: 1,
+                    y: 0,
+                    filter: "blur(0px)",
+                    transition: {
+                      duration: 0.8,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                      delay: 5.7
+                    }
+                  }
+                }}
+                className="w-full"
+              >
+                <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
+                  <motion.div 
+                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                    onClick={() => toggleComponent('authority')}
+                    whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+                      <motion.div 
+                        className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 400 }}
+                      >
+                        <Shield className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
+                      </motion.div>
+                      <div>
+                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                          With you in control of the authority
+                        </h2>
+                        <p className="text-sm sm:text-base text-muted-foreground">
+                          Define who can access your context and how they can use it
+                        </p>
+                      </div>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: showGrantAuthority ? 180 : 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" as const }}
+                      className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
+                    >
+                      <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                    </motion.div>
+                  </motion.div>
+                  
+                  <AnimatePresence>
+                    {showGrantAuthority && (
+                      <motion.div
+                        initial="collapsed"
+                        animate="expanded"
+                        exit="collapsed"
+                        variants={contentVariants}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
+                            <GrantAuthorityUI />
                           </div>
                         </div>
                       </motion.div>
