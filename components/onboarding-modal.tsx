@@ -139,28 +139,10 @@ export function OnboardingModal({
                   <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </motion.button>
                 
-                {/* Progress indicator */}
-                <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                  {story.map((_, index) => (
-                    <motion.div
-                      key={index}
-                      className={`h-1 rounded-full flex-1 ${
-                        index <= currentStep ? 'bg-primary' : 'bg-muted'
-                      }`}
-                      initial={{ scaleX: 0 }}
-                      animate={{ 
-                        scaleX: index <= currentStep ? 1 : 0.3,
-                        backgroundColor: index <= currentStep ? 'oklch(0.385 0.127 265)' : 'oklch(0.925 0.01 83)'
-                      }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    />
-                  ))}
-                </div>
                 
                 {/* Visual icon */}
                 <motion.div 
                   className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center"
-                  key={currentStep}
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", duration: 0.6 }}
@@ -172,9 +154,8 @@ export function OnboardingModal({
               {/* Content */}
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={currentStep}
                   initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -20 : 0 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                   className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10"
@@ -187,16 +168,16 @@ export function OnboardingModal({
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      {step?.title}
+                      {content?.title}
                     </motion.h2>
-                    {step?.subtitle && (
+                    {content?.subtitle && (
                       <motion.p 
                         className="text-sm sm:text-base text-primary/80 font-medium"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                       >
-                        {step.subtitle}
+                        {content.subtitle}
                       </motion.p>
                     )}
                   </div>
@@ -207,7 +188,7 @@ export function OnboardingModal({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                   >
-                    {step?.content}
+                    {content?.content}
                   </motion.p>
                   
                   {/* Key insights - only show when VERBOSE_DISPLAY=true */}
@@ -220,7 +201,7 @@ export function OnboardingModal({
                     >
                       <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Insights</h4>
                       <div className="space-y-3">
-                        {step?.insights.map((insight, index) => (
+                        {content?.keyPoints?.map((insight, index) => (
                           <motion.div
                             key={index}
                             className="flex items-start gap-3"
@@ -241,14 +222,6 @@ export function OnboardingModal({
               {/* Actions */}
               <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
                 <div className="flex justify-between items-center gap-4">
-                  <motion.p 
-                    className="text-xs sm:text-sm text-muted-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                  >
-                    {currentStep + 1} of {story.length}
-                  </motion.p>
                   
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -256,17 +229,13 @@ export function OnboardingModal({
                     transition={{ delay: 0.7 }}
                   >
                     <Button 
-                      onClick={handleNext}
+                      onClick={handleClose}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
                     >
-                      {currentStep < story.length - 1 ? (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      ) : (
-                        actionLabel
-                      )}
+                      <>
+                        {actionLabel}
+                        <Sparkles className="w-4 h-4" />
+                      </>
                     </Button>
                   </motion.div>
                 </div>
