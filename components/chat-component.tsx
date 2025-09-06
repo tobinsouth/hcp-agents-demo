@@ -47,7 +47,7 @@ function getContextCompleteness(context: HumanContext): number {
 
 export function ChatComponent() {
   const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState("What are the key styles of dining room chairs?")
+  const [input, setInput] = useState("What are the different types of washing machines available?")
   const [isLoading, setIsLoading] = useState(false)
   const [humanContext, setHumanContext] = useState<HumanContext | null>(null)
   const [contextCompleteness, setContextCompleteness] = useState(0)
@@ -409,7 +409,7 @@ export function ChatComponent() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about furniture or share your preferences..."
+          placeholder="Ask about washing machines or share your preferences..."
           disabled={isLoading}
           className="flex-1 border-0 bg-background/50 focus:bg-background transition-colors text-sm sm:text-base h-[44px]"
         />
