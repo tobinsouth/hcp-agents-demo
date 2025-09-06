@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { getPreferences } from "@/lib/preferences"
+import { getPreferences } from "@/lib/hcp"
 
 export async function POST(req: NextRequest) {
   try {

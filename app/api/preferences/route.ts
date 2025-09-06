@@ -1,4 +1,4 @@
-import { getPreferences } from "@/lib/preferences"
+import { getPreferences } from "@/lib/hcp"
 import { NextResponse } from "next/server"
 
 export async function GET() {

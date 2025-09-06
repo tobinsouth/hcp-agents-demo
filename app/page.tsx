@@ -9,6 +9,7 @@ import { GrantAuthorityUI } from "@/components/grant-authority-ui"
 import { OnboardingModal } from "@/components/onboarding-modal"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { ArrowDown, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
+import { useDemoInitialization } from "@/hooks/use-demo-initialization"
 
 // Typewriter component
 function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?: number; speed?: number }) {
@@ -43,6 +44,9 @@ function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?:
 }
 
 export default function HomePage() {
+  // Initialize demo data automatically
+  const { initialized: demoInitialized } = useDemoInitialization()
+  
   // Flow state management
   const [currentStep, setCurrentStep] = useState<'initial' | 'preferences' | 'authority' | 'applications'>('initial')
   const [showPreferences, setShowPreferences] = useState(false)

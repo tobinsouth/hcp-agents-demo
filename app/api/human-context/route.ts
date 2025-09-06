@@ -5,12 +5,12 @@ import {
   getAccessLog,
   clearHumanContext,
   getContextCompleteness
-} from "@/lib/human-context"
+} from "@/lib/hcp"
 
 export async function GET(req: Request) {
   try {
     // Get the human context for the chat UI client
-    const context = getFilteredHumanContext("claude-assistant")
+    const context = await getFilteredHumanContext("claude-assistant")
     
     return NextResponse.json(context)
   } catch (error) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 
     switch (action) {
       case "update":
-        updateHumanContext(data, clientId, true)
+        await updateHumanContext(data, clientId, true)
         return NextResponse.json({ success: true, message: "Context updated" })
       
       case "clear":
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ log })
       
       case "get-completeness":
-        const context = getFilteredHumanContext(clientId)
+        const context = await getFilteredHumanContext(clientId)
         const completeness = getContextCompleteness(context as any)
         return NextResponse.json({ completeness })
       

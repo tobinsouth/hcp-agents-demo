@@ -7,9 +7,9 @@ import {
   updateAutonomySettings,
   checkClientAccess,
   getFilteredPreferences,
-  resetGrantAuthority
-} from "@/lib/grant-authority"
-import { getPreferences } from "@/lib/preferences"
+  resetGrantAuthority,
+  getPreferences
+} from "@/lib/hcp"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   if (action === "check-access" && clientId) {
     const section = searchParams.get("section")
     if (section) {
-      const hasAccess = checkClientAccess(clientId, section as any)
+      const hasAccess = await checkClientAccess(clientId, section as any)
       return NextResponse.json({ hasAccess })
     }
   }
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   // Get filtered preferences for a specific client
   if (action === "filtered-preferences" && clientId) {
     const fullPreferences = getPreferences()
-    const filtered = getFilteredPreferences(clientId, fullPreferences)
+    const filtered = await getFilteredPreferences(clientId, fullPreferences)
     return NextResponse.json(filtered)
   }
 

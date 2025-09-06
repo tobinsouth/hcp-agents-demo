@@ -11,8 +11,7 @@ import { PreferenceDatabaseUI } from "./preference-database-ui"
 import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
-import { updatePreferences } from "@/lib/preferences"
-import { updateGrantAuthority, updateAutonomySettings } from "@/lib/grant-authority"
+import { updatePreferences, updateGrantAuthority, updateAutonomySettings } from "@/lib/hcp"
 import { cn } from "@/lib/utils"
 
 const OPENROUTER_MODELS = [
