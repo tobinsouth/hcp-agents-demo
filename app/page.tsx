@@ -169,7 +169,7 @@ export default function HomePage() {
         title={modalContent.chat.title}
         content={modalContent.chat.content}
         actionLabel="Start Chatting"
-        modalType="chat"
+        modalType="application"
       />
       <OnboardingModal
         isOpen={currentModal === 'preferences'}
@@ -185,7 +185,7 @@ export default function HomePage() {
         title={modalContent.negotiation.title}
         content={modalContent.negotiation.content}
         actionLabel="See Agents"
-        modalType="negotiation"
+        modalType="application"
       />
       <OnboardingModal
         isOpen={currentModal === 'authority'}
