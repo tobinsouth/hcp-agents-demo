@@ -98,15 +98,63 @@ export interface PreferenceData {
 // In-memory storage for demo purposes
 // In production, this would be replaced with a proper database
 let preferences: PreferenceData = {
+  communication_style: {
+    formality: "casual",
+    directness: "balanced",
+    tone: "friendly"
+  },
+  decision_making: {
+    risk_tolerance: "moderate",
+    information_needs: "standard",
+    consultation_style: "collaborative"
+  },
+  values: {
+    sustainability: "high",
+    innovation: "proven",
+    transparency: "full"
+  },
   negotiation_priorities: {
     price_sensitivity: "medium",
+    timeline_flexibility: "flexible",
+    quality_importance: "important",
+    relationship_focus: "partnership"
   },
   domains: {
     furniture: {
-      color_preferences: ["earthy tones", "greens"]
+      style_preferences: ["modern", "minimalist", "sustainable"],
+      material_preferences: ["natural wood", "recycled materials"],
+      color_preferences: ["earthy tones", "greens", "natural wood finishes"],
+      functionality_priorities: ["durability", "comfort", "eco-friendly"],
+      quality_vs_price: "balanced",
+      sustainability_importance: "high"
+    },
+    housing: {
+      type: "small San Francisco apartment",
+      location: "San Francisco, CA",
+      neighborhood: "Mission District",
+      living_situation: "rental",
+      square_footage: "650 sq ft",
+      residents: "2 adults",
+      space_constraints: "limited storage, small rooms"
+    },
+    personal: {
+      occupation: "software developer",
+      income_level: "$95,000/year",
+      age_range: "28-35",
+      lifestyle: "urban professional",
+      hobbies: ["hiking", "cooking", "reading"],
+      shopping_style: "research-driven, value-conscious"
     }
   },
-  last_updated: new Date().toISOString()
+  conversation_patterns: {
+    topics_of_interest: ["sustainability", "technology", "home improvement"],
+    frequently_mentioned_brands: ["IKEA", "West Elm", "CB2"],
+    decision_triggers: ["good value", "environmental impact", "quality reviews"],
+    pain_points: ["limited space", "high cost of living", "finding sustainable options"],
+    goals_mentioned: ["reduce environmental footprint", "maximize small space", "build long-term value"]
+  },
+  last_updated: new Date().toISOString(),
+  version: "1.0.0"
 }
 
 // Subscribers for real-time updates

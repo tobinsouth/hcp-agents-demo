@@ -533,17 +533,21 @@ export function GrantAuthorityUI() {
                   <div>
                     <label className="text-sm font-medium mb-2 block">Allowed Sections</label>
                     <div className="space-y-2">
-                      {Object.keys(sectionDisplayNames).map(section => (
-                        <label key={section} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={!!newClient.allowedSections?.[section as keyof ContextSection]}
-                            onChange={() => toggleSectionAccess(section)}
-                            className="rounded"
-                          />
-                          <span className="text-sm">{sectionDisplayNames[section]}</span>
-                        </label>
-                      ))}
+                      {Object.keys(sectionDisplayNames).map(section => {
+                        const value = newClient.allowedSections?.[section as keyof ContextSection]
+                        const isChecked = section === 'domains' ? !!value && typeof value === 'object' : !!value
+                        return (
+                          <label key={section} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleSectionAccess(section)}
+                              className="rounded"
+                            />
+                            <span className="text-sm">{sectionDisplayNames[section]}</span>
+                          </label>
+                        )
+                      })}
                     </div>
                   </div>
                 </div>
