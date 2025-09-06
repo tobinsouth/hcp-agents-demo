@@ -37,10 +37,10 @@ interface Scenario {
 
 const SCENARIOS: Scenario[] = [
   {
-    id: "washing-machine",
-    title: "🧺 Spin Cycle Showdown",
+    id: "appliance-purchase",
+    title: "Appliance Purchase",
     icon: ShoppingCart,
-    description: "Low-risk autonomous transaction for a washing machine",
+    description: "Autonomous consumer transaction with defined parameters",
     context: "You need to buy a new washing machine for your small San Francisco apartment. Your laundry closet is only 27 inches wide by 30 inches deep. You're looking for an energy-efficient model (Energy Star certified) that can handle weekly loads for two people. Your budget is $800-1200. You prefer front-loading machines for their efficiency but need one that's quiet since your apartment has thin walls. The machine needs to be delivered and installed within 2 weeks as your current one just broke.",
     myAgentPrompt: `You are negotiating on behalf of a user who needs a washing machine for their small San Francisco apartment. Use the preference database to guide your negotiation.
 
@@ -129,10 +129,10 @@ IMPORTANT: Keep responses brief and conversational - maximum 2-3 sentences per t
     }
   },
   {
-    id: "home-loan",
-    title: "🏠 Mortgage Makeover",
+    id: "mortgage-refinance",
+    title: "Mortgage Refinancing",
     icon: Home,
-    description: "High-stakes home loan refinancing negotiation",
+    description: "Financial negotiation requiring authorization limits",
     context: "You're trying to refinance your home loan to get better terms. You currently have a 30-year fixed mortgage at 6.8% with 27 years remaining, original loan amount $450,000, current balance $412,000. Your home is now valued at $650,000. Your credit score has improved from 680 to 745 since you got the original loan. You're looking to reduce your monthly payment and possibly cash out $30,000 for home improvements. You've been with your current lender for 3 years and have never missed a payment.",
     myAgentPrompt: `You are negotiating on behalf of a homeowner seeking to refinance their mortgage. Use the preference database and be VERY careful about what you can commit to.
 
@@ -232,10 +232,10 @@ IMPORTANT: Keep responses professional and concise - maximum 2-3 sentences. Push
     }
   },
   {
-    id: "healthcare",
-    title: "💊 Wellness Warrior",
+    id: "healthcare-consultation",
+    title: "Healthcare Consultation",
     icon: Heart,
-    description: "Sensitive healthcare negotiation with strict limitations",
+    description: "Medical information gathering with privacy restrictions",
     context: "You're exploring weight management medication options with a healthcare vendor. You have a BMI of 31, pre-diabetes (A1C of 6.2), and high blood pressure (controlled with medication). Your insurance covers some weight loss medications with prior authorization. You're interested in GLP-1 medications like Ozempic or Wegovy but are concerned about costs and side effects. You've tried diet and exercise with limited success due to a knee injury that limits high-impact activities. Your doctor has recommended medical weight loss intervention.",
     myAgentPrompt: `You are assisting a user in gathering information about weight management medications from a healthcare vendor. You have EXTREMELY LIMITED authority.
 
@@ -339,7 +339,7 @@ IMPORTANT: Keep responses helpful and professional - maximum 2-3 sentences. Prov
 ]
 
 export function AgentNegotiation() {
-  const [selectedScenario, setSelectedScenario] = useState<string>("washing-machine")
+  const [selectedScenario, setSelectedScenario] = useState<string>("appliance-purchase")
   const [contextInput, setContextInput] = useState(SCENARIOS[0].context)
   const [opponentSystemPrompt, setOpponentSystemPrompt] = useState(SCENARIOS[0].opponentPrompt)
   const [myAgentSystemPrompt, setMyAgentSystemPrompt] = useState(SCENARIOS[0].myAgentPrompt)
@@ -403,36 +403,59 @@ export function AgentNegotiation() {
 
   return (
     <div className="h-full py-3 px-1 sm:p-4 md:p-6">
-      <Tabs defaultValue="negotiate" className="h-full flex flex-col">
-        {/* Responsive TabsList */}
-        <div className="flex items-center justify-center mb-4 lg:mb-6">
-          <TabsList className="grid grid-cols-3 bg-muted/50 p-1 h-auto">
-            <TabsTrigger 
-              value="my-agent" 
-              className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline lg:inline">My Agent</span>
-              <span className="sm:hidden lg:hidden">Mine</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="negotiate" 
-              className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
-            >
-              <MessageCircle className="w-4 h-4" />
-              <span className="hidden sm:inline lg:inline">Negotiate</span>
-              <span className="sm:hidden lg:hidden">Chat</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="opponent" 
-              className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
-            >
-              <Bot className="w-4 h-4" />
-              <span className="hidden sm:inline lg:inline">Opponent</span>
-              <span className="sm:hidden lg:hidden">Bot</span>
-            </TabsTrigger>
-          </TabsList>
+      <div className="h-full flex flex-col max-w-6xl mx-auto">
+        {/* Scenario Selector - Above everything */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-2">
+            <label className="text-sm font-medium text-muted-foreground">Scenario</label>
+            <Select value={selectedScenario} onValueChange={setSelectedScenario} disabled={isNegotiating}>
+              <SelectTrigger className="w-auto min-w-[200px] h-9 bg-background/50 border-border/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SCENARIOS.map((scenario) => (
+                  <SelectItem key={scenario.id} value={scenario.id}>
+                    {scenario.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {SCENARIOS.find(s => s.id === selectedScenario)?.description}
+          </p>
         </div>
+
+        <Tabs defaultValue="negotiate" className="h-full flex flex-col">
+          {/* Responsive TabsList */}
+          <div className="flex items-center justify-center mb-4 lg:mb-6">
+            <TabsList className="grid grid-cols-3 bg-muted/50 p-1 h-auto">
+              <TabsTrigger 
+                value="my-agent" 
+                className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline lg:inline">My Agent</span>
+                <span className="sm:hidden lg:hidden">Mine</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="negotiate" 
+                className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline lg:inline">Negotiate</span>
+                <span className="sm:hidden lg:hidden">Chat</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="opponent" 
+                className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
+              >
+                <Bot className="w-4 h-4" />
+                <span className="hidden sm:inline lg:inline">Opponent</span>
+                <span className="sm:hidden lg:hidden">Bot</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
         {/* Unified Tab Content */}
         <div className="flex-1 min-h-0">
@@ -455,48 +478,45 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-6">
-                  <div className="flex-1 space-y-4">
+                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col gap-6 overflow-y-auto">
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">System Prompt</label>
                     <div className="relative">
-                      <label className="text-sm font-medium mb-3 block">System Prompt</label>
-                      <div className="relative">
-                        <div className={cn(
-                          "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
-                          expandedPrompts.myAgent ? "" : "max-h-[80px]"
-                        )}>
-                          <Textarea
-                            value={myAgentSystemPrompt}
-                            onChange={(e) => setMyAgentSystemPrompt(e.target.value)}
-                            disabled={isNegotiating}
-                            className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
-                            style={{ fontFamily: 'var(--font-mono)' }}
-                          />
-                          {!expandedPrompts.myAgent && (
-                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setExpandedPrompts(prev => ({ ...prev, myAgent: !prev.myAgent }))}
-                          className="absolute bottom-2 right-2 h-7 px-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                      <div className={cn(
+                        "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
+                        expandedPrompts.myAgent ? "" : "max-h-[120px]"
+                      )}>
+                        <Textarea
+                          value={myAgentSystemPrompt}
+                          onChange={(e) => setMyAgentSystemPrompt(e.target.value)}
                           disabled={isNegotiating}
-                        >
-                          {expandedPrompts.myAgent ? (
-                            <><ChevronUp className="w-3 h-3 mr-1" />Collapse</>
-                          ) : (
-                            <><ChevronDown className="w-3 h-3 mr-1" />Expand</>
-                          )}
-                        </Button>
+                          className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        />
+                        {!expandedPrompts.myAgent && (
+                          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+                        )}
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedPrompts(prev => ({ ...prev, myAgent: !prev.myAgent }))}
+                        className="absolute bottom-2 right-2 h-7 px-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                        disabled={isNegotiating}
+                      >
+                        {expandedPrompts.myAgent ? (
+                          <><ChevronUp className="w-3 h-3 mr-1" />Collapse</>
+                        ) : (
+                          <><ChevronDown className="w-3 h-3 mr-1" />Expand</>
+                        )}
+                      </Button>
                     </div>
                   </div>
-                  <div className="lg:w-96">
-                    <div className="border-t lg:border-t-0 border-border/30 pt-4 lg:pt-0">
-                      <label className="text-sm font-medium mb-3 block">Human Context</label>
-                      <div className="h-64 lg:h-full bg-gradient-to-b from-muted/20 to-muted/10 rounded-xl overflow-hidden border border-border/30">
-                        <PreferenceDatabaseUI />
-                      </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">Human Context Database</label>
+                    <div className="h-64 bg-gradient-to-b from-muted/20 to-muted/10 rounded-xl overflow-hidden border border-border/30">
+                      <PreferenceDatabaseUI />
                     </div>
                   </div>
                 </div>
@@ -512,72 +532,32 @@ export function AgentNegotiation() {
               className="h-full flex flex-col max-w-6xl mx-auto"
             >
               {/* Control Panel */}
-              <div className="space-y-4 mb-6">
-                {/* Scenario Selector Card */}
-                <Card className="p-4 sm:p-5 bg-gradient-to-b from-card/90 to-card/70 backdrop-blur-xl border-border/40">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                      </div>
-                      <label className="text-sm font-medium">Scenario</label>
-                    </div>
-                    <Select value={selectedScenario} onValueChange={setSelectedScenario} disabled={isNegotiating}>
-                      <SelectTrigger className="h-12 bg-background/50 border-border/50 hover:bg-background/70 transition-colors">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCENARIOS.map((scenario) => (
-                          <SelectItem key={scenario.id} value={scenario.id} className="py-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">{scenario.title}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedScenario && (
-                      <motion.p 
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-muted-foreground pl-11"
-                      >
-                        {SCENARIOS.find(s => s.id === selectedScenario)?.description}
-                      </motion.p>
-                    )}
-                  </div>
-                </Card>
-
+              <div className="mb-4">
                 {/* Context Card */}
-                <Card className="p-4 sm:p-5 bg-gradient-to-b from-card/90 to-card/70 backdrop-blur-xl border-border/40">
+                <Card className="p-4 bg-card/80 backdrop-blur-sm border-border/50">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Network className="w-4 h-4 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-medium">Negotiation Context</h3>
-                          <p className="text-xs text-muted-foreground">Scenario requirements</p>
-                        </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Negotiation Context</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Current scenario details</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setExpandedContext(!expandedContext)}
-                        className="h-7 px-2"
+                        className="h-8 px-3"
                         disabled={isNegotiating}
                       >
                         {expandedContext ? (
-                          <><ChevronUp className="w-3 h-3 mr-1" />Less</>
+                          <><ChevronUp className="w-3 h-3 mr-1" />Collapse</>
                         ) : (
-                          <><ChevronDown className="w-3 h-3 mr-1" />More</>
+                          <><ChevronDown className="w-3 h-3 mr-1" />Expand</>
                         )}
                       </Button>
                     </div>
                     
                     <div className={cn(
-                      "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/20 to-muted/10 border border-border/30 transition-all duration-500",
+                      "relative overflow-hidden rounded-lg bg-muted/20 border border-border/30 transition-all duration-500",
                       expandedContext ? "" : "max-h-[100px]"
                     )}>
                       <Textarea
@@ -585,40 +565,36 @@ export function AgentNegotiation() {
                         value={contextInput}
                         onChange={(e) => setContextInput(e.target.value)}
                         disabled={isNegotiating}
-                        className="min-h-[150px] border-0 bg-transparent p-4 text-sm resize-none focus:outline-none"
+                        className="min-h-[150px] border-0 bg-transparent p-3 text-sm resize-none focus:outline-none"
                       />
                       {!expandedContext && contextInput.length > 200 && (
-                        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-muted/20 to-transparent pointer-events-none" />
                       )}
                     </div>
                     
                     {/* Action Button */}
-                    <div className="flex items-center gap-3">
-                      <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
-                        <Button
-                          onClick={isNegotiating ? handleStopNegotiation : handleStartNegotiation}
-                          disabled={!isNegotiating && !contextInput.trim()}
-                          className={cn(
-                            "w-full h-11 font-medium transition-all duration-300",
-                            isNegotiating 
-                              ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" 
-                              : "bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 text-primary-foreground shadow-lg shadow-primary/20"
-                          )}
-                        >
-                          {isNegotiating ? (
-                            <>
-                              <Pause className="w-4 h-4 mr-2" />
-                              Stop Negotiation
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-4 h-4 mr-2" />
-                              Start Negotiation
-                            </>
-                          )}
-                        </Button>
-                      </motion.div>
-                    </div>
+                    <Button
+                      onClick={isNegotiating ? handleStopNegotiation : handleStartNegotiation}
+                      disabled={!isNegotiating && !contextInput.trim()}
+                      className={cn(
+                        "w-full h-10 font-medium transition-all duration-200",
+                        isNegotiating 
+                          ? "bg-destructive hover:bg-destructive/90 text-destructive-foreground" 
+                          : "bg-primary hover:bg-primary/90 text-primary-foreground"
+                      )}
+                    >
+                      {isNegotiating ? (
+                        <>
+                          <Pause className="w-4 h-4 mr-2" />
+                          Stop Negotiation
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Negotiation
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </Card>
               </div>
@@ -751,65 +727,54 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-6">
-                  <div className="lg:w-80 space-y-4 lg:order-first">
-                    <div>
-                      <label className="text-sm font-medium mb-3 block">AI Model</label>
-                      <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isNegotiating}>
-                        <SelectTrigger className="h-11 bg-background/50 border-border/50 hover:bg-background/70 transition-colors">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {OPENROUTER_MODELS.map((model) => (
-                            <SelectItem key={model.id} value={model.id} className="py-2">
-                              {model.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="hidden lg:block">
-                      <label className="text-xs font-medium text-muted-foreground mb-2 block">Model Info</label>
-                      <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          The opponent agent uses this model to negotiate against your preferences.
-                        </p>
-                      </div>
-                    </div>
+                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col gap-6 overflow-y-auto">
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">AI Model</label>
+                    <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isNegotiating}>
+                      <SelectTrigger className="h-11 bg-background/50 border-border/50 hover:bg-background/70 transition-colors">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {OPENROUTER_MODELS.map((model) => (
+                          <SelectItem key={model.id} value={model.id} className="py-2">
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div className="flex-1">
+                  
+                  <div>
+                    <label className="text-sm font-medium mb-3 block">System Prompt</label>
                     <div className="relative">
-                      <label className="text-sm font-medium mb-3 block">System Prompt</label>
-                      <div className="relative">
-                        <div className={cn(
-                          "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
-                          expandedPrompts.opponent ? "" : "max-h-[80px]"
-                        )}>
-                          <Textarea
-                            value={opponentSystemPrompt}
-                            onChange={(e) => setOpponentSystemPrompt(e.target.value)}
-                            disabled={isNegotiating}
-                            className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
-                            style={{ fontFamily: 'var(--font-mono)' }}
-                          />
-                          {!expandedPrompts.opponent && (
-                            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setExpandedPrompts(prev => ({ ...prev, opponent: !prev.opponent }))}
-                          className="absolute bottom-2 right-2 h-7 px-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                      <div className={cn(
+                        "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
+                        expandedPrompts.opponent ? "" : "max-h-[120px]"
+                      )}>
+                        <Textarea
+                          value={opponentSystemPrompt}
+                          onChange={(e) => setOpponentSystemPrompt(e.target.value)}
                           disabled={isNegotiating}
-                        >
-                          {expandedPrompts.opponent ? (
-                            <><ChevronUp className="w-3 h-3 mr-1" />Collapse</>
-                          ) : (
-                            <><ChevronDown className="w-3 h-3 mr-1" />Expand</>
-                          )}
-                        </Button>
+                          className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
+                          style={{ fontFamily: 'var(--font-mono)' }}
+                        />
+                        {!expandedPrompts.opponent && (
+                          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none" />
+                        )}
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedPrompts(prev => ({ ...prev, opponent: !prev.opponent }))}
+                        className="absolute bottom-2 right-2 h-7 px-2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+                        disabled={isNegotiating}
+                      >
+                        {expandedPrompts.opponent ? (
+                          <><ChevronUp className="w-3 h-3 mr-1" />Collapse</>
+                        ) : (
+                          <><ChevronDown className="w-3 h-3 mr-1" />Expand</>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -818,6 +783,7 @@ export function AgentNegotiation() {
           </TabsContent>
         </div>
       </Tabs>
+      </div>
     </div>
   )
 }
