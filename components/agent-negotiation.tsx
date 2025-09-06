@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, Sparkles, ShoppingCart, Home, Heart } from "lucide-react"
+import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
 import { updatePreferences } from "@/lib/preferences"
@@ -38,9 +38,9 @@ interface Scenario {
 const SCENARIOS: Scenario[] = [
   {
     id: "washing-machine",
-    title: "🧺 Spin Cycle Showdown",
+    title: "Consumer Purchase Negotiation",
     icon: ShoppingCart,
-    description: "Low-risk autonomous transaction for a washing machine",
+    description: "Low-risk autonomous transaction for a household appliance",
     context: "You need to buy a new washing machine for your small San Francisco apartment. Your laundry closet is only 27 inches wide by 30 inches deep. You're looking for an energy-efficient model (Energy Star certified) that can handle weekly loads for two people. Your budget is $800-1200. You prefer front-loading machines for their efficiency but need one that's quiet since your apartment has thin walls. The machine needs to be delivered and installed within 2 weeks as your current one just broke.",
     myAgentPrompt: `You are negotiating on behalf of a user who needs a washing machine for their small San Francisco apartment. Use the preference database to guide your negotiation.
 
@@ -130,9 +130,9 @@ IMPORTANT: Keep responses brief and conversational - maximum 2-3 sentences per t
   },
   {
     id: "home-loan",
-    title: "🏠 Mortgage Makeover",
+    title: "Financial Services Negotiation",
     icon: Home,
-    description: "High-stakes home loan refinancing negotiation",
+    description: "High-stakes mortgage refinancing with limited authority",
     context: "You're trying to refinance your home loan to get better terms. You currently have a 30-year fixed mortgage at 6.8% with 27 years remaining, original loan amount $450,000, current balance $412,000. Your home is now valued at $650,000. Your credit score has improved from 680 to 745 since you got the original loan. You're looking to reduce your monthly payment and possibly cash out $30,000 for home improvements. You've been with your current lender for 3 years and have never missed a payment.",
     myAgentPrompt: `You are negotiating on behalf of a homeowner seeking to refinance their mortgage. Use the preference database and be VERY careful about what you can commit to.
 
@@ -233,9 +233,9 @@ IMPORTANT: Keep responses professional and concise - maximum 2-3 sentences. Push
   },
   {
     id: "healthcare",
-    title: "💊 Wellness Warrior",
+    title: "Healthcare Information Gathering",
     icon: Heart,
-    description: "Sensitive healthcare negotiation with strict limitations",
+    description: "Medical consultation with strict privacy and authority limits",
     context: "You're exploring weight management medication options with a healthcare vendor. You have a BMI of 31, pre-diabetes (A1C of 6.2), and high blood pressure (controlled with medication). Your insurance covers some weight loss medications with prior authorization. You're interested in GLP-1 medications like Ozempic or Wegovy but are concerned about costs and side effects. You've tried diet and exercise with limited success due to a knee injury that limits high-impact activities. Your doctor has recommended medical weight loss intervention.",
     myAgentPrompt: `You are assisting a user in gathering information about weight management medications from a healthcare vendor. You have EXTREMELY LIMITED authority.
 
@@ -402,11 +402,41 @@ export function AgentNegotiation() {
   }
 
   return (
-    <div className="h-full py-3 px-1 sm:p-4 md:p-6">
-      <Tabs defaultValue="negotiate" className="h-full flex flex-col">
+    <div className="h-full py-3 px-1 sm:p-4 md:p-6 flex flex-col">
+      {/* Scenario Selector - Perfectly Centered */}
+      <div className="w-full flex flex-col items-center mb-8">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">Scenario</span>
+          <Select value={selectedScenario} onValueChange={setSelectedScenario} disabled={isNegotiating}>
+            <SelectTrigger className="h-10 min-w-[280px] bg-background/80 backdrop-blur-sm border-border/40 hover:border-border/60 transition-all duration-200 focus:ring-1 focus:ring-primary/20">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-background/95 backdrop-blur-xl border-border/50">
+              {SCENARIOS.map((scenario) => (
+                <SelectItem key={scenario.id} value={scenario.id} className="py-2.5 px-3 focus:bg-muted/50">
+                  <span className="font-medium text-sm">{scenario.title}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {selectedScenario && (
+          <motion.p 
+            key={selectedScenario}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="text-xs text-muted-foreground mt-2 text-center"
+          >
+            {SCENARIOS.find(s => s.id === selectedScenario)?.description}
+          </motion.p>
+        )}
+      </div>
+
+      <Tabs defaultValue="negotiate" className="flex-1 flex flex-col min-h-0">
         {/* Responsive TabsList */}
-        <div className="flex items-center justify-center mb-4 lg:mb-6">
-          <TabsList className="grid grid-cols-3 bg-muted/50 p-1 h-auto">
+        <div className="flex items-center justify-center mb-6">
+          <TabsList className="grid grid-cols-3 bg-background/60 backdrop-blur-sm border border-border/30 p-1 h-auto shadow-sm">
             <TabsTrigger 
               value="my-agent" 
               className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
@@ -455,20 +485,20 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-6">
-                  <div className="flex-1 space-y-4">
+                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col gap-6 overflow-y-auto">
+                  <div className="space-y-4">
                     <div className="relative">
                       <label className="text-sm font-medium mb-3 block">System Prompt</label>
                       <div className="relative">
                         <div className={cn(
                           "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
-                          expandedPrompts.myAgent ? "" : "max-h-[80px]"
+                          expandedPrompts.myAgent ? "" : "max-h-[120px]"
                         )}>
                           <Textarea
                             value={myAgentSystemPrompt}
                             onChange={(e) => setMyAgentSystemPrompt(e.target.value)}
                             disabled={isNegotiating}
-                            className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
+                            className="min-h-[200px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
                             style={{ fontFamily: 'var(--font-mono)' }}
                           />
                           {!expandedPrompts.myAgent && (
@@ -491,10 +521,10 @@ export function AgentNegotiation() {
                       </div>
                     </div>
                   </div>
-                  <div className="lg:w-96">
-                    <div className="border-t lg:border-t-0 border-border/30 pt-4 lg:pt-0">
+                  <div className="space-y-4">
+                    <div>
                       <label className="text-sm font-medium mb-3 block">Human Context</label>
-                      <div className="h-64 lg:h-full bg-gradient-to-b from-muted/20 to-muted/10 rounded-xl overflow-hidden border border-border/30">
+                      <div className="h-64 bg-gradient-to-b from-muted/20 to-muted/10 rounded-xl overflow-hidden border border-border/30">
                         <PreferenceDatabaseUI />
                       </div>
                     </div>
@@ -513,41 +543,6 @@ export function AgentNegotiation() {
             >
               {/* Control Panel */}
               <div className="space-y-4 mb-6">
-                {/* Scenario Selector Card */}
-                <Card className="p-4 sm:p-5 bg-gradient-to-b from-card/90 to-card/70 backdrop-blur-xl border-border/40">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-primary" />
-                      </div>
-                      <label className="text-sm font-medium">Scenario</label>
-                    </div>
-                    <Select value={selectedScenario} onValueChange={setSelectedScenario} disabled={isNegotiating}>
-                      <SelectTrigger className="h-12 bg-background/50 border-border/50 hover:bg-background/70 transition-colors">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SCENARIOS.map((scenario) => (
-                          <SelectItem key={scenario.id} value={scenario.id} className="py-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">{scenario.title}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {selectedScenario && (
-                      <motion.p 
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-xs text-muted-foreground pl-11"
-                      >
-                        {SCENARIOS.find(s => s.id === selectedScenario)?.description}
-                      </motion.p>
-                    )}
-                  </div>
-                </Card>
-
                 {/* Context Card */}
                 <Card className="p-4 sm:p-5 bg-gradient-to-b from-card/90 to-card/70 backdrop-blur-xl border-border/40">
                   <div className="space-y-4">
