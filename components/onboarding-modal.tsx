@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { PaperLinkButton } from "@/components/ui/paper-link-button"
 import { useEffect, useCallback } from "react"
 import { useVerboseMode } from "@/lib/utils"
 
@@ -21,6 +22,11 @@ const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority',
   content: string
   visual: 'chat' | 'data' | 'authority' | 'agents'
   keyPoints: string[]
+  paperLink?: {
+    href: string
+    title: string
+    subtitle: string
+  }
 }> = {
   chat: {
     title: "Chatbots are becoming our friends",
@@ -31,7 +37,12 @@ const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority',
       "Natural language interaction",
       "Context accumulation over time",
       "Personalized responses"
-    ]
+    ],
+    paperLink: {
+      href: "https://hcp.loyalagents.org/hcp-paper.pdf",
+      title: "Read the Human Context Protocol Paper",
+      subtitle: "Learn about portable human context for AI systems"
+    }
   },
   preferences: {
     title: "Your accumulated context forms a rich preference database",
@@ -42,7 +53,12 @@ const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority',
       "Transparent: You can see and control your data",
       "Interoperable: Works across different AI services",
       "Secure: Protected by design and encrypted"
-    ]
+    ],
+    paperLink: {
+      href: "https://hcp.loyalagents.org/hcp-paper.pdf",
+      title: "Read the Human Context Protocol Paper",
+      subtitle: "Explore the technical architecture and privacy guarantees"
+    }
   },
   negotiation: {
     title: "AI Agents will soon take action on your behalf",
@@ -53,7 +69,12 @@ const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority',
       "Seamless AI experiences across all platforms",
       "Agents that truly represent your interests",
       "Transparent, controllable, and trustworthy"
-    ]
+    ],
+    paperLink: {
+      href: "https://hcp.loyalagents.org/hcp-paper.pdf",
+      title: "Read the Human Context Protocol Paper",
+      subtitle: "Discover how agents can safely act on your behalf"
+    }
   },
   authority: {
     title: "You control who can access your context",
@@ -64,7 +85,12 @@ const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority',
       "Define precise access rules for each AI service",
       "Set autonomy levels based on trust and task",
       "Maintain complete audit trail of all access"
-    ]
+    ],
+    paperLink: {
+      href: "https://hcp.loyalagents.org/authentic-AI-whitepaper.pdf",
+      title: "Read the Authentic AI Whitepaper",
+      subtitle: "Learn about safe and reliable AI delegation"
+    }
   }
 }
 
@@ -219,6 +245,22 @@ export function OnboardingModal({
                         </motion.div>
                       ))}
                     </div>
+                  </motion.div>
+                )}
+                
+                {/* Paper link button */}
+                {content?.paperLink && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, type: "spring", stiffness: 300 }}
+                    className="mb-4 sm:mb-6"
+                  >
+                    <PaperLinkButton
+                      href={content.paperLink.href}
+                      title={content.paperLink.title}
+                      subtitle={content.paperLink.subtitle}
+                    />
                   </motion.div>
                 )}
               </div>
