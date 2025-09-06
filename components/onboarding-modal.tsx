@@ -2,7 +2,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect, useCallback } from "react"
+import { useEffect, useCallback } from "react"
 import { useVerboseMode } from "@/lib/utils"
 
 interface OnboardingModalProps {
@@ -11,21 +11,32 @@ interface OnboardingModalProps {
   title: string
   content: string
   actionLabel?: string
-  modalType: 'preferences' | 'authority' | 'application'
+  modalType: 'chat' | 'preferences' | 'negotiation' | 'authority'
 }
 
 // Single card content for each modal type
-const modalContent: Record<'preferences' | 'authority' | 'application', {
+const modalContent: Record<'chat' | 'preferences' | 'negotiation' | 'authority', {
   title: string
   subtitle: string
   content: string
-  visual: 'data' | 'authority' | 'agents'
+  visual: 'chat' | 'data' | 'authority' | 'agents'
   keyPoints: string[]
 }> = {
+  chat: {
+    title: "Chatbots are becoming our friends",
+    subtitle: "Natural conversation is the new interface",
+    content: "Every day when you talk with Claude or ChatGPT, they are implicitly storing and remembering information about you and your preferences. This is how they achieve market lock-in.",
+    visual: 'chat',
+    keyPoints: [
+      "Natural language interaction",
+      "Context accumulation over time",
+      "Personalized responses"
+    ]
+  },
   preferences: {
-    title: "The Importance of Human Context",
+    title: "Your accumulated context forms a rich preference database",
     subtitle: "Your preferences are the foundation of AI utility",
-    content: "To perform most interactions online, you need to know an individual's preferences and history of interactions with that service. This 'human context' - your values, communication style, and decision patterns - is what makes AI truly useful and personalized to you.",
+    content: "This data represents your unique digital fingerprint - your interests, values, and decision patterns. This is what creates vendor lock-in, but it could also enable personalized AI experiences across platforms.",
     visual: 'data',
     keyPoints: [
       "Transparent: You can see and control your data",
@@ -33,26 +44,26 @@ const modalContent: Record<'preferences' | 'authority' | 'application', {
       "Secure: Protected by design and encrypted"
     ]
   },
-  authority: {
-    title: "Controlling Your Digital Authority",
-    subtitle: "Your context is sensitive and powerful",
-    content: "Human context contains deeply personal information about how you think, decide, and interact. Controlling how it can be shared and under what contexts is critically important. Grant of Authority is the key to deploying agents at scale with safety and reliability.",
-    visual: 'authority',
-    keyPoints: [
-      "Define precise access rules for each AI service",
-      "Set autonomy levels based on trust and task",
-      "Maintain complete audit trail of all access"
-    ]
-  },
-  application: {
-    title: "Bringing It All Together",
+  negotiation: {
+    title: "AI Agents will soon take action on your behalf",
     subtitle: "Context + Authority = Powerful AI",
-    content: "When human context and grant of authority combine, they unlock a new paradigm of AI interaction. Your preferences guide AI behavior across native chat applications, MCP protocols, and agent-to-agent negotiations - all while maintaining your control and privacy.",
+    content: "With portable human context, AI agents can negotiate on your behalf with deep understanding of your preferences. This enables a future where multiple AI systems can collaborate while respecting your individual needs and values.",
     visual: 'agents',
     keyPoints: [
       "Seamless AI experiences across all platforms",
       "Agents that truly represent your interests",
       "Transparent, controllable, and trustworthy"
+    ]
+  },
+  authority: {
+    title: "You control who can access your context",
+    subtitle: "Your context is sensitive and powerful",
+    content: "Grant of Authority lets you decide which AI agents and services can access your preferences, what data they can see, and how much autonomy they have when acting on your behalf. This ensures your digital sovereignty in an AI-powered world.",
+    visual: 'authority',
+    keyPoints: [
+      "Define precise access rules for each AI service",
+      "Set autonomy levels based on trust and task",
+      "Maintain complete audit trail of all access"
     ]
   }
 }
@@ -91,6 +102,7 @@ export function OnboardingModal({
   
   const getVisualIcon = (visual: string) => {
     switch (visual) {
+      case 'chat': return Sparkles
       case 'data': return Archive
       case 'agents': return Network
       case 'authority': return Shield
@@ -139,28 +151,10 @@ export function OnboardingModal({
                   <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 </motion.button>
                 
-                {/* Progress indicator */}
-                <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6">
-                  {story.map((_, index) => (
-                    <motion.div
-                      key={index}
-                      className={`h-1 rounded-full flex-1 ${
-                        index <= currentStep ? 'bg-primary' : 'bg-muted'
-                      }`}
-                      initial={{ scaleX: 0 }}
-                      animate={{ 
-                        scaleX: index <= currentStep ? 1 : 0.3,
-                        backgroundColor: index <= currentStep ? 'oklch(0.385 0.127 265)' : 'oklch(0.925 0.01 83)'
-                      }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                    />
-                  ))}
-                </div>
                 
                 {/* Visual icon */}
                 <motion.div 
                   className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center"
-                  key={currentStep}
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", duration: 0.6 }}
@@ -170,103 +164,79 @@ export function OnboardingModal({
               </div>
               
               {/* Content */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isTransitioning ? 0 : 1, y: isTransitioning ? -20 : 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10"
-                >
-                  <div className="text-center mb-6 sm:mb-8">
-                    <motion.h2 
-                      className="text-2xl sm:text-3xl md:text-4xl mb-2 font-light"
-                      style={{ fontFamily: 'var(--font-crimson)' }}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      {step?.title}
-                    </motion.h2>
-                    {step?.subtitle && (
-                      <motion.p 
-                        className="text-sm sm:text-base text-primary/80 font-medium"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        {step.subtitle}
-                      </motion.p>
-                    )}
-                  </div>
-                  
-                  <motion.p 
-                    className="text-sm sm:text-base text-muted-foreground leading-[1.6] sm:leading-[1.7] text-center mb-6 sm:mb-8 max-w-sm sm:max-w-lg mx-auto"
+              <div className="px-4 pb-3 sm:px-8 sm:pb-4 md:px-10">
+                <div className="text-center mb-6 sm:mb-8">
+                  <motion.h2 
+                    className="text-2xl sm:text-3xl md:text-4xl mb-2 font-light"
+                    style={{ fontFamily: 'var(--font-crimson)' }}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    {step?.content}
-                  </motion.p>
-                  
-                  {/* Key insights - only show when VERBOSE_DISPLAY=true */}
-                  {showVerboseDisplay && (
-                    <motion.div 
-                      className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
-                      initial={{ opacity: 0, y: 20 }}
+                    {content?.title}
+                  </motion.h2>
+                  {content?.subtitle && (
+                    <motion.p 
+                      className="text-sm sm:text-base text-primary/80 font-medium"
+                      initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
+                      transition={{ delay: 0.3 }}
                     >
-                      <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Insights</h4>
-                      <div className="space-y-3">
-                        {step?.insights.map((insight, index) => (
-                          <motion.div
-                            key={index}
-                            className="flex items-start gap-3"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.6 + index * 0.1 }}
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
-                            <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
+                      {content.subtitle}
+                    </motion.p>
                   )}
-                </motion.div>
-              </AnimatePresence>
+                </div>
+                
+                <motion.p 
+                  className="text-sm sm:text-base text-muted-foreground leading-[1.6] sm:leading-[1.7] text-center mb-6 sm:mb-8 max-w-sm sm:max-w-lg mx-auto"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  {content?.content}
+                </motion.p>
+                
+                {/* Key insights - only show when VERBOSE_DISPLAY=true */}
+                {showVerboseDisplay && (
+                  <motion.div 
+                    className="bg-muted/20 rounded-xl p-3 sm:p-6 mb-4 sm:mb-8"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <h4 className="font-medium mb-4 text-center" style={{ fontFamily: 'var(--font-crimson)' }}>Key Insights</h4>
+                    <div className="space-y-3">
+                      {content?.keyPoints.map((point, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex items-start gap-3"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.6 + index * 0.1 }}
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2.5 flex-shrink-0" />
+                          <p className="text-sm text-muted-foreground leading-relaxed">{point}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
               
               {/* Actions */}
               <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                <div className="flex justify-between items-center gap-4">
-                  <motion.p 
-                    className="text-xs sm:text-sm text-muted-foreground"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.8 }}
-                  >
-                    {currentStep + 1} of {story.length}
-                  </motion.p>
-                  
+                <div className="flex justify-center">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
                   >
                     <Button 
-                      onClick={handleNext}
+                      onClick={handleClose}
                       className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
                     >
-                      {currentStep < story.length - 1 ? (
-                        <>
-                          Continue
-                          <ArrowRight className="w-4 h-4" />
-                        </>
-                      ) : (
-                        actionLabel
-                      )}
+                      {actionLabel}
+                      <ArrowRight className="w-4 h-4" />
                     </Button>
                   </motion.div>
                 </div>

@@ -537,7 +537,11 @@ export function GrantAuthorityUI() {
                         <label key={section} className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={newClient.allowedSections?.[section as keyof ContextSection] || false}
+                            checked={
+                              section === 'domains' 
+                                ? false 
+                                : (newClient.allowedSections?.[section as keyof ContextSection] === true || false)
+                            }
                             onChange={() => toggleSectionAccess(section)}
                             className="rounded"
                           />
