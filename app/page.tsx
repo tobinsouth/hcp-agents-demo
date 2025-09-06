@@ -154,7 +154,7 @@ export default function HomePage() {
         isOpen={currentModal === 'authority'}
         onClose={() => handleModalClose('authority')}
         title="Controlling Your Agent Authority"
-        content="Your context is sensitive. Grant of Authority lets you control how it's shared and used BY AI."
+        content="Your context is sensitive. Grant of Authority lets you control how it's shared and used by AI."
         actionLabel="Grant Agentic Authorization"
         modalType="authority"
       />
