@@ -20,15 +20,23 @@ import { DEMO_PREFERENCES, DEMO_CONTEXT, loadDemoData } from './demo-data'
 
 // Initialize with demo data on first access
 let demoDataLoaded = false
+let demoDataLoading = false
 
 /**
  * Ensure demo data is loaded
  */
 async function ensureDemoData() {
-  if (!demoDataLoaded && !hcp.isDemoMode()) {
-    await loadDemoData(hcp)
-    hcp.setDemoMode(true)
-    demoDataLoaded = true
+  if (!demoDataLoaded && !demoDataLoading && !hcp.isDemoMode()) {
+    demoDataLoading = true
+    try {
+      await loadDemoData(hcp)
+      hcp.setDemoMode(true)
+      demoDataLoaded = true
+    } catch (error) {
+      console.error('[HCP] Failed to load demo data:', error)
+    } finally {
+      demoDataLoading = false
+    }
   }
 }
 
@@ -36,11 +44,9 @@ async function ensureDemoData() {
  * Get preferences in legacy format
  */
 export function getPreferences(): LegacyPreferenceData {
-  // Ensure demo data is loaded synchronously (for backward compatibility)
-  if (!demoDataLoaded && !hcp.isDemoMode()) {
-    // Load demo data synchronously for initial state
-    loadDemoData(hcp).catch(console.error)
-    demoDataLoaded = true
+  // Schedule demo data loading if needed (non-blocking)
+  if (!demoDataLoaded && !demoDataLoading && !hcp.isDemoMode()) {
+    ensureDemoData().catch(console.error)
   }
   
   const context = hcp.getContext('system') as HCPContext

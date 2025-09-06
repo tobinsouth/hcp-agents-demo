@@ -107,7 +107,8 @@ export class HCPManager extends EventEmitter {
           id: 'default',
           name: 'Default Policy',
           rules: [
-            { section: '*', access: 'deny', conditions: [] }
+            // Allow system client full access
+            { section: '*', access: 'allow', conditions: [] }
           ],
           priority: 0
         }
@@ -120,12 +121,33 @@ export class HCPManager extends EventEmitter {
           legal: true,
           medical: true,
           personal_data: false,
+          location_tracking: false,
+          third_party_sharing: true,
+          ai_training: false,
+          advertising: true,
           threshold_amount: 500
         },
         notification_preferences: {
           before_action: false,
           after_action: true,
-          summary_frequency: 'daily'
+          on_grant_expiry: true,
+          on_suspicious_activity: true,
+          on_threshold_reached: true,
+          summary_frequency: 'daily',
+          notification_channels: ['email', 'in_app']
+        },
+        global_limits: {
+          max_clients: 50,
+          max_grants_per_client: 5,
+          max_daily_spend: 1000,
+          max_monthly_spend: 10000
+        },
+        privacy_settings: {
+          data_minimization: true,
+          purpose_limitation: true,
+          consent_required: true,
+          right_to_deletion: true,
+          data_portability: true
         }
       },
       metadata: {
@@ -152,7 +174,26 @@ export class HCPManager extends EventEmitter {
       }
     })
 
-    // Note: Other clients like claude-assistant will be loaded via demo data
+    // Register claude-assistant by default for backward compatibility
+    this.registerClient({
+      id: 'claude-assistant',
+      name: 'Claude AI Assistant',
+      type: 'ai_assistant',
+      description: 'Primary AI assistant for general tasks',
+      capabilities: ['read', 'write', 'execute'],
+      metadata: {
+        created_at: new Date().toISOString(),
+        trusted: true
+      }
+    })
+    
+    // Grant default access to claude-assistant
+    this.grantAuthority('claude-assistant', {
+      client_id: 'claude-assistant',
+      allowed_sections: ['*'],
+      allowed_actions: ['read', 'write', 'execute'],
+      restrictions: []
+    })
   }
 
   /**
@@ -476,6 +517,15 @@ export class HCPManager extends EventEmitter {
    */
   getAuthority(): HCPAuthority {
     return { ...this.authority }
+  }
+  
+  /**
+   * Update authority settings
+   */
+  updateAuthoritySettings(settings: any): void {
+    this.authority.settings = { ...this.authority.settings, ...settings }
+    this.authority.metadata.last_updated = new Date().toISOString()
+    this.emit('authoritySettingsUpdated', settings)
   }
 
   /**

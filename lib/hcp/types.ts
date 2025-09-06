@@ -129,18 +129,50 @@ export interface HCPAuthority {
   // Global settings
   settings: {
     autonomy_level: 'high_security' | 'balanced' | 'max_autonomy' | 'custom'
+    
+    // Approval requirements by category
     require_approval: {
       financial: boolean
       legal: boolean
       medical: boolean
       personal_data: boolean
+      location_tracking: boolean
+      third_party_sharing: boolean
+      ai_training: boolean  // Using data for AI model training
+      advertising: boolean  // Using data for advertising
       threshold_amount?: number
     }
+    
+    // Notification preferences
     notification_preferences: {
       before_action: boolean
       after_action: boolean
-      summary_frequency: 'immediate' | 'hourly' | 'daily' | 'weekly'
+      on_grant_expiry: boolean
+      on_suspicious_activity: boolean
+      on_threshold_reached: boolean
+      summary_frequency: 'immediate' | 'hourly' | 'daily' | 'weekly' | 'monthly'
+      notification_channels?: ('email' | 'sms' | 'push' | 'in_app')[]
     }
+    
+    // Global limits
+    global_limits?: {
+      max_clients?: number
+      max_grants_per_client?: number
+      max_daily_spend?: number
+      max_monthly_spend?: number
+      blacklisted_domains?: string[]
+      whitelisted_domains?: string[]
+    }
+    
+    // Privacy settings
+    privacy_settings?: {
+      data_minimization: boolean  // Only share minimum required data
+      purpose_limitation: boolean  // Enforce purpose restrictions
+      consent_required: boolean  // Require explicit consent
+      right_to_deletion: boolean  // Support deletion requests
+      data_portability: boolean  // Support data export
+    }
+    
     [key: string]: any
   }
   
@@ -168,20 +200,117 @@ export interface HCPRule {
 }
 
 export interface HCPCondition {
-  type: 'time' | 'location' | 'client_type' | 'custom'
-  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'not_in'
+  type: 'time' | 'location' | 'client_type' | 'amount' | 'frequency' | 'data_type' | 'risk_score' | 'custom'
+  operator: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'not_in' | 'contains' | 'regex'
   value: any
   field?: string
+  description?: string  // Human-readable condition description
 }
 
 export interface HCPGrant {
+  // Core identifiers
+  grant_id?: string
   client_id: string
+  granted_by?: string  // Who authorized this grant
+  purpose?: string  // Human-readable purpose
+  
+  // Temporal constraints
   granted_at: string
   expires_at?: string
+  valid_times?: {  // Time windows when grant is active
+    days?: ('monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday')[]
+    hours?: { start: string; end: string }  // e.g., "09:00"-"17:00"
+    timezone?: string
+  }
+  
+  // Access permissions
   allowed_sections: string[]
-  allowed_actions: ('read' | 'write' | 'execute')[]
-  restrictions?: string[]
-  metadata?: Record<string, any>
+  allowed_actions: ('read' | 'write' | 'execute' | 'delegate')[]
+  
+  // Financial constraints
+  financial_limits?: {
+    per_transaction?: number
+    daily_limit?: number
+    monthly_limit?: number
+    total_limit?: number
+    currency?: string
+    payment_methods?: string[]  // ['credit_card', 'bank_transfer', 'digital_wallet']
+    require_2fa_above?: number  // Amount above which 2FA is required
+  }
+  
+  // Operational constraints
+  operation_limits?: {
+    max_requests_per_hour?: number
+    max_requests_per_day?: number
+    max_data_size_mb?: number
+    allowed_operations?: string[]  // Specific operations this grant allows
+    denied_operations?: string[]  // Explicitly denied operations
+  }
+  
+  // Geographic constraints
+  geographic_limits?: {
+    allowed_countries?: string[]
+    denied_countries?: string[]
+    allowed_regions?: string[]
+    ip_whitelist?: string[]
+    ip_blacklist?: string[]
+  }
+  
+  // Data handling rules
+  data_handling?: {
+    retention_days?: number  // How long client can retain data
+    deletion_required?: boolean  // Must delete after use
+    aggregation_allowed?: boolean  // Can aggregate with other data
+    sharing_allowed?: boolean  // Can share with third parties
+    third_party_whitelist?: string[]  // Allowed third parties
+    encryption_required?: boolean
+    anonymization_required?: boolean
+  }
+  
+  // Approval and notification rules
+  approval_requirements?: {
+    pre_approval?: boolean  // Require approval before action
+    post_notification?: boolean  // Notify after action
+    approval_threshold?: number  // Amount/risk level requiring approval
+    approvers?: string[]  // List of approver IDs
+    auto_approve_below?: number  // Auto-approve below this amount
+  }
+  
+  // Audit and compliance
+  audit_requirements?: {
+    log_all_access?: boolean
+    log_data_accessed?: boolean  // Log actual data, not just metadata
+    compliance_frameworks?: string[]  // ['GDPR', 'CCPA', 'HIPAA']
+    audit_retention_days?: number
+    real_time_monitoring?: boolean
+  }
+  
+  // Conditional rules
+  conditions?: HCPCondition[]
+  
+  // Restrictions and notes
+  restrictions?: string[]  // Human-readable restrictions
+  
+  // Revocation conditions
+  revocation_conditions?: {
+    on_breach?: boolean  // Revoke on any policy breach
+    on_suspicious_activity?: boolean
+    on_data_leak?: boolean
+    on_third_party_sharing?: boolean
+    max_violations?: number  // Number of violations before auto-revoke
+  }
+  
+  // Grant metadata
+  metadata?: {
+    grant_type?: 'temporary' | 'permanent' | 'recurring' | 'one_time'
+    risk_level?: 'low' | 'medium' | 'high' | 'critical'
+    trust_score?: number  // 0-100
+    review_required?: boolean
+    last_reviewed?: string
+    next_review?: string
+    tags?: string[]
+    [key: string]: any
+  }
 }
 
 // ============================================================================
