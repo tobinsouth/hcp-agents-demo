@@ -436,7 +436,7 @@ export function AgentNegotiation() {
       <Tabs defaultValue="negotiate" className="flex-1 flex flex-col min-h-0">
         {/* Responsive TabsList */}
         <div className="flex items-center justify-center mb-6">
-          <TabsList className="grid grid-cols-3 bg-background/60 backdrop-blur-sm border border-border/30 p-1 h-auto shadow-sm">
+          <TabsList className="grid grid-cols-3 backdrop-blur-sm border border-border/30 p-1 h-auto shadow-sm">
             <TabsTrigger 
               value="my-agent" 
               className="flex items-center gap-2 lg:gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground py-3 lg:px-6"
@@ -746,8 +746,8 @@ export function AgentNegotiation() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col lg:flex-row gap-6">
-                  <div className="lg:w-80 space-y-4 lg:order-first">
+                <div className="p-4 sm:p-6 h-[calc(100%-80px)] lg:h-[calc(100%-100px)] flex flex-col gap-6 overflow-y-auto">
+                  <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium mb-3 block">AI Model</label>
                       <Select value={selectedModel} onValueChange={setSelectedModel} disabled={isNegotiating}>
@@ -763,7 +763,7 @@ export function AgentNegotiation() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="hidden lg:block">
+                    <div>
                       <label className="text-xs font-medium text-muted-foreground mb-2 block">Model Info</label>
                       <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
                         <p className="text-xs text-muted-foreground leading-relaxed">
@@ -772,19 +772,19 @@ export function AgentNegotiation() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex-1">
+                  <div className="space-y-4">
                     <div className="relative">
                       <label className="text-sm font-medium mb-3 block">System Prompt</label>
                       <div className="relative">
                         <div className={cn(
                           "relative overflow-hidden rounded-xl bg-gradient-to-b from-muted/30 to-muted/10 border border-border/50 transition-all duration-500",
-                          expandedPrompts.opponent ? "" : "max-h-[80px]"
+                          expandedPrompts.opponent ? "" : "max-h-[120px]"
                         )}>
                           <Textarea
                             value={opponentSystemPrompt}
                             onChange={(e) => setOpponentSystemPrompt(e.target.value)}
                             disabled={isNegotiating}
-                            className="min-h-[300px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
+                            className="min-h-[200px] border-0 bg-transparent p-4 text-xs lg:text-sm resize-none focus:outline-none"
                             style={{ fontFamily: 'var(--font-mono)' }}
                           />
                           {!expandedPrompts.opponent && (
