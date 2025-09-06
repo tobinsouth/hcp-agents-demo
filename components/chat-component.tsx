@@ -55,8 +55,8 @@ export function ChatComponent() {
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
   const [expandedContext, setExpandedContext] = useState(false)
 
+  // Fetch initial context on mount
   useEffect(() => {
-    // Fetch initial context
     const fetchContext = () => {
       fetch("/api/human-context")
         .then(res => res.json())
@@ -68,14 +68,22 @@ export function ChatComponent() {
     }
     
     fetchContext()
+  }, [])
+
+  // Update context when messages change (after user sends a message)
+  useEffect(() => {
+    if (messages.length === 0) return
     
-    // Poll for context updates every 5 seconds
-    const interval = setInterval(() => {
+    // Fetch updated context after a short delay to allow backend processing
+    const timeoutId = setTimeout(() => {
       fetch("/api/human-context")
         .then(res => res.json())
         .then(data => {
-          // Check if context has changed
-          if (JSON.stringify(data) !== JSON.stringify(humanContext)) {
+          // Only update if the context has actually changed
+          const prevUpdateCount = humanContext?.metadata?.update_count || 0
+          const newUpdateCount = data?.metadata?.update_count || 0
+          
+          if (newUpdateCount > prevUpdateCount) {
             setHumanContext(data)
             setContextCompleteness(getContextCompleteness(data))
             setShowContextUpdate(true)
@@ -86,10 +94,10 @@ export function ChatComponent() {
           }
         })
         .catch(err => console.error("Failed to fetch human context:", err))
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [humanContext])
+    }, 2000) // Wait 2 seconds after message to check for updates
+    
+    return () => clearTimeout(timeoutId)
+  }, [messages.length, humanContext?.metadata?.update_count]) // Only re-run when number of messages changes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

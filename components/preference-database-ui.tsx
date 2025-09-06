@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { subscribeToPreferences, type PreferenceData } from "@/lib/preferences"
 import { Archive, RefreshCw, CircleDot } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
 export function PreferenceDatabaseUI() {
@@ -13,11 +14,8 @@ export function PreferenceDatabaseUI() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
-    // Fetch preferences immediately
+    // Fetch preferences once on mount
     fetchPreferences()
-
-    // Poll for updates every 2 seconds
-    const interval = setInterval(fetchPreferences, 2000)
 
     // Subscribe to local preference updates (for immediate feedback)
     const unsubscribe = subscribeToPreferences((newPreferences) => {
@@ -26,7 +24,6 @@ export function PreferenceDatabaseUI() {
     })
 
     return () => {
-      clearInterval(interval)
       unsubscribe()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -187,25 +184,30 @@ export function PreferenceDatabaseUI() {
           </div>
           <span className="font-medium">Preference Database</span>
         </div>
-        <AnimatePresence>
-          {lastUpdated && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-            >
-              <Badge variant="secondary" className="text-xs">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                >
-                  <RefreshCw className="w-3 h-3 mr-1" />
-                </motion.div>
-                {lastUpdated.toLocaleTimeString()}
-              </Badge>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="flex items-center gap-2">
+          <AnimatePresence>
+            {lastUpdated && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+              >
+                <Badge variant="secondary" className="text-xs">
+                  Updated: {lastUpdated.toLocaleTimeString()}
+                </Badge>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={fetchPreferences}
+            className="h-7 px-2"
+            title="Refresh preferences"
+          >
+            <RefreshCw className="w-3 h-3" />
+          </Button>
+        </div>
       </motion.div>
 
       {/* Organized Preference Display */}
