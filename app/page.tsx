@@ -6,6 +6,7 @@ import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
 import { GrantAuthorityUI } from "@/components/grant-authority-ui"
 import { OnboardingModal } from "@/components/onboarding-modal"
+import { InfoButton } from "@/components/ui/info-button"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { ArrowDown, Sparkles, Archive, Network, Shield } from "lucide-react"
 
@@ -103,6 +104,10 @@ export default function HomePage() {
         }
         break
     }
+  }
+
+  const reopenModal = (component: 'chat' | 'preferences' | 'negotiation' | 'authority') => {
+    setCurrentModal(component)
   }
 
   const containerVariants = {
@@ -357,8 +362,11 @@ export default function HomePage() {
                         className="overflow-hidden"
                       >
                         <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1 relative">
                             <ChatComponent />
+                            {hasOpenedChat && (
+                              <InfoButton onClick={() => reopenModal('chat')} />
+                            )}
                           </div>
                         </div>
                       </motion.div>
@@ -433,8 +441,11 @@ export default function HomePage() {
                         className="overflow-hidden"
                       >
                         <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1 relative">
                             <PreferenceDatabaseUI />
+                            {hasOpenedPreferences && (
+                              <InfoButton onClick={() => reopenModal('preferences')} />
+                            )}
                           </div>
                         </div>
                       </motion.div>
@@ -509,8 +520,11 @@ export default function HomePage() {
                         className="overflow-hidden"
                       >
                         <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
+                          <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1 relative">
                             <AgentNegotiation />
+                            {hasOpenedNegotiation && (
+                              <InfoButton onClick={() => reopenModal('negotiation')} />
+                            )}
                           </div>
                         </div>
                       </motion.div>
@@ -585,8 +599,11 @@ export default function HomePage() {
                         className="overflow-hidden"
                       >
                         <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
-                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1">
+                          <div className="h-[350px] sm:h-[400px] md:h-[450px] rounded-lg bg-muted/5 p-1 relative">
                             <GrantAuthorityUI />
+                            {hasOpenedAuthority && (
+                              <InfoButton onClick={() => reopenModal('authority')} />
+                            )}
                           </div>
                         </div>
                       </motion.div>
