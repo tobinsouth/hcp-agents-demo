@@ -55,14 +55,14 @@ const modalContent: Record<'chat' | 'preferences' | 'authority' | 'application' 
     ]
   },
   application: {
-    title: "Bringing It All Together",
-    subtitle: "Context + Authority = Powerful AI",
-    content: "When human context and grant of authority combine, they unlock a new paradigm of AI interaction. Your preferences guide AI behavior across native chat applications, MCP protocols, and agent-to-agent negotiations - all while maintaining your control and privacy.",
+    title: "Granting Context Authority to Agents",
+    subtitle: "Context + Control = Useful Personal Agents",
+    content: "To ensure human context is both useful and secure across AI workloads, we combine it with controlled access through tools like the Model Context Protocol (MCP). Each time a new AI session connects to the Human Context Protocol, it establishes its identity with the server and receives a grant of authority based on default permissions. Users can dynamically adjust these permissions based on their needs and the AI's intended purpose, maintaining complete control over how their context is accessed and used.",
     visual: 'agents',
     keyPoints: [
-      "Seamless AI experiences across all platforms",
-      "Agents that truly represent your interests",
-      "Transparent, controllable, and trustworthy"
+      "Human context is interoperable and accessible across platforms",
+      "Access to the context is protected and user-controlled",
+      "Decisions made based on the context are auditable, transparent, and controllable"
     ]
   },
   negotiation: {
