@@ -180,7 +180,7 @@ export default function HomePage() {
           }}
         />
         
-        <div className="max-w-4xl mx-auto px-3 py-10 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12 lg:py-20">
+        <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:px-12 lg:py-20">
         {/* Header */}
         <motion.div 
           className="text-center mb-16 sm:mb-16 md:mb-20 lg:mb-24"
@@ -197,7 +197,7 @@ export default function HomePage() {
               }}
               className="inline-block mb-8 sm:mb-10"
             >
-              <span className="text-xs font-mono tracking-[0.3em] text-muted-foreground/60 uppercase">
+              <span className="text-xs sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground/60 uppercase">
                 <TypewriterText 
                   text="HUMAN CONTEXT IN AI WORKFLOWS" 
                   delay={500}
@@ -259,7 +259,7 @@ export default function HomePage() {
               delay: 0.6,
               ease: [0.16, 1, 0.3, 1]
             }}
-            className="text-base sm:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed mb-8"
+            className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed mb-8"
           >
             Demonstrating the critical role of delegated authority in AI systems
           </motion.p>
@@ -280,7 +280,7 @@ export default function HomePage() {
               <Button
                 onClick={() => setCurrentModal('preferences')}
                 size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 rounded-lg text-lg font-medium transition-all duration-300 hover:scale-105"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-all duration-300 hover:scale-105 min-h-[44px] sm:min-h-[48px]"
               >
                 See why context and delegation is important
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -320,7 +320,7 @@ export default function HomePage() {
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                   <motion.div 
-                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                    className="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-between cursor-pointer group"
                     onClick={() => toggleComponent('preferences')}
                     whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                   >
@@ -333,10 +333,10 @@ export default function HomePage() {
                         <Archive className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </motion.div>
                       <div>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                           Human Context
                         </h2>
-                        <p className="text-sm sm:text-base text-muted-foreground">
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                           Your preferences, values, and interaction history
                         </p>
                       </div>
@@ -383,7 +383,7 @@ export default function HomePage() {
                       <Button
                         onClick={handleAddAuthority}
                         size="lg"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg flex items-center gap-2"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
                       >
                         Add Grant of Authority
                         <ArrowRight className="w-4 h-4" />
@@ -405,7 +405,7 @@ export default function HomePage() {
               >
                 <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                   <motion.div 
-                    className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                    className="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-between cursor-pointer group"
                     onClick={() => toggleComponent('authority')}
                     whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                   >
@@ -418,10 +418,10 @@ export default function HomePage() {
                         <Shield className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                       </motion.div>
                       <div>
-                        <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                        <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                           Grant of Authority
                         </h2>
-                        <p className="text-sm sm:text-base text-muted-foreground">
+                        <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                           Control how your context is shared and used
                         </p>
                       </div>
@@ -468,7 +468,7 @@ export default function HomePage() {
                       <Button
                         onClick={handleSeeInUse}
                         size="lg"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-lg flex items-center gap-2"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
                       >
                         See this in use
                         <ArrowRight className="w-4 h-4" />
@@ -488,7 +488,7 @@ export default function HomePage() {
                     transition={{ delay: 0.2 }}
                     className="text-center mb-8"
                   >
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-light mb-2" style={{ fontFamily: 'var(--font-crimson)' }}>
+                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light mb-2" style={{ fontFamily: 'var(--font-crimson)' }}>
                       Applications in Action
                     </h2>
                     <p className="text-sm sm:text-base text-muted-foreground">
@@ -506,7 +506,7 @@ export default function HomePage() {
                   >
                     <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                       <motion.div 
-                        className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                        className="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-between cursor-pointer group"
                         onClick={() => toggleComponent('chat')}
                         whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                       >
@@ -519,10 +519,10 @@ export default function HomePage() {
                             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                           </motion.div>
                           <div>
-                            <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                               Chat Interface
                             </h2>
-                            <p className="text-sm sm:text-base text-muted-foreground">
+                            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                               Natural conversation with context awareness
                             </p>
                           </div>
@@ -566,7 +566,7 @@ export default function HomePage() {
                   >
                     <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
                       <motion.div 
-                        className="p-4 sm:p-8 md:p-10 flex items-center justify-between cursor-pointer group"
+                        className="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-between cursor-pointer group"
                         onClick={() => toggleComponent('negotiation')}
                         whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
                       >
@@ -579,10 +579,10 @@ export default function HomePage() {
                             <Network className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
                           </motion.div>
                           <div>
-                            <h2 className="text-xl sm:text-2xl md:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
                               Agent Negotiation
                             </h2>
-                            <p className="text-sm sm:text-base text-muted-foreground">
+                            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
                               AI agents working together on your behalf
                             </p>
                           </div>

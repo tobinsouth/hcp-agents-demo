@@ -243,7 +243,7 @@ export function OnboardingModal({
                   >
                     <Button 
                       onClick={handleClose}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
                     >
                       {actionLabel}
                       <ArrowRight className="w-4 h-4" />

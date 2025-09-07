@@ -201,7 +201,7 @@ export function GrantAuthorityUI() {
             size="sm"
             variant="ghost"
             onClick={fetchAuthority}
-            className="h-7 px-2"
+            className="h-8 sm:h-7 px-2 min-w-[44px] sm:min-w-0"
           >
             <RefreshCw className="w-3 h-3" />
           </Button>
@@ -214,11 +214,12 @@ export function GrantAuthorityUI() {
           <CardTitle className="text-sm">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button 
               size="sm" 
               variant="outline"
               onClick={handleInitializePermissions}
+              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
             >
               Initialize All Keys
             </Button>
@@ -226,6 +227,7 @@ export function GrantAuthorityUI() {
               size="sm" 
               variant="outline"
               onClick={() => handleSetAllPermissions('Allow', 'Never')}
+              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
             >
               Read-Only
             </Button>
@@ -233,6 +235,7 @@ export function GrantAuthorityUI() {
               size="sm" 
               variant="outline"
               onClick={() => handleSetAllPermissions('Allow', 'Allow')}
+              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
             >
               Full Access
             </Button>
@@ -240,6 +243,7 @@ export function GrantAuthorityUI() {
               size="sm" 
               variant="outline"
               onClick={() => handleSetAllPermissions('Never', 'Never')}
+              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
             >
               Block All
             </Button>
@@ -314,7 +318,7 @@ export function GrantAuthorityUI() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-7 w-7 p-0"
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
                                 onClick={saveEditing}
                               >
                                 <Check className="w-3 h-3" />
@@ -322,7 +326,7 @@ export function GrantAuthorityUI() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-7 w-7 p-0"
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
                                 onClick={cancelEditing}
                               >
                                 <X className="w-3 h-3" />
@@ -349,7 +353,7 @@ export function GrantAuthorityUI() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="h-7 w-7 p-0"
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
                                 onClick={() => startEditing(key)}
                               >
                                 <Edit className="w-3 h-3" />
