@@ -1,7 +1,7 @@
 import { streamText, generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 
-// Simple wrapper functions for the HCP API
+// Enhanced wrapper functions for the HCP API with grant of authority support
 async function getContext() {
   const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp?endpoint=context')
   if (response.ok) {
@@ -10,15 +10,56 @@ async function getContext() {
   return {}
 }
 
+async function getAuthority() {
+  const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp?endpoint=authority')
+  if (response.ok) {
+    return await response.json()
+  }
+  return { permissions: {} }
+}
+
+async function checkPermission(key: string, operation: 'read' | 'write'): Promise<'Allow' | 'Ask' | 'Never'> {
+  const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + `/api/hcp?endpoint=permission&key=${encodeURIComponent(key)}`)
+  if (response.ok) {
+    const permission = await response.json()
+    return permission[operation] || 'Ask'
+  }
+  return 'Ask'
+}
+
 async function updateContext(data: any) {
-  await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'update-context',
-      data
+  // Check write permissions for each key being updated
+  const authority = await getAuthority()
+  const filteredData: any = {}
+  
+  for (const [key, value] of Object.entries(data)) {
+    const permission = await checkPermission(key, 'write')
+    
+    if (permission === 'Allow') {
+      // Permission granted, include in update
+      filteredData[key] = value
+      console.log(`[Context] Write allowed for key: ${key}`)
+    } else if (permission === 'Ask') {
+      // Would normally prompt user, but for demo we'll allow with logging
+      filteredData[key] = value
+      console.log(`[Context] Write permission requested for key: ${key} (auto-granted for demo)`)
+    } else {
+      // Permission denied, skip this key
+      console.log(`[Context] Write denied for key: ${key}`)
+    }
+  }
+  
+  // Only update if we have permitted data
+  if (Object.keys(filteredData).length > 0) {
+    await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update-context',
+        data: filteredData
+      })
     })
-  })
+  }
 }
 
 async function extractPreferencesAndContext(messages: any[]) {
@@ -26,7 +67,17 @@ async function extractPreferencesAndContext(messages: any[]) {
     apiKey: process.env.OPENROUTER_API_KEY!,
   })
 
-  const currentContext = await getContext()
+  // Get current context with permission filtering
+  const fullContext = await getContext()
+  const currentContext: any = {}
+  
+  // Filter context based on read permissions before using it for extraction
+  for (const [key, value] of Object.entries(fullContext)) {
+    const permission = await checkPermission(key, 'read')
+    if (permission === 'Allow' || permission === 'Ask') {
+      currentContext[key] = value
+    }
+  }
   
   try {
     console.log("[Context] Starting preference and context extraction...")
@@ -93,16 +144,32 @@ export async function POST(request: Request) {
     apiKey: process.env.OPENROUTER_API_KEY!,
   })
 
-  // Get current context for the AI
-  const currentContext = await getContext()
+  // Get current context for the AI with permission filtering
+  const fullContext = await getContext()
+  const authority = await getAuthority()
+  
+  // Filter context based on read permissions
+  const filteredContext: any = {}
+  for (const [key, value] of Object.entries(fullContext)) {
+    const permission = await checkPermission(key, 'read')
+    if (permission === 'Allow') {
+      filteredContext[key] = value
+    } else if (permission === 'Ask') {
+      // For demo, allow with indication that permission was requested
+      filteredContext[key] = value
+      console.log(`[Context] Read permission requested for key: ${key} (auto-granted for demo)`)
+    } else {
+      console.log(`[Context] Read access denied for key: ${key}`)
+    }
+  }
   
   // Build context-aware system prompt
-  const contextSummary = currentContext && Object.keys(currentContext).length > 0
-    ? `User Context Available:
-${JSON.stringify(currentContext, null, 2)}
+  const contextSummary = filteredContext && Object.keys(filteredContext).length > 0
+    ? `User Context Available (filtered by permissions):
+${JSON.stringify(filteredContext, null, 2)}
 
 Use this context to personalize your responses when relevant.`
-    : "No user context available yet."
+    : "No accessible user context available."
 
   const systemPrompt = `You are a helpful AI assistant engaged in building understanding of the user through natural conversation.
 

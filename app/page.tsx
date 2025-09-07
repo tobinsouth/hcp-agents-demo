@@ -527,10 +527,10 @@ export default function HomePage() {
                           </motion.div>
                           <div>
                             <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
-                              Chat Interface
+                              AI Chat Interface
                             </h2>
                             <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
-                              Natural conversation with context awareness
+                              Using human context in chatbots safely
                             </p>
                           </div>
                         </div>
