@@ -6,8 +6,9 @@ import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
 import { GrantAuthorityUI } from "@/components/grant-authority-ui"
 import { OnboardingModal } from "@/components/onboarding-modal"
+import { MCPComponent } from "@/components/mcp-component"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
-import { ArrowDown, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
+import { ArrowDown, ArrowRight, Sparkles, Archive, Network, Shield, Workflow } from "lucide-react"
 import { useDemoInitialization } from "@/hooks/use-demo-initialization"
 
 // Typewriter component
@@ -53,6 +54,7 @@ export default function HomePage() {
   const [showApplications, setShowApplications] = useState(false)
   const [showChat, setShowChat] = useState(false)
   const [showNegotiation, setShowNegotiation] = useState(false)
+  const [showMCP, setShowMCP] = useState(false)
   
   // Modal state
   const [currentModal, setCurrentModal] = useState<'preferences' | 'authority' | 'application' | null>(null)
@@ -101,6 +103,9 @@ export default function HomePage() {
         break
       case 'authority':
         setShowGrantAuthority(!showGrantAuthority)
+        break
+      case 'mcp':
+        setShowMCP(!showMCP)
         break
     }
   }
@@ -615,6 +620,66 @@ export default function HomePage() {
                             <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
                               <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
                                 <AgentNegotiation />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </Card>
+                  </motion.div>
+                  
+                  {/* Model Context Protocol */}
+                  <motion.div
+                    layout
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="w-full"
+                  >
+                    <Card className="overflow-hidden bg-card/80 backdrop-blur-md border-border/40 shadow-lg hover:shadow-xl transition-shadow duration-500">
+                      <motion.div 
+                        className="p-4 sm:p-6 md:p-8 lg:p-10 flex items-center justify-between cursor-pointer group"
+                        onClick={() => toggleComponent('mcp')}
+                        whileHover={{ backgroundColor: "rgba(0,0,0,0.01)" }}
+                      >
+                        <div className="flex items-center gap-3 sm:gap-4 md:gap-5">
+                          <motion.div 
+                            className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center"
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 400 }}
+                          >
+                            <Workflow className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-primary" />
+                          </motion.div>
+                          <div>
+                            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-1" style={{ fontFamily: 'var(--font-crimson)' }}>
+                              Model Context Protocol
+                            </h2>
+                            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
+                              Connect your context to any AI workflow
+                            </p>
+                          </div>
+                        </div>
+                        <motion.div
+                          animate={{ rotate: showMCP ? 180 : 0 }}
+                          transition={{ duration: 0.4, ease: "easeInOut" as const }}
+                          className="group-hover:bg-accent/10 rounded-full p-2 sm:p-3 transition-colors"
+                        >
+                          <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
+                        </motion.div>
+                      </motion.div>
+                      
+                      <AnimatePresence>
+                        {showMCP && (
+                          <motion.div
+                            initial="collapsed"
+                            animate="expanded"
+                            exit="collapsed"
+                            variants={contentVariants}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 sm:px-8 sm:pb-8 md:px-10 md:pb-10">
+                              <div className="min-h-[350px] sm:min-h-[400px] md:min-h-[450px] rounded-lg bg-muted/5 p-1">
+                                <MCPComponent />
                               </div>
                             </div>
                           </motion.div>
