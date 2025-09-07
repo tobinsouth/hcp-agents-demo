@@ -3,7 +3,9 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 
 // Enhanced wrapper functions for the HCP API with grant of authority support
 async function getContext() {
-  const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp?endpoint=context')
+  // Use absolute URL with the request origin
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/hcp?endpoint=context`)
   if (response.ok) {
     return await response.json()
   }
@@ -11,7 +13,8 @@ async function getContext() {
 }
 
 async function getAuthority() {
-  const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp?endpoint=authority')
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/hcp?endpoint=authority`)
   if (response.ok) {
     return await response.json()
   }
@@ -19,7 +22,8 @@ async function getAuthority() {
 }
 
 async function checkPermission(key: string, operation: 'read' | 'write'): Promise<'Allow' | 'Ask' | 'Never'> {
-  const response = await fetch(process.env.NEXT_PUBLIC_APP_URL + `/api/hcp?endpoint=permission&key=${encodeURIComponent(key)}`)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const response = await fetch(`${baseUrl}/api/hcp?endpoint=permission&key=${encodeURIComponent(key)}`)
   if (response.ok) {
     const permission = await response.json()
     return permission[operation] || 'Ask'
@@ -31,6 +35,11 @@ async function updateContext(data: any) {
   // Check write permissions for each key being updated
   const authority = await getAuthority()
   const filteredData: any = {}
+  const writeAccess = {
+    allowed: [] as string[],
+    requested: [] as string[],
+    denied: [] as string[]
+  }
   
   for (const [key, value] of Object.entries(data)) {
     const permission = await checkPermission(key, 'write')
@@ -38,20 +47,24 @@ async function updateContext(data: any) {
     if (permission === 'Allow') {
       // Permission granted, include in update
       filteredData[key] = value
+      writeAccess.allowed.push(key)
       console.log(`[Context] Write allowed for key: ${key}`)
     } else if (permission === 'Ask') {
       // Would normally prompt user, but for demo we'll allow with logging
       filteredData[key] = value
+      writeAccess.allowed.push(key)
       console.log(`[Context] Write permission requested for key: ${key} (auto-granted for demo)`)
     } else {
       // Permission denied, skip this key
+      writeAccess.denied.push(key)
       console.log(`[Context] Write denied for key: ${key}`)
     }
   }
   
   // Only update if we have permitted data
   if (Object.keys(filteredData).length > 0) {
-    await fetch(process.env.NEXT_PUBLIC_APP_URL + '/api/hcp', {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    await fetch(`${baseUrl}/api/hcp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -60,6 +73,8 @@ async function updateContext(data: any) {
       })
     })
   }
+  
+  return writeAccess
 }
 
 async function extractPreferencesAndContext(messages: any[]) {
@@ -99,8 +114,9 @@ Return a JSON object with any preferences or context information you can extract
     const preferences = JSON.parse(prefResult.text || "{}")
     console.log("[Context] Extracted preferences:", preferences)
 
+    let preferencesWriteAccess = null
     if (Object.keys(preferences).length > 0) {
-      await updateContext(preferences)
+      preferencesWriteAccess = await updateContext(preferences)
       console.log("[Context] Updated context with new preferences")
     }
 
@@ -125,20 +141,34 @@ Return a JSON object with behavioral insights. Structure it under a "behavioral"
     const behavioralContext = JSON.parse(contextResult.text || "{}")
     console.log("[Context] Extracted behavioral context:", behavioralContext)
 
+    let behavioralWriteAccess = null
     if (Object.keys(behavioralContext).length > 0) {
-      await updateContext(behavioralContext)
+      behavioralWriteAccess = await updateContext(behavioralContext)
       console.log("[Context] Updated context with behavioral insights")
     }
 
-    return { preferences, behavioralContext }
+    // Combine write access information
+    const allWriteKeys = [
+      ...(preferencesWriteAccess?.allowed || []),
+      ...(behavioralWriteAccess?.allowed || [])
+    ]
+    
+    return {
+      allowed: allWriteKeys,
+      requested: [],
+      denied: [
+        ...(preferencesWriteAccess?.denied || []),
+        ...(behavioralWriteAccess?.denied || [])
+      ]
+    }
   } catch (error) {
     console.error("[Context] Error extracting context:", error)
-    return { preferences: {}, behavioralContext: {} }
+    return { allowed: [], requested: [], denied: [] }
   }
 }
 
 export async function POST(request: Request) {
-  const { messages } = await request.json()
+  const { messages, approvedPermissions = [] } = await request.json()
 
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY!,
@@ -148,17 +178,33 @@ export async function POST(request: Request) {
   const fullContext = await getContext()
   const authority = await getAuthority()
   
+  // Track context access for UI display
+  const contextAccess = {
+    allowed: [] as string[],
+    requested: [] as string[],
+    denied: [] as string[]
+  }
+  
   // Filter context based on read permissions
   const filteredContext: any = {}
   for (const [key, value] of Object.entries(fullContext)) {
     const permission = await checkPermission(key, 'read')
     if (permission === 'Allow') {
       filteredContext[key] = value
+      contextAccess.allowed.push(key)
     } else if (permission === 'Ask') {
-      // For demo, allow with indication that permission was requested
-      filteredContext[key] = value
-      console.log(`[Context] Read permission requested for key: ${key} (auto-granted for demo)`)
+      // Check if user has approved this permission for this session
+      if (approvedPermissions.includes(key)) {
+        filteredContext[key] = value
+        contextAccess.allowed.push(key)
+        console.log(`[Context] Read permission approved by user for key: ${key}`)
+      } else {
+        // Don't include in context, mark as needing approval
+        contextAccess.requested.push(key)
+        console.log(`[Context] Read permission needed for key: ${key}`)
+      }
     } else {
+      contextAccess.denied.push(key)
       console.log(`[Context] Read access denied for key: ${key}`)
     }
   }
@@ -182,21 +228,53 @@ Guidelines:
 - Help the user explore topics they're interested in
 - Build context through organic conversation rather than direct questioning`
 
+  // Track write access for context extraction
+  let writeAccess: any = null
+  
   // Extract context in the background (don't await)
   if (messages.length >= 2) {
-    extractPreferencesAndContext(messages).catch(error => {
+    extractPreferencesAndContext(messages).then(result => {
+      writeAccess = result
+    }).catch(error => {
       console.error("[Context] Background extraction error:", error)
     })
   }
 
-  // Stream the response
-  const result = streamText({
-    model: openrouter.chat("openai/gpt-4o-mini"),
-    system: systemPrompt,
-    messages,
-    temperature: 0.85,
-    maxRetries: 2,
+  // Create a custom stream that includes metadata
+  const encoder = new TextEncoder()
+  const customStream = new ReadableStream({
+    async start(controller) {
+      // Send context access metadata first
+      const metadata = JSON.stringify({
+        type: 'context_access',
+        data: { ...contextAccess, write: writeAccess }
+      })
+      controller.enqueue(encoder.encode(`[METADATA]${metadata}[/METADATA]`))
+      
+      // Then stream the actual response
+      const result = streamText({
+        model: openrouter.chat("openai/gpt-4o-mini"),
+        system: systemPrompt,
+        messages,
+        temperature: 0.85,
+        maxRetries: 2,
+      })
+      
+      const reader = result.toTextStreamResponse().body?.getReader()
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          controller.enqueue(value)
+        }
+      }
+      controller.close()
+    }
   })
 
-  return result.toTextStreamResponse()
+  return new Response(customStream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  })
 }

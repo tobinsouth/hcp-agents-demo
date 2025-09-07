@@ -8,13 +8,23 @@ import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Send, User, Sparkles, Brain, Database, CheckCircle, Activity } from "lucide-react"
+import { Send, User, Sparkles, Brain, Database, CheckCircle, Activity, Shield, Lock, Unlock, AlertCircle } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface Message {
   id: string
   role: "user" | "assistant"
   content: string
+  contextAccess?: {
+    allowed: string[]
+    requested: string[]
+    denied: string[]
+  }
+}
+
+interface PermissionRequest {
+  messageId: string
+  keys: string[]
 }
 
 interface HumanContext {
@@ -54,6 +64,8 @@ export function ChatComponent() {
   const [showContextUpdate, setShowContextUpdate] = useState(false)
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null)
   const [expandedContext, setExpandedContext] = useState(false)
+  const [approvedPermissions, setApprovedPermissions] = useState<string[]>([])
+  const [pendingPermissions, setPendingPermissions] = useState<PermissionRequest[]>([])
 
   // Fetch initial context on mount
   useEffect(() => {
@@ -99,18 +111,38 @@ export function ChatComponent() {
     return () => clearTimeout(timeoutId)
   }, [messages.length, humanContext?.metadata?.update_count]) // Only re-run when number of messages changes
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
+  const handleApprovePermission = (messageId: string, keys: string[]) => {
+    setApprovedPermissions(prev => [...prev, ...keys])
+    setPendingPermissions(prev => prev.filter(p => p.messageId !== messageId))
+    
+    // Re-send the last user message with approved permissions
+    const lastUserMessage = messages.filter(m => m.role === 'user').pop()
+    if (lastUserMessage) {
+      // Create a new assistant message with approved context
+      handleSubmit(null, true)
     }
+  }
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
+  const handleDenyPermission = (messageId: string) => {
+    setPendingPermissions(prev => prev.filter(p => p.messageId !== messageId))
+  }
+
+  const handleSubmit = async (e: React.FormEvent | null, withApprovedPermissions = false) => {
+    if (e) e.preventDefault()
+    if (!withApprovedPermissions && (!input.trim() || isLoading)) return
+
+    const userMessage: Message = withApprovedPermissions 
+      ? messages.filter(m => m.role === 'user').pop()!
+      : {
+          id: Date.now().toString(),
+          role: "user",
+          content: input,
+        }
+
+    if (!withApprovedPermissions) {
+      setMessages((prev) => [...prev, userMessage])
+      setInput("")
+    }
     setIsLoading(true)
 
     try {
@@ -120,10 +152,11 @@ export function ChatComponent() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage].map((m) => ({
+          messages: messages.filter(m => !withApprovedPermissions || m !== userMessage).concat(userMessage).map((m) => ({
             role: m.role,
             content: m.content,
           })),
+          approvedPermissions,
         }),
       })
 
@@ -138,23 +171,57 @@ export function ChatComponent() {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "",
+        contextAccess: undefined,
       }
 
       setMessages((prev) => [...prev, assistantMessage])
 
       const decoder = new TextDecoder()
       let done = false
+      let buffer = ""
 
       while (!done) {
         const { value, done: readerDone } = await reader.read()
         done = readerDone
 
         if (value) {
-          const chunk = decoder.decode(value, { stream: true })
-          console.log("Received chunk:", chunk)
+          buffer += decoder.decode(value, { stream: true })
+          
+          // Check for metadata
+          const metadataMatch = buffer.match(/\[METADATA\](.*?)\[\/METADATA\]/)
+          if (metadataMatch) {
+            try {
+              const metadata = JSON.parse(metadataMatch[1])
+              if (metadata.type === 'context_access') {
+                // Update the assistant message with context access info
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessage.id 
+                      ? { ...msg, contextAccess: metadata.data }
+                      : msg
+                  )
+                )
+                
+                // If there are requested permissions, add to pending
+                if (metadata.data.requested && metadata.data.requested.length > 0) {
+                  setPendingPermissions(prev => [...prev, {
+                    messageId: assistantMessage.id,
+                    keys: metadata.data.requested
+                  }])
+                }
+              }
+            } catch (err) {
+              console.error("Failed to parse metadata:", err)
+            }
+            // Remove metadata from buffer
+            buffer = buffer.replace(metadataMatch[0], '')
+          }
+          
+          // Update content with the remaining buffer
+          const cleanContent = buffer
           setMessages((prev) =>
             prev.map((msg) =>
-              msg.id === assistantMessage.id ? { ...msg, content: msg.content + chunk } : msg,
+              msg.id === assistantMessage.id ? { ...msg, content: cleanContent } : msg,
             ),
           )
         }
@@ -231,12 +298,87 @@ export function ChatComponent() {
                           : "bg-card/50 backdrop-blur-sm"
                       }`}>
                       <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                      {message.role === "assistant" && humanContext && (
-                        <div className="mt-2 pt-2 border-t border-border/20">
-                          <div className="flex items-center gap-2 text-xs opacity-60">
-                            <Brain className="h-3 w-3" />
-                            <span>Using human context</span>
-                          </div>
+                      
+                      {/* Context Access Display */}
+                      {message.role === "assistant" && message.contextAccess && (
+                        <div className="mt-3 space-y-2">
+                          {/* Allowed Context */}
+                          {message.contextAccess.allowed.length > 0 && (
+                            <div className="flex items-start gap-2 p-2 rounded-lg bg-green-500/5 border border-green-500/20">
+                              <Unlock className="h-3 w-3 text-green-600 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium text-green-700 mb-1">Accessing Context</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {message.contextAccess.allowed.map((key) => (
+                                    <Badge key={key} variant="outline" className="text-xs bg-green-500/10 border-green-500/30">
+                                      {key}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Permission Requests */}
+                          {pendingPermissions.find(p => p.messageId === message.id) && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/5 border border-yellow-500/20"
+                            >
+                              <AlertCircle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium text-yellow-700 mb-2">Permission Required</p>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  The AI needs access to the following context to provide a personalized response:
+                                </p>
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {pendingPermissions.find(p => p.messageId === message.id)?.keys.map((key) => (
+                                    <Badge key={key} variant="outline" className="text-xs bg-yellow-500/10 border-yellow-500/30">
+                                      {key}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => handleApprovePermission(
+                                      message.id, 
+                                      pendingPermissions.find(p => p.messageId === message.id)?.keys || []
+                                    )}
+                                    size="sm"
+                                    className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700"
+                                  >
+                                    Allow Access
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleDenyPermission(message.id)}
+                                    size="sm"
+                                    variant="destructive"
+                                    className="h-7 px-3 text-xs"
+                                  >
+                                    Deny
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                          
+                          {/* Denied Context */}
+                          {message.contextAccess.denied.length > 0 && (
+                            <div className="flex items-start gap-2 p-2 rounded-lg bg-red-500/5 border border-red-500/20">
+                              <Lock className="h-3 w-3 text-red-600 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium text-red-700 mb-1">Access Denied</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {message.contextAccess.denied.map((key) => (
+                                    <Badge key={key} variant="outline" className="text-xs bg-red-500/10 border-red-500/30">
+                                      {key}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </Card>
