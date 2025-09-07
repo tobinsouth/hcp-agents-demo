@@ -205,44 +205,43 @@ export function GrantAuthorityUI() {
         </div>
       </motion.div>
 
-      {/* Quick Actions */}
-      <Card className="mb-4">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex flex-wrap gap-2">
-            <button 
-              onClick={handleInitializePermissions}
-              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-            >
-              Initialize All
-            </button>
-            <button 
-              onClick={() => handleSetAllPermissions('Allow', 'Never')}
-              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-            >
-              Read-Only
-            </button>
-            <button 
-              onClick={() => handleSetAllPermissions('Allow', 'Allow')}
-              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-            >
-              Full Access
-            </button>
-            <button 
-              onClick={() => handleSetAllPermissions('Never', 'Never')}
-              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-            >
-              Block All
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Permissions List */}
       <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-2 pr-4">
+          {/* Quick Actions */}
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={handleInitializePermissions}
+                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
+                >
+                  Initialize All
+                </button>
+                <button 
+                  onClick={() => handleSetAllPermissions('Allow', 'Never')}
+                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
+                >
+                  Read-Only
+                </button>
+                <button 
+                  onClick={() => handleSetAllPermissions('Allow', 'Allow')}
+                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
+                >
+                  Full Access
+                </button>
+                <button 
+                  onClick={() => handleSetAllPermissions('Never', 'Never')}
+                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
+                >
+                  Block All
+                </button>
+              </div>
+            </CardContent>
+          </Card>
           <AnimatePresence>
             {allKeys.length === 0 ? (
               <Card>
