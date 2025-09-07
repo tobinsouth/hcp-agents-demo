@@ -10,61 +10,30 @@ import { useEffect, useState } from 'react'
 export function useDemoInitialization() {
   const [initialized, setInitialized] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let mounted = true
-
-    const initializeDemo = async () => {
+    // The backend auto-initializes with demo data on first access
+    // This hook just confirms the initialization
+    const checkInitialization = async () => {
       try {
-        // Check if demo data is already loaded
-        const statusResponse = await fetch('/api/demo?action=status')
-        const status = await statusResponse.json()
-
-        if (!status.demo_mode && mounted) {
-          // Load demo data if not already loaded
-          const loadResponse = await fetch('/api/demo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              scenario: undefined, // Load default demo data
-              reset: false // Don't reset if data exists
-            })
-          })
-
-          const result = await loadResponse.json()
-          
-          if (!result.success) {
-            throw new Error(result.error || 'Failed to load demo data')
-          }
-
-          console.log('[Demo] Initialized with demo data:', result.message)
-        }
-
-        if (mounted) {
+        const response = await fetch('/api/demo?action=status')
+        if (response.ok) {
+          const status = await response.json()
+          console.log('[Demo] Status:', status)
           setInitialized(true)
-          setError(null)
         }
-      } catch (err) {
-        console.error('[Demo] Failed to initialize:', err)
-        if (mounted) {
-          setError(err instanceof Error ? err.message : 'Failed to initialize demo')
-        }
+      } catch (error) {
+        console.log('[Demo] Status check failed, but backend will auto-initialize')
+        setInitialized(true)
       } finally {
-        if (mounted) {
-          setLoading(false)
-        }
+        setLoading(false)
       }
     }
 
-    initializeDemo()
-
-    return () => {
-      mounted = false
-    }
+    checkInitialization()
   }, [])
 
-  return { initialized, loading, error }
+  return { initialized, loading }
 }
 
 /**

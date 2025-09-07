@@ -12,6 +12,9 @@ export { agentContext, AgentContextManager } from './agent-context'
 // API exports
 export { createHCPRoute, createHCPAPIHandler } from './api'
 
+// Demo data exports
+export { DEMO_CONTEXT, DEMO_PERMISSIONS, loadDemoData } from './demo-data'
+
 // Type exports
 export type {
   HCPContext,

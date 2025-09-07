@@ -10,6 +10,13 @@ import { grantAuthority } from './grant-authority'
 import { agentContext } from './agent-context'
 import type { HCPAPIRequest, HCPAPIResponse, AgentContext } from './types'
 
+// Ensure instances are initialized when the API is accessed
+const ensureInitialized = () => {
+  // Just accessing the instances will trigger their initialization
+  hcp.getContext()
+  grantAuthority.getAuthority()
+}
+
 /**
  * Create a unified HCP API handler for Next.js
  */
@@ -19,6 +26,9 @@ export function createHCPAPIHandler() {
      * Handle GET requests
      */
     async GET(request: NextRequest): Promise<NextResponse> {
+      // Ensure demo data is initialized
+      ensureInitialized()
+      
       const { searchParams } = new URL(request.url)
       const endpoint = searchParams.get('endpoint') || 'context'
 
@@ -96,6 +106,9 @@ export function createHCPAPIHandler() {
      * Handle POST requests
      */
     async POST(request: NextRequest): Promise<NextResponse> {
+      // Ensure demo data is initialized
+      ensureInitialized()
+      
       try {
         const body: HCPAPIRequest = await request.json()
         const { action, data, agentContext: agentCtx } = body

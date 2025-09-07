@@ -13,6 +13,7 @@ import { hcp } from './core'
 export class GrantAuthorityManager {
   private static instance: GrantAuthorityManager
   private authority: GrantOfAuthority
+  private initialized: boolean = false
 
   private constructor() {
     this.authority = {
@@ -30,8 +31,32 @@ export class GrantAuthorityManager {
   static getInstance(): GrantAuthorityManager {
     if (!GrantAuthorityManager.instance) {
       GrantAuthorityManager.instance = new GrantAuthorityManager()
+      GrantAuthorityManager.instance.initializeDemo()
     }
     return GrantAuthorityManager.instance
+  }
+
+  /**
+   * Initialize with demo permissions
+   */
+  private initializeDemo(): void {
+    if (!this.initialized) {
+      // Lazy load demo data
+      import('./demo-data').then(({ DEMO_PERMISSIONS }) => {
+        if (Object.keys(this.authority.permissions).length === 0) {
+          this.authority.permissions = DEMO_PERMISSIONS
+          this.authority.metadata = {
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            context: "Demo configuration with privacy-conscious defaults"
+          }
+          console.log('[GrantAuthority] Initialized with demo permissions')
+        }
+      }).catch(err => {
+        console.error('[GrantAuthority] Failed to load demo data:', err)
+      })
+      this.initialized = true
+    }
   }
 
   /**

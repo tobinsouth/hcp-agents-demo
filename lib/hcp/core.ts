@@ -12,6 +12,7 @@ import type { HCPContext } from './types'
 export class HCPManager {
   private static instance: HCPManager
   private context: HCPContext
+  private initialized: boolean = false
 
   private constructor() {
     this.context = {}
@@ -23,8 +24,27 @@ export class HCPManager {
   static getInstance(): HCPManager {
     if (!HCPManager.instance) {
       HCPManager.instance = new HCPManager()
+      HCPManager.instance.initializeDemo()
     }
     return HCPManager.instance
+  }
+
+  /**
+   * Initialize with demo data
+   */
+  private initializeDemo(): void {
+    if (!this.initialized) {
+      // Lazy load demo data
+      import('./demo-data').then(({ DEMO_CONTEXT }) => {
+        if (Object.keys(this.context).length === 0) {
+          this.context = DEMO_CONTEXT
+          console.log('[HCP] Initialized with demo context')
+        }
+      }).catch(err => {
+        console.error('[HCP] Failed to load demo data:', err)
+      })
+      this.initialized = true
+    }
   }
 
   /**

@@ -178,7 +178,7 @@ export function GrantAuthorityUI() {
   const allKeys = [...new Set([...Object.keys(authority.permissions), ...contextKeys])]
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full max-h-full overflow-hidden p-4">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
@@ -248,8 +248,8 @@ export function GrantAuthorityUI() {
       </Card>
 
       {/* Permissions List */}
-      <ScrollArea className="flex-1">
-        <div className="space-y-2">
+      <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
+        <div className="space-y-2 pr-4">
           <AnimatePresence>
             {allKeys.length === 0 ? (
               <Card>
