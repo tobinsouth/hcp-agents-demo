@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -55,11 +55,13 @@ export function GrantAuthorityUI() {
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [editingValues, setEditingValues] = useState<Permission | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [currentPolicy, setCurrentPolicy] = useState<string>('allow-list')
 
   useEffect(() => {
     // Fetch initial data
     fetchAuthority()
     fetchContextKeys()
+    fetchDefaultPolicy()
 
     // Set up polling for updates
     const interval = setInterval(() => {
@@ -97,6 +99,18 @@ export function GrantAuthorityUI() {
     }
   }
 
+  const fetchDefaultPolicy = async () => {
+    try {
+      const response = await fetch("/api/hcp?endpoint=default-policy")
+      if (response.ok) {
+        const data = await response.json()
+        setCurrentPolicy(data.policy || 'allow-list')
+      }
+    } catch (error) {
+      console.error("Error fetching default policy:", error)
+    }
+  }
+
   const handlePermissionChange = async (key: string, permission: Permission) => {
     try {
       await fetch("/api/hcp", {
@@ -115,33 +129,27 @@ export function GrantAuthorityUI() {
     }
   }
 
-  const handleInitializePermissions = async () => {
+
+
+  const handlePolicyChange = async (policy: string) => {
+    // Update the local state
+    setCurrentPolicy(policy)
+    
+    // Store the policy on the backend (as runtime override only)
     try {
       await fetch("/api/hcp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "initialize-permissions"
+          action: "set-default-policy",
+          data: { policy }
         })
       })
+      // Refresh to show the effect of the override
       fetchAuthority()
     } catch (error) {
-      console.error("Error initializing permissions:", error)
+      console.error("Error setting default policy:", error)
     }
-  }
-
-  const handleSetAllPermissions = async (read: PermissionValue, write: PermissionValue) => {
-    for (const key of contextKeys) {
-      await fetch("/api/hcp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "set-permission",
-          data: { key, permission: { read, write } }
-        })
-      })
-    }
-    fetchAuthority()
   }
 
   const startEditing = (key: string) => {
@@ -182,40 +190,41 @@ export function GrantAuthorityUI() {
       {/* Permissions List */}
       <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
         <div className="space-y-2 pr-4">
-          {/* Quick Actions */}
-          <Card className="mb-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Default Values</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex flex-wrap gap-2">
-                <button 
-                  onClick={handleInitializePermissions}
-                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-                >
-                  Initialize All
-                </button>
-                <button 
-                  onClick={() => handleSetAllPermissions('Allow', 'Never')}
-                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-                >
-                  Read-Only
-                </button>
-                <button 
-                  onClick={() => handleSetAllPermissions('Allow', 'Allow')}
-                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-                >
-                  Full Access
-                </button>
-                <button 
-                  onClick={() => handleSetAllPermissions('Never', 'Never')}
-                  className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
-                >
-                  Block All
-                </button>
+          {/* Default Grant Policy */}
+          <div className="mb-4 p-3 rounded-lg bg-muted/30 border border-border/50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Settings className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Default Grant of Authority</span>
               </div>
-            </CardContent>
-          </Card>
+              <Select value={currentPolicy} onValueChange={handlePolicyChange}>
+                <SelectTrigger className="w-[220px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="share-everything">
+                    <div className="flex items-center gap-2">
+                      <Unlock className="w-3 h-3 text-red-500" />
+                      <span>Always share everything</span>
+                      <span className="text-red-500 text-xs">(dangerous)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="ask-permission">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-3 h-3 text-yellow-500" />
+                      <span>Always ask permission</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="allow-list">
+                    <div className="flex items-center gap-2">
+                      <Lock className="w-3 h-3 text-green-500" />
+                      <span>Use allow list</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <AnimatePresence>
             {allKeys.length === 0 ? (
               <Card>
@@ -229,6 +238,18 @@ export function GrantAuthorityUI() {
                 const permission = authority.permissions[key] || { read: 'Ask', write: 'Ask' }
                 const isEditing = editingKey === key
                 
+                // Determine if default policy is overriding
+                let isOverridden = false
+                
+                if (currentPolicy === 'share-everything') {
+                  isOverridden = permission.read !== 'Allow' || permission.write !== 'Allow'
+                } else if (currentPolicy === 'allow-list') {
+                  // Only override if not explicitly allowed
+                  if (!(permission.read === 'Allow' || permission.write === 'Allow')) {
+                    isOverridden = permission.read !== 'Never' || permission.write !== 'Never'
+                  }
+                }
+                
                 return (
                   <motion.div
                     key={key}
@@ -236,15 +257,18 @@ export function GrantAuthorityUI() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.02 }}
                   >
-                    <Card className="hover:shadow-sm transition-shadow">
+                    <Card className={`hover:shadow-sm transition-shadow relative ${isOverridden ? 'opacity-75' : ''}`}>
+                      {isOverridden && (
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-yellow-500/50" title="Overridden by default policy" />
+                      )}
                       <CardContent className="py-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <p className="text-sm font-medium">{key}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{key}</p>
                           </div>
                           
                           {isEditing && editingValues ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Select
                                 value={editingValues.read}
                                 onValueChange={(value) => 
@@ -291,25 +315,27 @@ export function GrantAuthorityUI() {
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Badge 
                                 variant="outline" 
-                                className={`text-xs ${permissionColors[permission.read] || permissionColors.default}`}
+                                className={`text-xs flex-shrink-0 ${isOverridden ? 'opacity-60' : ''} ${permissionColors[permission.read] || permissionColors.default}`}
                               >
                                 {permissionIcons[permission.read] || permissionIcons.default}
-                                <span className="ml-1">Read: {permission.read}</span>
+                                <span className="ml-1 hidden sm:inline">Read:</span>
+                                <span className="ml-1">{permission.read}</span>
                               </Badge>
                               
                               <Badge 
                                 variant="outline" 
-                                className={`text-xs ${permissionColors[permission.write] || permissionColors.default}`}
+                                className={`text-xs flex-shrink-0 ${isOverridden ? 'opacity-60' : ''} ${permissionColors[permission.write] || permissionColors.default}`}
                               >
                                 {permissionIcons[permission.write] || permissionIcons.default}
-                                <span className="ml-1">Write: {permission.write}</span>
+                                <span className="ml-1 hidden sm:inline">Write:</span>
+                                <span className="ml-1">{permission.write}</span>
                               </Badge>
                               
                               <button
-                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0 rounded-lg hover:bg-accent/50 transition-all duration-200 flex items-center justify-center"
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0 rounded-lg hover:bg-accent/50 transition-all duration-200 flex items-center justify-center flex-shrink-0"
                                 onClick={() => startEditing(key)}
                               >
                                 <Edit className="w-3 h-3" />

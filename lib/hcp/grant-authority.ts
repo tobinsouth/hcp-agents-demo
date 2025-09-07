@@ -14,6 +14,7 @@ export class GrantAuthorityManager {
   private static instance: GrantAuthorityManager
   private authority: GrantOfAuthority
   private initialized: boolean = false
+  private defaultPolicy: 'share-everything' | 'ask-permission' | 'allow-list' = 'allow-list'
 
   private constructor() {
     this.authority = {
@@ -83,13 +84,30 @@ export class GrantAuthorityManager {
   }
 
   /**
-   * Get permission for a specific key
+   * Get permission for a specific key (with default policy override)
    */
   getPermission(key: string): Permission {
-    return this.authority.permissions[key] || {
-      read: 'Ask',
-      write: 'Ask'
+    // If default policy is set to override, return those values
+    if (this.defaultPolicy === 'share-everything') {
+      return { read: 'Allow', write: 'Allow' }
+    } else if (this.defaultPolicy === 'allow-list') {
+      // For allow-list, only return Allow if explicitly set
+      const stored = this.authority.permissions[key]
+      if (stored && (stored.read === 'Allow' || stored.write === 'Allow')) {
+        return stored
+      }
+      return { read: 'Never', write: 'Never' }
     }
+    
+    // For 'ask-permission' or if no override, return stored or default
+    return this.authority.permissions[key] || this.getDefaultPermissionValues()
+  }
+  
+  /**
+   * Get the raw stored permission without policy override
+   */
+  getStoredPermission(key: string): Permission | undefined {
+    return this.authority.permissions[key]
   }
 
   /**
@@ -119,17 +137,49 @@ export class GrantAuthorityManager {
   }
 
   /**
+   * Set the default policy (runtime override, doesn't change stored permissions)
+   */
+  setDefaultPolicy(policy: 'share-everything' | 'ask-permission' | 'allow-list'): void {
+    this.defaultPolicy = policy
+    // Don't modify stored permissions - this is just a runtime override
+    if (this.authority.metadata) {
+      this.authority.metadata.updated_at = new Date().toISOString()
+    }
+  }
+
+  /**
+   * Get the default policy
+   */
+  getDefaultPolicy(): 'share-everything' | 'ask-permission' | 'allow-list' {
+    return this.defaultPolicy
+  }
+
+  /**
+   * Get default permission values based on the current policy
+   */
+  private getDefaultPermissionValues(): { read: PermissionValue, write: PermissionValue } {
+    switch (this.defaultPolicy) {
+      case 'share-everything':
+        return { read: 'Allow', write: 'Allow' }
+      case 'ask-permission':
+        return { read: 'Ask', write: 'Ask' }
+      case 'allow-list':
+        return { read: 'Never', write: 'Never' }
+      default:
+        return { read: 'Ask', write: 'Ask' }
+    }
+  }
+
+  /**
    * Initialize default permissions for all context keys
    */
   initializeDefaultPermissions(): void {
     const keys = hcp.getAllKeys()
+    const defaultPerms = this.getDefaultPermissionValues()
     
     for (const key of keys) {
       if (!this.authority.permissions[key]) {
-        this.authority.permissions[key] = {
-          read: 'Ask',
-          write: 'Ask'
-        }
+        this.authority.permissions[key] = { ...defaultPerms }
       }
     }
     

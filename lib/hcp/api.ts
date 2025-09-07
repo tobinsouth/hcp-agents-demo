@@ -41,9 +41,18 @@ export function createHCPAPIHandler() {
           }
 
           case 'authority': {
-            // Get the current grant of authority
+            // Get the current grant of authority with stored permissions
             const authority = grantAuthority.getAuthority()
-            return NextResponse.json(authority)
+            const policy = grantAuthority.getDefaultPolicy()
+            
+            // Include both stored and effective permissions
+            const enhancedAuthority = {
+              ...authority,
+              defaultPolicy: policy,
+              // Keep stored permissions as-is for display
+              storedPermissions: authority.permissions
+            }
+            return NextResponse.json(enhancedAuthority)
           }
 
           case 'agent-context': {
@@ -78,6 +87,12 @@ export function createHCPAPIHandler() {
             }
             const permission = grantAuthority.getPermission(key)
             return NextResponse.json(permission)
+          }
+
+          case 'default-policy': {
+            // Get the default policy
+            const policy = grantAuthority.getDefaultPolicy()
+            return NextResponse.json({ policy })
           }
 
           case 'health': {
@@ -163,6 +178,18 @@ export function createHCPAPIHandler() {
           case 'initialize-permissions': {
             grantAuthority.initializeDefaultPermissions()
             return NextResponse.json({ success: true, message: 'Default permissions initialized' })
+          }
+
+          case 'set-default-policy': {
+            const { policy } = data
+            if (!['share-everything', 'ask-permission', 'allow-list'].includes(policy)) {
+              return NextResponse.json(
+                { error: 'Invalid policy. Must be: share-everything, ask-permission, or allow-list' },
+                { status: 400 }
+              )
+            }
+            grantAuthority.setDefaultPolicy(policy)
+            return NextResponse.json({ success: true, message: 'Default policy set' })
           }
 
           case 'clear-authority': {
