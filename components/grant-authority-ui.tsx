@@ -189,7 +189,7 @@ export function GrantAuthorityUI() {
 
       {/* Permissions List */}
       <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
-        <div className="space-y-2 pr-4">
+        <div className="space-y-2 pr-6">
           {/* Default Grant Policy */}
           <div className="mb-4 p-3 rounded-lg bg-muted/30 border border-border/50">
             <div className="flex items-center justify-between gap-3">
