@@ -42,19 +42,6 @@ export function PreferenceDatabaseUI() {
   if (!context || Object.keys(context).length === 0) {
     return (
       <div className="flex flex-col h-full p-4">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between flex-shrink-0 mb-6"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Archive className="w-4 h-4 text-primary" />
-            </div>
-            <span className="font-medium">Human Context</span>
-          </div>
-        </motion.div>
         
         {/* Empty state */}
         <motion.div 
@@ -140,43 +127,6 @@ export function PreferenceDatabaseUI() {
 
   return (
     <div className="flex flex-col h-full p-4">
-      {/* Header with last updated */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between flex-shrink-0 mb-6"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Archive className="w-4 h-4 text-primary" />
-          </div>
-          <span className="font-medium">Human Context</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <AnimatePresence>
-            {lastUpdated && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-              >
-                <Badge variant="secondary" className="text-xs">
-                  Updated: {lastUpdated.toLocaleTimeString()}
-                </Badge>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={fetchContext}
-            className="h-7 px-2"
-            title="Refresh context"
-          >
-            <RefreshCw className="w-3 h-3" />
-          </Button>
-        </div>
-      </motion.div>
 
       {/* Context Display */}
       <ScrollArea className="flex-1 min-h-0">
@@ -211,6 +161,36 @@ export function PreferenceDatabaseUI() {
               </pre>
             </Card>
           </motion.details>
+          
+          {/* Last updated and refresh at bottom */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-between mt-6 pt-4 border-t border-border/30"
+          >
+            <AnimatePresence>
+              {lastUpdated && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                >
+                  <Badge variant="secondary" className="text-xs">
+                    Last updated: {lastUpdated.toLocaleTimeString()}
+                  </Badge>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={fetchContext}
+              className="h-7 px-2"
+              title="Refresh context"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          </motion.div>
         </motion.div>
       </ScrollArea>
     </div>

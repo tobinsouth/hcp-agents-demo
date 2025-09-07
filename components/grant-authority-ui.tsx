@@ -178,32 +178,6 @@ export function GrantAuthorityUI() {
 
   return (
     <div className="flex flex-col h-full max-h-full overflow-hidden p-4">
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between flex-shrink-0 mb-6"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-primary" />
-          </div>
-          <span className="font-medium">Grant of Authority</span>
-        </div>
-        <div className="flex items-center gap-2">
-          {lastUpdated && (
-            <Badge variant="secondary" className="text-xs">
-              Updated: {lastUpdated.toLocaleTimeString()}
-            </Badge>
-          )}
-          <button
-            onClick={fetchAuthority}
-            className="h-8 sm:h-7 px-2 min-w-[44px] sm:min-w-0 rounded-lg hover:bg-accent/50 transition-all duration-200"
-          >
-            <RefreshCw className="w-3 h-3" />
-          </button>
-        </div>
-      </motion.div>
 
       {/* Permissions List */}
       <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
@@ -211,7 +185,7 @@ export function GrantAuthorityUI() {
           {/* Quick Actions */}
           <Card className="mb-4">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Quick Actions</CardTitle>
+              <CardTitle className="text-sm">Default Values</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex flex-wrap gap-2">
@@ -352,6 +326,26 @@ export function GrantAuthorityUI() {
           </AnimatePresence>
         </div>
       </ScrollArea>
+      
+      {/* Bottom section with last updated and refresh */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between flex-shrink-0 mt-4 pt-4 border-t border-border/30"
+      >
+        {lastUpdated && (
+          <Badge variant="secondary" className="text-xs">
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </Badge>
+        )}
+        <button
+          onClick={fetchAuthority}
+          className="h-7 px-2 rounded-lg hover:bg-accent/50 transition-all duration-200"
+          title="Refresh authority"
+        >
+          <RefreshCw className="w-3 h-3" />
+        </button>
+      </motion.div>
     </div>
   )
 }
