@@ -1,570 +1,371 @@
 "use client"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
   Shield, 
   Lock, 
   Unlock, 
   Settings, 
-  Trash2, 
-  Plus, 
-  Eye, 
-  EyeOff,
-  AlertCircle,
-  CheckCircle,
-  Bot,
-  Server,
-  Smartphone,
-  Globe,
-  ChevronDown,
-  ChevronRight,
-  Bell,
-  FileCheck
+  RefreshCw,
+  Eye,
+  Edit,
+  Check,
+  X
 } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import {
-  subscribeToGrantAuthority,
-  type GrantAuthority,
-  type ClientAccess,
-  type AutonomyLevel,
-  type ContextSection
-} from "@/lib/grant-authority"
 
-// Icon mapping for client types
-const clientTypeIcons = {
-  ai_assistant: Bot,
-  agent: Server,
-  service: Globe,
-  application: Smartphone
+type PermissionValue = 'Allow' | 'Ask' | 'Never' | string
+
+interface Permission {
+  read: PermissionValue
+  write: PermissionValue
 }
 
-// Autonomy level descriptions
-const autonomyDescriptions = {
-  high_security: "Maximum security with approval required for all actions",
-  balanced: "Balanced approach with smart defaults and selective approvals",
-  max_autonomy: "Maximum autonomy with minimal restrictions",
-  custom: "Custom configuration with fine-grained control"
+interface GrantOfAuthority {
+  permissions: Record<string, Permission>
+  metadata?: {
+    created_at: string
+    updated_at: string
+    agent_id?: string
+    context?: string
+  }
 }
 
-// Context section display names
-const sectionDisplayNames: Record<string, string> = {
-  communication_style: "Communication Style",
-  decision_making: "Decision Making",
-  values: "Personal Values",
-  negotiation_priorities: "Negotiation Priorities",
-  constraints: "Constraints & Limits",
-  domains: "Domain Preferences",
-  conversation_patterns: "Conversation Patterns"
+const permissionColors: Record<string, string> = {
+  Allow: "bg-green-500/10 text-green-600 border-green-500/20",
+  Ask: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
+  Never: "bg-red-500/10 text-red-600 border-red-500/20",
+  default: "bg-blue-500/10 text-blue-600 border-blue-500/20"
+}
+
+const permissionIcons: Record<string, React.ReactNode> = {
+  Allow: <Unlock className="w-3 h-3" />,
+  Ask: <Eye className="w-3 h-3" />,
+  Never: <Lock className="w-3 h-3" />,
+  default: <Settings className="w-3 h-3" />
 }
 
 export function GrantAuthorityUI() {
-  const [grantAuthority, setGrantAuthority] = useState<GrantAuthority | null>(null)
-  const [expandedClient, setExpandedClient] = useState<string | null>(null)
-  const [showCustomSettings, setShowCustomSettings] = useState(false)
-  const [customSettingsText, setCustomSettingsText] = useState("")
-  const [selectedLevel, setSelectedLevel] = useState<AutonomyLevel>("balanced")
-  const [showAddClient, setShowAddClient] = useState(false)
-  const [newClient, setNewClient] = useState<Partial<ClientAccess>>({
-    clientName: "",
-    clientType: "ai_assistant",
-    description: "",
-    allowedSections: {}
-  })
+  const [authority, setAuthority] = useState<GrantOfAuthority | null>(null)
+  const [contextKeys, setContextKeys] = useState<string[]>([])
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editingValues, setEditingValues] = useState<Permission | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
     // Fetch initial data
-    fetch("/api/grant-authority")
-      .then((res) => res.json())
-      .then((data) => {
-        setGrantAuthority(data)
-        setSelectedLevel(data.autonomySettings.level)
-        if (data.autonomySettings.customSettings) {
-          setCustomSettingsText(data.autonomySettings.customSettings)
-        }
-      })
+    fetchAuthority()
+    fetchContextKeys()
 
-    // Subscribe to real-time updates
-    const unsubscribe = subscribeToGrantAuthority((updated) => {
-      setGrantAuthority(updated)
-      setSelectedLevel(updated.autonomySettings.level)
-      if (updated.autonomySettings.customSettings) {
-        setCustomSettingsText(updated.autonomySettings.customSettings)
-      }
-    })
+    // Set up polling for updates
+    const interval = setInterval(() => {
+      fetchAuthority()
+      fetchContextKeys()
+    }, 3000)
 
-    return () => unsubscribe()
+    return () => clearInterval(interval)
   }, [])
 
-  const handleAutonomyChange = async (level: AutonomyLevel) => {
-    setSelectedLevel(level)
-    if (level === "custom") {
-      setShowCustomSettings(true)
-      return
-    }
-
-    const settings = {
-      level,
-      requiresApproval: {
-        financial: level === "high_security",
-        legal: level === "high_security",
-        medical: level === "high_security",
-        personal_data: level === "high_security",
-        threshold_amount: level === "high_security" ? 100 : level === "balanced" ? 500 : 10000
-      },
-      notificationPreferences: {
-        before_action: level === "high_security",
-        after_action: level !== "max_autonomy",
-        summary_frequency: level === "high_security" ? "immediate" : level === "balanced" ? "daily" : "weekly"
+  const fetchAuthority = async () => {
+    try {
+      const response = await fetch("/api/hcp?endpoint=authority")
+      if (response.ok) {
+        const data = await response.json()
+        setAuthority(data)
+        if (data.metadata?.updated_at) {
+          setLastUpdated(new Date(data.metadata.updated_at))
+        }
       }
+    } catch (error) {
+      console.error("Error fetching authority:", error)
     }
-
-    await fetch("/api/grant-authority", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "update-autonomy", settings })
-    })
   }
 
-  const handleCustomSettingsSave = async () => {
-    const settings = {
-      level: "custom" as AutonomyLevel,
-      customSettings: customSettingsText,
-      requiresApproval: {
-        financial: true,
-        legal: true,
-        medical: true,
-        personal_data: false,
-        threshold_amount: 250
-      },
-      notificationPreferences: {
-        before_action: false,
-        after_action: true,
-        summary_frequency: "daily" as const
+  const fetchContextKeys = async () => {
+    try {
+      const response = await fetch("/api/hcp?endpoint=context-keys")
+      if (response.ok) {
+        const data = await response.json()
+        setContextKeys(data.keys || [])
       }
+    } catch (error) {
+      console.error("Error fetching context keys:", error)
     }
-
-    await fetch("/api/grant-authority", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "update-autonomy", settings })
-    })
-    
-    setShowCustomSettings(false)
   }
 
-  const handleRemoveClient = async (clientId: string) => {
-    await fetch("/api/grant-authority", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "remove-client", clientId })
-    })
-  }
-
-  const handleAddClient = async () => {
-    const client: ClientAccess = {
-      clientId: `client-${Date.now()}`,
-      clientName: newClient.clientName || "New Client",
-      clientType: newClient.clientType || "ai_assistant",
-      description: newClient.description,
-      allowedSections: newClient.allowedSections || {},
-      createdAt: new Date().toISOString(),
-      accessCount: 0
+  const handlePermissionChange = async (key: string, permission: Permission) => {
+    try {
+      await fetch("/api/hcp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set-permission",
+          data: { key, permission }
+        })
+      })
+      setEditingKey(null)
+      setEditingValues(null)
+      fetchAuthority()
+    } catch (error) {
+      console.error("Error updating permission:", error)
     }
-
-    await fetch("/api/grant-authority", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "add-client", client })
-    })
-
-    setShowAddClient(false)
-    setNewClient({
-      clientName: "",
-      clientType: "ai_assistant",
-      description: "",
-      allowedSections: {}
-    })
   }
 
-  const toggleSectionAccess = (section: string) => {
-    setNewClient(prev => ({
-      ...prev,
-      allowedSections: {
-        ...prev.allowedSections,
-        [section]: !prev.allowedSections?.[section as keyof ContextSection]
-      }
-    }))
+  const handleInitializePermissions = async () => {
+    try {
+      await fetch("/api/hcp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "initialize-permissions"
+        })
+      })
+      fetchAuthority()
+    } catch (error) {
+      console.error("Error initializing permissions:", error)
+    }
   }
 
-  if (!grantAuthority) {
+  const handleSetAllPermissions = async (read: PermissionValue, write: PermissionValue) => {
+    for (const key of contextKeys) {
+      await fetch("/api/hcp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "set-permission",
+          data: { key, permission: { read, write } }
+        })
+      })
+    }
+    fetchAuthority()
+  }
+
+  const startEditing = (key: string) => {
+    const current = authority?.permissions[key] || { read: 'Ask', write: 'Ask' }
+    setEditingKey(key)
+    setEditingValues({ ...current })
+  }
+
+  const cancelEditing = () => {
+    setEditingKey(null)
+    setEditingValues(null)
+  }
+
+  const saveEditing = () => {
+    if (editingKey && editingValues) {
+      handlePermissionChange(editingKey, editingValues)
+    }
+  }
+
+  if (!authority) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-pulse text-muted-foreground">Loading authority settings...</div>
+      <div className="flex flex-col h-full p-4">
+        <div className="flex items-center justify-center flex-1">
+          <div className="text-center">
+            <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground">Loading grant authority...</p>
+          </div>
+        </div>
       </div>
     )
   }
 
+  const allKeys = [...new Set([...Object.keys(authority.permissions), ...contextKeys])]
+
   return (
-    <ScrollArea className="h-full">
-      <div className="p-6 space-y-6">
-        {/* Autonomy Settings */}
-        <Card className="border-border/40 bg-card/50 backdrop-blur">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Shield className="h-5 w-5 text-primary" />
-              Autonomy Level
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Select value={selectedLevel} onValueChange={(v) => handleAutonomyChange(v as AutonomyLevel)}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high_security">
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4" />
-                    High Security
-                  </div>
-                </SelectItem>
-                <SelectItem value="balanced">
-                  <div className="flex items-center gap-2">
-                    <Settings className="h-4 w-4" />
-                    Balanced (Default)
-                  </div>
-                </SelectItem>
-                <SelectItem value="max_autonomy">
-                  <div className="flex items-center gap-2">
-                    <Unlock className="h-4 w-4" />
-                    Max Autonomy
-                  </div>
-                </SelectItem>
-                <SelectItem value="custom">
-                  <div className="flex items-center gap-2">
-                    <FileCheck className="h-4 w-4" />
-                    Custom
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <p className="text-sm text-muted-foreground">
-              {autonomyDescriptions[selectedLevel]}
-            </p>
-
-            {/* Notification Preferences */}
-            {grantAuthority.autonomySettings.notificationPreferences && (
-              <div className="pt-2 space-y-2">
-                <div className="flex items-center gap-2 text-sm">
-                  <Bell className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Notifications:</span>
-                  <Badge variant={grantAuthority.autonomySettings.notificationPreferences.before_action ? "default" : "secondary"}>
-                    {grantAuthority.autonomySettings.notificationPreferences.before_action ? "Before Action" : "After Action"}
-                  </Badge>
-                  <Badge variant="outline">
-                    {grantAuthority.autonomySettings.notificationPreferences.summary_frequency}
-                  </Badge>
-                </div>
-              </div>
-            )}
-
-            {/* Custom Settings Input */}
-            <AnimatePresence>
-              {showCustomSettings && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="space-y-3 overflow-hidden"
-                >
-                  <Textarea
-                    placeholder="Enter custom autonomy rules and constraints..."
-                    value={customSettingsText}
-                    onChange={(e) => setCustomSettingsText(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleCustomSettingsSave}>
-                      Save Custom Settings
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => {
-                        setShowCustomSettings(false)
-                        setSelectedLevel("balanced")
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-
-        {/* Authorized Clients */}
-        <Card className="border-border/40 bg-card/50 backdrop-blur">
-          <CardHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <Server className="h-5 w-5 text-primary" />
-                Authorized Clients
-              </CardTitle>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => setShowAddClient(true)}
-                className="gap-1"
-              >
-                <Plus className="h-4 w-4" />
-                Add Client
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {grantAuthority.authorizedClients.map((client) => {
-              const Icon = clientTypeIcons[client.clientType]
-              const isExpanded = expandedClient === client.clientId
-              
-              return (
-                <motion.div
-                  key={client.clientId}
-                  layout
-                  className="border rounded-lg p-4 space-y-3 bg-background/50"
-                >
-                  <div className="flex items-start justify-between">
-                    <div 
-                      className="flex items-start gap-3 flex-1 cursor-pointer"
-                      onClick={() => setExpandedClient(isExpanded ? null : client.clientId)}
-                    >
-                      <Icon className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{client.clientName}</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {client.clientType}
-                          </Badge>
-                        </div>
-                        {client.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {client.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <span>Access Count: {client.accessCount || 0}</span>
-                          {client.lastAccessed && (
-                            <>
-                              <span>•</span>
-                              <span>Last: {new Date(client.lastAccessed).toLocaleDateString()}</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleRemoveClient(client.clientId)}
-                      className="ml-2"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pt-3 border-t space-y-3">
-                          <div className="space-y-2">
-                            <span className="text-sm font-medium">Allowed Context Sections:</span>
-                            <div className="flex flex-wrap gap-2">
-                              {Object.entries(client.allowedSections).map(([section, allowed]) => {
-                                if (section === "domains" && allowed && typeof allowed === "object") {
-                                  return Object.entries(allowed).map(([domain, domainAllowed]) => (
-                                    domainAllowed && (
-                                      <Badge key={`domain-${domain}`} variant="outline" className="gap-1">
-                                        <CheckCircle className="h-3 w-3" />
-                                        {domain}
-                                      </Badge>
-                                    )
-                                  ))
-                                }
-                                return allowed && (
-                                  <Badge key={section} variant="outline" className="gap-1">
-                                    <CheckCircle className="h-3 w-3" />
-                                    {sectionDisplayNames[section] || section}
-                                  </Badge>
-                                )
-                              })}
-                            </div>
-                          </div>
-
-                          {client.restrictions && client.restrictions.length > 0 && (
-                            <div className="space-y-2">
-                              <span className="text-sm font-medium">Restrictions:</span>
-                              <div className="space-y-1">
-                                {client.restrictions.map((restriction, i) => (
-                                  <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                    <AlertCircle className="h-3 w-3 mt-0.5 text-yellow-500" />
-                                    <span>{restriction}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {client.expiresAt && (
-                            <div className="text-sm text-muted-foreground">
-                              Expires: {new Date(client.expiresAt).toLocaleDateString()}
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )
-            })}
-
-            {grantAuthority.authorizedClients.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground">
-                <Server className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No authorized clients yet</p>
-                <p className="text-sm">Add clients to grant them access to your context</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Global Restrictions */}
-        {grantAuthority.globalRestrictions && grantAuthority.globalRestrictions.length > 0 && (
-          <Card className="border-border/40 bg-card/50 backdrop-blur">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <AlertCircle className="h-5 w-5 text-primary" />
-                Global Restrictions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {grantAuthority.globalRestrictions.map((restriction, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <Lock className="h-4 w-4 text-muted-foreground mt-0.5" />
-                    <span>{restriction}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Add Client Modal */}
-        <AnimatePresence>
-          {showAddClient && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setShowAddClient(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-card border rounded-lg p-6 max-w-md w-full space-y-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-lg font-semibold">Add New Client</h3>
-                
-                <div className="space-y-3">
-                  <div>
-                    <label className="text-sm font-medium">Client Name</label>
-                    <Input
-                      placeholder="e.g., Shopping Assistant"
-                      value={newClient.clientName}
-                      onChange={(e) => setNewClient(prev => ({ ...prev, clientName: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Client Type</label>
-                    <Select 
-                      value={newClient.clientType}
-                      onValueChange={(v) => setNewClient(prev => ({ ...prev, clientType: v as any }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="ai_assistant">AI Assistant</SelectItem>
-                        <SelectItem value="agent">Agent</SelectItem>
-                        <SelectItem value="service">Service</SelectItem>
-                        <SelectItem value="application">Application</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium">Description</label>
-                    <Textarea
-                      placeholder="What will this client do?"
-                      value={newClient.description}
-                      onChange={(e) => setNewClient(prev => ({ ...prev, description: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Allowed Sections</label>
-                    <div className="space-y-2">
-                      {Object.keys(sectionDisplayNames).map(section => {
-                        const value = newClient.allowedSections?.[section as keyof ContextSection]
-                        const isChecked = section === 'domains' ? !!value && typeof value === 'object' : !!value
-                        return (
-                          <label key={section} className="flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleSectionAccess(section)}
-                              className="rounded"
-                            />
-                            <span className="text-sm">{sectionDisplayNames[section]}</span>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button onClick={handleAddClient} className="flex-1">
-                    Add Client
-                  </Button>
-                  <Button variant="outline" onClick={() => setShowAddClient(false)} className="flex-1">
-                    Cancel
-                  </Button>
-                </div>
-              </motion.div>
-            </motion.div>
+    <div className="flex flex-col h-full p-4">
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between flex-shrink-0 mb-6"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Shield className="w-4 h-4 text-primary" />
+          </div>
+          <span className="font-medium">Grant of Authority</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {lastUpdated && (
+            <Badge variant="secondary" className="text-xs">
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </Badge>
           )}
-        </AnimatePresence>
-      </div>
-    </ScrollArea>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={fetchAuthority}
+            className="h-7 px-2"
+          >
+            <RefreshCw className="w-3 h-3" />
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Quick Actions */}
+      <Card className="mb-4">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleInitializePermissions}
+            >
+              Initialize All Keys
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleSetAllPermissions('Allow', 'Never')}
+            >
+              Read-Only
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleSetAllPermissions('Allow', 'Allow')}
+            >
+              Full Access
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => handleSetAllPermissions('Never', 'Never')}
+            >
+              Block All
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Permissions List */}
+      <ScrollArea className="flex-1">
+        <div className="space-y-2">
+          <AnimatePresence>
+            {allKeys.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">No context keys available yet</p>
+                  <p className="text-sm text-muted-foreground mt-2">Add data to context to see permissions</p>
+                </CardContent>
+              </Card>
+            ) : (
+              allKeys.map((key, index) => {
+                const permission = authority.permissions[key] || { read: 'Ask', write: 'Ask' }
+                const isEditing = editingKey === key
+                
+                return (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
+                    <Card className="hover:shadow-sm transition-shadow">
+                      <CardContent className="py-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{key}</p>
+                          </div>
+                          
+                          {isEditing && editingValues ? (
+                            <div className="flex items-center gap-2">
+                              <Select
+                                value={editingValues.read}
+                                onValueChange={(value) => 
+                                  setEditingValues({ ...editingValues, read: value as PermissionValue })
+                                }
+                              >
+                                <SelectTrigger className="w-24 h-7 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Allow">Allow</SelectItem>
+                                  <SelectItem value="Ask">Ask</SelectItem>
+                                  <SelectItem value="Never">Never</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <Select
+                                value={editingValues.write}
+                                onValueChange={(value) => 
+                                  setEditingValues({ ...editingValues, write: value as PermissionValue })
+                                }
+                              >
+                                <SelectTrigger className="w-24 h-7 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Allow">Allow</SelectItem>
+                                  <SelectItem value="Ask">Ask</SelectItem>
+                                  <SelectItem value="Never">Never</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={saveEditing}
+                              >
+                                <Check className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={cancelEditing}
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${permissionColors[permission.read] || permissionColors.default}`}
+                              >
+                                {permissionIcons[permission.read] || permissionIcons.default}
+                                <span className="ml-1">Read: {permission.read}</span>
+                              </Badge>
+                              
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs ${permissionColors[permission.write] || permissionColors.default}`}
+                              >
+                                {permissionIcons[permission.write] || permissionIcons.default}
+                                <span className="ml-1">Write: {permission.write}</span>
+                              </Badge>
+                              
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 w-7 p-0"
+                                onClick={() => startEditing(key)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )
+              })
+            )}
+          </AnimatePresence>
+        </div>
+      </ScrollArea>
+    </div>
   )
 }

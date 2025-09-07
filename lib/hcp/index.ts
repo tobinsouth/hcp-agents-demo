@@ -1,61 +1,27 @@
 /**
- * Human Context Protocol (HCP) Library
+ * Human Context Protocol (HCP) - Simplified
  * 
- * Main entry point for the HCP system
+ * Main entry point for the HCP library
  */
 
-// Export core functionality
+// Core exports
 export { hcp, getHCP, HCPManager } from './core'
+export { grantAuthority, GrantAuthorityManager } from './grant-authority'
+export { agentContext, AgentContextManager } from './agent-context'
 
-// Export all types
-export * from './types'
+// API exports
+export { createHCPRoute, createHCPAPIHandler } from './api'
 
-// Export adapters for backward compatibility
-export {
-  // Preferences adapter
-  getPreferences,
-  updatePreferences,
-  subscribeToPreferences,
-  clearPreferences,
-  
-  // Human context adapter
-  getHumanContext,
-  getFilteredHumanContext,
-  updateHumanContext,
-  getAccessLog,
-  clearHumanContext,
-  getContextCompleteness,
-  subscribeToHumanContext,
-  
-  // Grant authority adapter
-  getGrantAuthority,
-  updateGrantAuthority,
-  addAuthorizedClient,
-  removeAuthorizedClient,
-  updateAutonomySettings,
-  checkClientAccess,
-  getFilteredPreferences,
-  resetGrantAuthority,
-  subscribeToGrantAuthority
-} from './adapters'
-
-// Export plugin system
-export { createPlugin, createMiddleware } from './plugins'
-
-// Export API handlers
-export { createHCPAPIHandler, createHCPWebSocketHandler } from './api'
-
-// Export demo data utilities
-export { 
-  loadDemoData, 
-  getDemoSummary, 
-  DEMO_PREFERENCES,
-  DEMO_CONTEXT,
-  DEMO_CLIENTS,
-  DEMO_SCENARIOS,
-  DEMO_DOMAINS,
-  DEFAULT_AUTONOMY 
-} from './demo-data'
+// Type exports
+export type {
+  HCPContext,
+  PermissionValue,
+  Permission,
+  GrantOfAuthority,
+  AgentContext,
+  HCPAPIRequest,
+  HCPAPIResponse
+} from './types'
 
 // Default export
 import { hcp } from './core'

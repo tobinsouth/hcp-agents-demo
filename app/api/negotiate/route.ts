@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { getPreferences } from "@/lib/hcp"
+// Simple wrapper function for getting context
+async function getContext() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  const response = await fetch(baseUrl + '/api/hcp?endpoint=context')
+  if (response.ok) {
+    return await response.json()
+  }
+  return {}
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +24,11 @@ export async function POST(req: NextRequest) {
     if (agent === "my_agent") {
       // Use provided system prompt or build from preferences
       if (systemPrompt) {
-        const preferences = getPreferences()
-        finalSystemPrompt = `${systemPrompt}\n\nCurrent Preferences Database:\n${JSON.stringify(preferences, null, 2)}\n\nNegotiation Context: ${context}`
+        const contextData = await getContext()
+        finalSystemPrompt = `${systemPrompt}\n\nCurrent Context:\n${JSON.stringify(contextData, null, 2)}\n\nNegotiation Context: ${context}`
       } else {
-        const preferences = getPreferences()
-        finalSystemPrompt = buildMyAgentPrompt(preferences, context)
+        const contextData = await getContext()
+        finalSystemPrompt = buildMyAgentPrompt(contextData, context)
       }
     } else {
       // Use provided system prompt for opponent

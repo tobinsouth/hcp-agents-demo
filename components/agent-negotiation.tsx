@@ -11,8 +11,43 @@ import { PreferenceDatabaseUI } from "./preference-database-ui"
 import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
-import { updatePreferences, updateGrantAuthority, updateAutonomySettings } from "@/lib/hcp"
 import { cn } from "@/lib/utils"
+
+// Simplified API wrapper functions
+const updatePreferences = async (preferences: any) => {
+  await fetch('/api/hcp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update-context',
+      data: preferences
+    })
+  })
+}
+
+const updateGrantAuthority = async (settings: any) => {
+  // For now, we'll store this in the context as well
+  await fetch('/api/hcp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update-context',
+      data: { grantAuthority: settings }
+    })
+  })
+}
+
+const updateAutonomySettings = async (settings: any) => {
+  // Store autonomy settings in context
+  await fetch('/api/hcp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update-context',
+      data: { autonomySettings: settings }
+    })
+  })
+}
 
 const OPENROUTER_MODELS = [
   { id: "openai/gpt-4o-mini", name: "GPT-4o Mini (Default)" },

@@ -9,4 +9,4 @@
 import { createHCPRoute } from '@/lib/hcp/api'
 
 // Export the unified HCP route handlers
-export const { GET, POST, DELETE } = createHCPRoute()
+export const { GET, POST } = createHCPRoute()

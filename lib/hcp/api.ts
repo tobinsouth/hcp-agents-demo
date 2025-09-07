@@ -1,34 +1,14 @@
 /**
- * HCP API Handlers
+ * HCP API Handlers - Simplified
  * 
- * Provides HTTP and WebSocket API handlers for the HCP system
+ * Provides HTTP API handlers for the simplified HCP system
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { hcp } from './core'
-import type { HCPAPIRequest, HCPAPIResponse, HCPAccessRequest } from './types'
-import { 
-  getPreferences,
-  updatePreferences,
-  getHumanContext,
-  getFilteredHumanContext,
-  updateHumanContext,
-  clearHumanContext,
-  getAccessLog,
-  getContextCompleteness,
-  getGrantAuthority,
-  updateGrantAuthority,
-  addAuthorizedClient,
-  removeAuthorizedClient,
-  updateAutonomySettings,
-  checkClientAccess,
-  getFilteredPreferences,
-  resetGrantAuthority
-} from './adapters'
-
-// ============================================================================
-// HTTP API Handler
-// ============================================================================
+import { grantAuthority } from './grant-authority'
+import { agentContext } from './agent-context'
+import type { HCPAPIRequest, HCPAPIResponse, AgentContext } from './types'
 
 /**
  * Create a unified HCP API handler for Next.js
@@ -41,73 +21,58 @@ export function createHCPAPIHandler() {
     async GET(request: NextRequest): Promise<NextResponse> {
       const { searchParams } = new URL(request.url)
       const endpoint = searchParams.get('endpoint') || 'context'
-      const clientId = searchParams.get('clientId') || 'system'
-      const action = searchParams.get('action')
 
       try {
         switch (endpoint) {
           case 'context': {
-            if (action === 'completeness') {
-              const context = await getFilteredHumanContext(clientId)
-              const completeness = getContextCompleteness(context)
-              return NextResponse.json({ completeness })
-            }
-            
-            const context = clientId === 'system' 
-              ? await getHumanContext(clientId)
-              : await getFilteredHumanContext(clientId)
+            // Get the full HCP context
+            const context = hcp.getContext()
             return NextResponse.json(context)
           }
 
-          case 'preferences': {
-            const preferences = getPreferences()
-            return NextResponse.json(preferences)
-          }
-
           case 'authority': {
-            if (action === 'check-access') {
-              const section = searchParams.get('section')
-              if (section) {
-                const hasAccess = await checkClientAccess(clientId, section)
-                return NextResponse.json({ hasAccess })
-              }
-            }
-            
-            if (action === 'filtered-preferences') {
-              const fullPreferences = getPreferences()
-              const filtered = await getFilteredPreferences(clientId, fullPreferences)
-              return NextResponse.json(filtered)
-            }
-            
-            const authority = getGrantAuthority()
+            // Get the current grant of authority
+            const authority = grantAuthority.getAuthority()
             return NextResponse.json(authority)
           }
 
-          case 'audit': {
-            const log = getAccessLog()
-            return NextResponse.json({ log })
+          case 'agent-context': {
+            // Generate an agent context
+            const agent_id = searchParams.get('agent_id') || undefined
+            const purpose = searchParams.get('purpose') || undefined
+            const includeUserContext = searchParams.get('includeUserContext') === 'true'
+            
+            const context = agentContext.generateAgentContext({
+              agent_id,
+              purpose,
+              includeUserContext
+            })
+            
+            return NextResponse.json(context)
           }
 
-          case 'analytics': {
-            // Access analytics through plugin capability
-            const request: HCPAccessRequest = {
-              clientId: 'system',
-              action: 'execute',
-              capability: 'get-analytics',
-              timestamp: new Date().toISOString()
+          case 'context-keys': {
+            // Get all available context keys
+            const keys = hcp.getAllKeys()
+            return NextResponse.json({ keys })
+          }
+
+          case 'permission': {
+            // Get permission for a specific key
+            const key = searchParams.get('key')
+            if (!key) {
+              return NextResponse.json(
+                { error: 'Key parameter required' },
+                { status: 400 }
+              )
             }
-            
-            const response = await hcp.accessContext(request)
-            if (response.success) {
-              return NextResponse.json(response.data)
-            }
-            return NextResponse.json({ error: 'Analytics not available' }, { status: 500 })
+            const permission = grantAuthority.getPermission(key)
+            return NextResponse.json(permission)
           }
 
           case 'health': {
             return NextResponse.json({
               status: 'healthy',
-              version: hcp.getContext('system').version,
               timestamp: new Date().toISOString()
             })
           }
@@ -133,90 +98,87 @@ export function createHCPAPIHandler() {
     async POST(request: NextRequest): Promise<NextResponse> {
       try {
         const body: HCPAPIRequest = await request.json()
-        const { action, clientId = 'system', data, options } = body
+        const { action, data, agentContext: agentCtx } = body
 
         switch (action) {
           // Context operations
           case 'update-context': {
-            await updateHumanContext(data, clientId, options?.merge !== false)
+            hcp.updateContext(data)
             return NextResponse.json({ success: true, message: 'Context updated' })
           }
 
+          case 'set-context': {
+            hcp.setContext(data)
+            return NextResponse.json({ success: true, message: 'Context set' })
+          }
+
           case 'clear-context': {
-            clearHumanContext()
+            hcp.clearContext()
             return NextResponse.json({ success: true, message: 'Context cleared' })
           }
 
-          // Preference operations
-          case 'update-preferences': {
-            updatePreferences(data)
-            return NextResponse.json({ success: true, message: 'Preferences updated' })
+          case 'set-value': {
+            const { path, value } = data
+            hcp.setValueAtPath(path, value)
+            return NextResponse.json({ success: true, message: 'Value set' })
           }
 
           // Authority operations
-          case 'update-authority': {
-            updateGrantAuthority(data)
-            return NextResponse.json({ success: true })
+          case 'set-authority': {
+            grantAuthority.setAuthority(data)
+            return NextResponse.json({ success: true, message: 'Authority set' })
           }
 
-          case 'add-client': {
-            addAuthorizedClient(data)
-            return NextResponse.json({ success: true })
+          case 'set-permission': {
+            const { key, permission } = data
+            grantAuthority.setPermission(key, permission)
+            return NextResponse.json({ success: true, message: 'Permission set' })
           }
 
-          case 'remove-client': {
-            removeAuthorizedClient(data.clientId)
-            return NextResponse.json({ success: true })
+          case 'set-read-permission': {
+            const { key, value } = data
+            grantAuthority.setReadPermission(key, value)
+            return NextResponse.json({ success: true, message: 'Read permission set' })
           }
 
-          case 'update-autonomy': {
-            updateAutonomySettings(data)
-            return NextResponse.json({ success: true })
+          case 'set-write-permission': {
+            const { key, value } = data
+            grantAuthority.setWritePermission(key, value)
+            return NextResponse.json({ success: true, message: 'Write permission set' })
           }
 
-          case 'reset-authority': {
-            resetGrantAuthority()
-            return NextResponse.json({ success: true })
+          case 'initialize-permissions': {
+            grantAuthority.initializeDefaultPermissions()
+            return NextResponse.json({ success: true, message: 'Default permissions initialized' })
           }
 
-          // Demo operations
-          case 'load-demo': {
-            const { scenario } = data
-            const result = await hcp.loadDemoData(scenario)
-            return NextResponse.json(result)
+          case 'clear-authority': {
+            grantAuthority.clearAuthority()
+            return NextResponse.json({ success: true, message: 'Authority cleared' })
           }
 
-          case 'get-demo-summary': {
-            const { getDemoSummary } = await import('./demo-data')
-            const summary = getDemoSummary()
-            return NextResponse.json(summary)
-          }
-
-          // Plugin operations
-          case 'register-plugin': {
-            const { pluginId } = data
-            // Load and register plugin dynamically
-            // This is simplified - in production, you'd have proper plugin loading
-            return NextResponse.json({ 
-              success: false, 
-              error: 'Dynamic plugin loading not implemented' 
-            })
-          }
-
-          // Direct HCP access (for advanced use cases)
-          case 'access': {
-            const accessRequest: HCPAccessRequest = {
-              clientId,
-              action: data.accessAction || 'read',
-              sections: data.sections,
-              data: data.accessData,
-              capability: data.capability,
-              metadata: data.metadata,
-              timestamp: new Date().toISOString()
+          // Agent context operations
+          case 'generate-agent-authority': {
+            if (!agentCtx) {
+              return NextResponse.json(
+                { error: 'Agent context required' },
+                { status: 400 }
+              )
             }
-            
-            const response = await hcp.accessContext(accessRequest)
-            return NextResponse.json(response)
+            const authority = grantAuthority.generateAuthorityForAgent(agentCtx)
+            return NextResponse.json({ success: true, authority })
+          }
+
+          case 'generate-context-from-keys': {
+            const { keys, agent_id } = data
+            const context = agentContext.generateContextFromKeys(keys, agent_id)
+            return NextResponse.json({ success: true, context })
+          }
+
+          case 'parse-agent-intent': {
+            const { context } = data
+            const intent = agentContext.parseAgentIntent(context)
+            return NextResponse.json({ success: true, intent })
           }
 
           default:
@@ -232,187 +194,9 @@ export function createHCPAPIHandler() {
           { status: 500 }
         )
       }
-    },
-
-    /**
-     * Handle DELETE requests
-     */
-    async DELETE(request: NextRequest): Promise<NextResponse> {
-      const { searchParams } = new URL(request.url)
-      const clientId = searchParams.get('clientId')
-
-      try {
-        if (clientId) {
-          removeAuthorizedClient(clientId)
-          return NextResponse.json({ success: true })
-        }
-
-        return NextResponse.json(
-          { error: 'Client ID required' },
-          { status: 400 }
-        )
-      } catch (error) {
-        console.error('[HCP API] Error in DELETE:', error)
-        return NextResponse.json(
-          { error: error instanceof Error ? error.message : 'Internal server error' },
-          { status: 500 }
-        )
-      }
     }
   }
 }
-
-// ============================================================================
-// WebSocket Handler
-// ============================================================================
-
-/**
- * Create a WebSocket handler for real-time HCP updates
- */
-export function createHCPWebSocketHandler() {
-  return {
-    /**
-     * Handle WebSocket connection
-     */
-    onConnection(ws: any, request: any) {
-      const url = new URL(request.url, `http://${request.headers.host}`)
-      const clientId = url.searchParams.get('clientId') || 'anonymous'
-      
-      console.log(`[HCP WebSocket] Client connected: ${clientId}`)
-
-      // Subscribe to HCP events
-      const handlers = {
-        contextUpdated: (event: any) => {
-          ws.send(JSON.stringify({
-            type: 'context-update',
-            data: event,
-            timestamp: new Date().toISOString()
-          }))
-        },
-        authorityGranted: (event: any) => {
-          ws.send(JSON.stringify({
-            type: 'authority-granted',
-            data: event,
-            timestamp: new Date().toISOString()
-          }))
-        },
-        authorityRevoked: (event: any) => {
-          ws.send(JSON.stringify({
-            type: 'authority-revoked',
-            data: event,
-            timestamp: new Date().toISOString()
-          }))
-        },
-        access: (event: any) => {
-          if (event.clientId === clientId || clientId === 'system') {
-            ws.send(JSON.stringify({
-              type: 'access',
-              data: event,
-              timestamp: new Date().toISOString()
-            }))
-          }
-        },
-        accessDenied: (event: any) => {
-          if (event.clientId === clientId || clientId === 'system') {
-            ws.send(JSON.stringify({
-              type: 'access-denied',
-              data: event,
-              timestamp: new Date().toISOString()
-            }))
-          }
-        }
-      }
-
-      // Register event handlers
-      Object.entries(handlers).forEach(([event, handler]) => {
-        hcp.on(event, handler)
-      })
-
-      // Handle incoming messages
-      ws.on('message', async (message: string) => {
-        try {
-          const data = JSON.parse(message)
-          
-          switch (data.type) {
-            case 'subscribe': {
-              // Client wants to subscribe to specific events
-              ws.send(JSON.stringify({
-                type: 'subscribed',
-                events: data.events || Object.keys(handlers),
-                timestamp: new Date().toISOString()
-              }))
-              break
-            }
-
-            case 'access': {
-              // Client wants to access context
-              const request: HCPAccessRequest = {
-                clientId,
-                action: data.action || 'read',
-                sections: data.sections,
-                data: data.data,
-                capability: data.capability,
-                metadata: data.metadata,
-                timestamp: new Date().toISOString()
-              }
-              
-              const response = await hcp.accessContext(request)
-              ws.send(JSON.stringify({
-                type: 'access-response',
-                requestId: data.requestId,
-                response,
-                timestamp: new Date().toISOString()
-              }))
-              break
-            }
-
-            case 'ping': {
-              ws.send(JSON.stringify({
-                type: 'pong',
-                timestamp: new Date().toISOString()
-              }))
-              break
-            }
-
-            default:
-              ws.send(JSON.stringify({
-                type: 'error',
-                message: `Unknown message type: ${data.type}`,
-                timestamp: new Date().toISOString()
-              }))
-          }
-        } catch (error) {
-          ws.send(JSON.stringify({
-            type: 'error',
-            message: error instanceof Error ? error.message : 'Invalid message',
-            timestamp: new Date().toISOString()
-          }))
-        }
-      })
-
-      // Handle disconnection
-      ws.on('close', () => {
-        console.log(`[HCP WebSocket] Client disconnected: ${clientId}`)
-        
-        // Unregister event handlers
-        Object.entries(handlers).forEach(([event, handler]) => {
-          hcp.off(event, handler)
-        })
-      })
-
-      // Send initial state
-      ws.send(JSON.stringify({
-        type: 'connected',
-        clientId,
-        timestamp: new Date().toISOString()
-      }))
-    }
-  }
-}
-
-// ============================================================================
-// Convenience Functions
-// ============================================================================
 
 /**
  * Create a complete HCP API route handler for Next.js App Router
@@ -421,43 +205,6 @@ export function createHCPRoute() {
   const handler = createHCPAPIHandler()
   return {
     GET: handler.GET,
-    POST: handler.POST,
-    DELETE: handler.DELETE
-  }
-}
-
-/**
- * Create middleware for HCP authentication
- */
-export function createHCPAuthMiddleware(options?: {
-  requireAuth?: boolean
-  allowedClients?: string[]
-}) {
-  return async (request: NextRequest) => {
-    const clientId = request.headers.get('x-hcp-client-id') || 'anonymous'
-    
-    if (options?.requireAuth && clientId === 'anonymous') {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      )
-    }
-    
-    if (options?.allowedClients && !options.allowedClients.includes(clientId)) {
-      return NextResponse.json(
-        { error: 'Client not authorized' },
-        { status: 403 }
-      )
-    }
-    
-    // Add client ID to request for downstream use
-    const headers = new Headers(request.headers)
-    headers.set('x-hcp-client-id', clientId)
-    
-    return NextResponse.next({
-      request: {
-        headers
-      }
-    })
+    POST: handler.POST
   }
 }

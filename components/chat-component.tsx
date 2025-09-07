@@ -58,7 +58,7 @@ export function ChatComponent() {
   // Fetch initial context on mount
   useEffect(() => {
     const fetchContext = () => {
-      fetch("/api/human-context")
+      fetch("/api/hcp?endpoint=context")
         .then(res => res.json())
         .then(data => {
           setHumanContext(data)
@@ -76,7 +76,7 @@ export function ChatComponent() {
     
     // Fetch updated context after a short delay to allow backend processing
     const timeoutId = setTimeout(() => {
-      fetch("/api/human-context")
+      fetch("/api/hcp?endpoint=context")
         .then(res => res.json())
         .then(data => {
           // Only update if the context has actually changed
