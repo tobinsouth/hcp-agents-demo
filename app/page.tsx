@@ -275,6 +275,7 @@ export default function HomePage() {
                 ease: [0.16, 1, 0.3, 1]
               }}
               className="flex justify-center"
+              style={{ pointerEvents: 'auto' }}
             >
               <Button
                 onClick={() => setCurrentModal('preferences')}
@@ -377,6 +378,7 @@ export default function HomePage() {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ delay: 0.8, duration: 0.3 }}
                       className="flex justify-center mt-6"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <Button
                         onClick={handleAddAuthority}
@@ -461,6 +463,7 @@ export default function HomePage() {
                       exit={{ opacity: 0, y: -20 }}
                       transition={{ delay: 0.8, duration: 0.3 }}
                       className="flex justify-center mt-6"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <Button
                         onClick={handleSeeInUse}
