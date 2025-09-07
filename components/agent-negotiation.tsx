@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart } from "lucide-react"
+import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, LinkOff } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -509,13 +509,21 @@ export function AgentNegotiation() {
             >
               <Card className="h-full bg-card/80 backdrop-blur-md border-primary/20">
                 <div className="p-2 sm:p-4 lg:p-6 border-b border-border/50">
-                  <div className="flex items-center gap-3 lg:gap-4">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <User className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 lg:gap-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold lg:text-xl" style={{ fontFamily: 'var(--font-crimson)' }}>Your Agent</h3>
+                        <p className="text-xs lg:text-sm text-muted-foreground">Negotiates using your Human Context Protocol</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold lg:text-xl" style={{ fontFamily: 'var(--font-crimson)' }}>Your Agent</h3>
-                      <p className="text-xs lg:text-sm text-muted-foreground">Negotiates on your behalf using your context</p>
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 flex items-center gap-2">
+                        <Link2 className="w-3 h-3 text-green-600" />
+                        <span className="text-xs font-medium text-green-600">HCP Connected</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -557,10 +565,19 @@ export function AgentNegotiation() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium mb-3 block">Human Context</label>
-                      <div className="h-64 bg-gradient-to-b from-muted/20 to-muted/10 rounded-xl overflow-hidden border border-border/30">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Shield className="w-4 h-4 text-primary" />
+                        <label className="text-sm font-medium">Human Context Protocol Access</label>
+                      </div>
+                      <div className="h-64 bg-gradient-to-b from-primary/5 to-primary/10 rounded-xl overflow-hidden border border-primary/20 relative">
+                        <div className="absolute top-2 right-2 z-10">
+                          <div className="px-2 py-1 rounded-md bg-primary/10 backdrop-blur-sm border border-primary/20">
+                            <span className="text-[10px] font-medium text-primary">Protected Context</span>
+                          </div>
+                        </div>
                         <PreferenceDatabaseUI />
                       </div>
+                      <p className="text-xs text-muted-foreground mt-2">Your agent has exclusive access to your personal context and preferences</p>
                     </div>
                   </div>
                 </div>
@@ -654,7 +671,26 @@ export function AgentNegotiation() {
 
               {/* Chat Display */}
               <Card className="flex-1 bg-gradient-to-b from-background/50 to-background/30 backdrop-blur-xl border-border/30 overflow-hidden">
-                <ScrollArea className="h-full p-4 sm:p-6">
+                {/* HCP Status Bar */}
+                <div className="px-4 py-2 border-b border-border/20 bg-gradient-to-r from-primary/5 to-transparent">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-3 h-3 text-primary" />
+                      <span className="text-xs font-medium text-primary">HCP Protected Negotiation</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-muted-foreground">Your Agent: HCP Active</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-muted"></div>
+                        <span className="text-muted-foreground">Opponent: No Access</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <ScrollArea className="h-[calc(100%-40px)] p-4 sm:p-6">
                   {messages.length === 0 ? (
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.95 }}
@@ -677,7 +713,8 @@ export function AgentNegotiation() {
                           <MessageCircle className="w-8 h-8 text-primary" />
                         </motion.div>
                         <p className="text-base font-medium text-foreground mb-2">Ready to negotiate</p>
-                        <p className="text-sm text-muted-foreground">Select a scenario and start the conversation</p>
+                        <p className="text-sm text-muted-foreground mb-1">Your agent will use your Human Context Protocol</p>
+                        <p className="text-xs text-muted-foreground/70">Opponent has no access to your personal data</p>
                       </div>
                     </motion.div>
                   ) : (
@@ -696,23 +733,30 @@ export function AgentNegotiation() {
                             className={`flex ${message.agent === "my_agent" ? "justify-start" : "justify-end"}`}
                           >
                             <div className={`flex gap-3 max-w-[90%] sm:max-w-[80%] lg:max-w-[70%] ${message.agent === "my_agent" ? "flex-row" : "flex-row-reverse"}`}>
-                              <motion.div 
-                                className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                                  message.agent === "my_agent" 
-                                    ? "bg-gradient-to-br from-primary/20 to-primary/10" 
-                                    : "bg-gradient-to-br from-muted to-muted/80"
-                                }`}
-                                whileHover={{ scale: 1.05 }}
-                              >
-                                {message.agent === "my_agent" ? (
-                                  <User className="w-4 h-4 text-primary" />
-                                ) : (
-                                  <Bot className="w-4 h-4 text-foreground/60" />
+                              <div className="relative">
+                                <motion.div 
+                                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                    message.agent === "my_agent" 
+                                      ? "bg-gradient-to-br from-primary/20 to-primary/10" 
+                                      : "bg-gradient-to-br from-muted to-muted/80"
+                                  }`}
+                                  whileHover={{ scale: 1.05 }}
+                                >
+                                  {message.agent === "my_agent" ? (
+                                    <User className="w-4 h-4 text-primary" />
+                                  ) : (
+                                    <Bot className="w-4 h-4 text-foreground/60" />
+                                  )}
+                                </motion.div>
+                                {message.agent === "my_agent" && (
+                                  <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                                    <Link2 className="w-2 h-2 text-green-600" />
+                                  </div>
                                 )}
-                              </motion.div>
+                              </div>
                               <div className="flex flex-col gap-1">
                                 <span className="text-xs text-muted-foreground px-1">
-                                  {message.agent === "my_agent" ? "Your Agent" : "Opponent"} • Round {message.turn}
+                                  {message.agent === "my_agent" ? "Your Agent (HCP)" : "Opponent"} • Round {message.turn}
                                 </span>
                                 <div className={`px-4 py-3 rounded-2xl ${
                                   message.agent === "my_agent" 
@@ -770,13 +814,21 @@ export function AgentNegotiation() {
             >
               <Card className="h-full bg-card/80 backdrop-blur-md border-border/50">
                 <div className="p-2 sm:p-4 lg:p-6 border-b border-border/50">
-                  <div className="flex items-center gap-3 lg:gap-4">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-muted flex items-center justify-center">
-                      <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 lg:gap-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-muted flex items-center justify-center">
+                        <Bot className="w-5 h-5 lg:w-6 lg:h-6 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold lg:text-xl" style={{ fontFamily: 'var(--font-crimson)' }}>Opponent Agent</h3>
+                        <p className="text-xs lg:text-sm text-muted-foreground">Standard AI agent without HCP access</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold lg:text-xl" style={{ fontFamily: 'var(--font-crimson)' }}>Opponent Agent</h3>
-                      <p className="text-xs lg:text-sm text-muted-foreground">AI that negotiates against you</p>
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 flex items-center gap-2">
+                        <LinkOff className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs font-medium text-muted-foreground">No HCP Access</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -801,7 +853,7 @@ export function AgentNegotiation() {
                       <label className="text-xs font-medium text-muted-foreground mb-2 block">Model Info</label>
                       <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
                         <p className="text-xs text-muted-foreground leading-relaxed">
-                          The opponent agent uses this model to negotiate against your preferences.
+                          The opponent agent operates without access to your Human Context Protocol. It only has the information you explicitly share during negotiation.
                         </p>
                       </div>
                     </div>
