@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -197,14 +196,12 @@ export function GrantAuthorityUI() {
               Updated: {lastUpdated.toLocaleTimeString()}
             </Badge>
           )}
-          <Button
-            size="sm"
-            variant="ghost"
+          <button
             onClick={fetchAuthority}
-            className="h-8 sm:h-7 px-2 min-w-[44px] sm:min-w-0"
+            className="h-8 sm:h-7 px-2 min-w-[44px] sm:min-w-0 rounded-lg hover:bg-accent/50 transition-all duration-200"
           >
             <RefreshCw className="w-3 h-3" />
-          </Button>
+          </button>
         </div>
       </motion.div>
 
@@ -215,38 +212,30 @@ export function GrantAuthorityUI() {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex flex-wrap gap-2">
-            <Button 
-              size="sm" 
-              variant="outline"
+            <button 
               onClick={handleInitializePermissions}
-              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
+              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
             >
-              Initialize All Keys
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
+              Initialize All
+            </button>
+            <button 
               onClick={() => handleSetAllPermissions('Allow', 'Never')}
-              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
+              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
             >
               Read-Only
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
+            </button>
+            <button 
               onClick={() => handleSetAllPermissions('Allow', 'Allow')}
-              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
+              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
             >
               Full Access
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
+            </button>
+            <button 
               onClick={() => handleSetAllPermissions('Never', 'Never')}
-              className="text-xs sm:text-sm px-2 sm:px-3 py-2 min-h-[40px] sm:min-h-[32px]"
+              className="text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[40px] sm:min-h-[36px] rounded-lg bg-background hover:bg-accent/50 border border-border/50 hover:border-border transition-all duration-200 font-medium"
             >
               Block All
-            </Button>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -315,22 +304,18 @@ export function GrantAuthorityUI() {
                                 </SelectContent>
                               </Select>
                               
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
+                              <button
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0 rounded-lg hover:bg-green-500/10 text-green-600 transition-all duration-200 flex items-center justify-center"
                                 onClick={saveEditing}
                               >
                                 <Check className="w-3 h-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
+                              </button>
+                              <button
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0 rounded-lg hover:bg-red-500/10 text-red-600 transition-all duration-200 flex items-center justify-center"
                                 onClick={cancelEditing}
                               >
                                 <X className="w-3 h-3" />
-                              </Button>
+                              </button>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2">
@@ -350,14 +335,12 @@ export function GrantAuthorityUI() {
                                 <span className="ml-1">Write: {permission.write}</span>
                               </Badge>
                               
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0"
+                              <button
+                                className="h-8 w-8 sm:h-7 sm:w-7 p-0 min-w-[32px] sm:min-w-0 rounded-lg hover:bg-accent/50 transition-all duration-200 flex items-center justify-center"
                                 onClick={() => startEditing(key)}
                               >
                                 <Edit className="w-3 h-3" />
-                              </Button>
+                              </button>
                             </div>
                           )}
                         </div>

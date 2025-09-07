@@ -1,7 +1,6 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, ArrowRight, Sparkles, Archive, Network, Shield } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { useState, useEffect, useCallback } from "react"
 import { useVerboseMode } from "@/lib/utils"
 
@@ -241,13 +240,16 @@ export function OnboardingModal({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
                   >
-                    <Button 
+                    <button 
                       onClick={handleClose}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
+                      className="group relative bg-gradient-to-b from-primary to-primary/90 hover:from-primary/95 hover:to-primary/85 text-primary-foreground px-5 sm:px-6 md:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px] shadow-md hover:shadow-lg"
                     >
-                      {actionLabel}
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
+                      <span className="flex items-center justify-center gap-2">
+                        <span>{actionLabel}</span>
+                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </span>
+                      <span className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
+                    </button>
                   </motion.div>
                 </div>
               </div>

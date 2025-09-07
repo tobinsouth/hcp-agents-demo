@@ -1,7 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { ChatComponent } from "@/components/chat-component"
 import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
 import { AgentNegotiation } from "@/components/agent-negotiation"
@@ -277,14 +276,18 @@ export default function HomePage() {
               className="flex justify-center"
               style={{ pointerEvents: 'auto' }}
             >
-              <Button
+              <button
                 onClick={() => setCurrentModal('preferences')}
-                size="lg"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-all duration-300 hover:scale-105 min-h-[44px] sm:min-h-[48px]"
+                className="group relative bg-gradient-to-b from-primary to-primary/90 hover:from-primary/95 hover:to-primary/85 text-primary-foreground px-6 sm:px-8 md:px-10 py-4 sm:py-5 rounded-2xl text-sm sm:text-base md:text-lg font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[56px] sm:min-h-[60px] shadow-lg hover:shadow-xl max-w-[280px] sm:max-w-none"
               >
-                See why context and delegation is important
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
+                <span className="flex items-center justify-center gap-2 sm:gap-3">
+                  <span className="block sm:inline leading-tight">
+                    See why context and delegation is important
+                  </span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
+                </span>
+                <span className="absolute inset-0 rounded-2xl ring-1 ring-white/10" />
+              </button>
             </motion.div>
           )}
         </motion.div>
@@ -380,14 +383,16 @@ export default function HomePage() {
                       className="flex justify-center mt-6"
                       style={{ pointerEvents: 'auto' }}
                     >
-                      <Button
+                      <button
                         onClick={handleAddAuthority}
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
+                        className="group relative bg-gradient-to-b from-primary to-primary/90 hover:from-primary/95 hover:to-primary/85 text-primary-foreground px-5 sm:px-6 md:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px] shadow-md hover:shadow-lg"
                       >
-                        Add Grant of Authority
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
+                        <span className="flex items-center justify-center gap-2">
+                          <span>Add Grant of Authority</span>
+                          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                        </span>
+                        <span className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -465,14 +470,16 @@ export default function HomePage() {
                       className="flex justify-center mt-6"
                       style={{ pointerEvents: 'auto' }}
                     >
-                      <Button
+                      <button
                         onClick={handleSeeInUse}
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 sm:px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 text-sm sm:text-base min-h-[44px] sm:min-h-[48px]"
+                        className="group relative bg-gradient-to-b from-primary to-primary/90 hover:from-primary/95 hover:to-primary/85 text-primary-foreground px-5 sm:px-6 md:px-8 py-3.5 sm:py-4 rounded-xl text-sm sm:text-base font-medium transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] min-h-[48px] sm:min-h-[52px] shadow-md hover:shadow-lg"
                       >
-                        See this in use
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
+                        <span className="flex items-center justify-center gap-2">
+                          <span>See this in use</span>
+                          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                        </span>
+                        <span className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
