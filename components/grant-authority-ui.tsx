@@ -185,20 +185,20 @@ export function GrantAuthorityUI() {
   const allKeys = [...new Set([...Object.keys(authority.permissions), ...contextKeys])]
 
   return (
-    <div className="flex flex-col h-full max-h-full overflow-hidden p-4">
+    <div className="flex flex-col h-full p-4">
 
       {/* Permissions List */}
-      <ScrollArea className="flex-1 min-h-0 overflow-y-auto">
-        <div className="space-y-2 pr-6">
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="space-y-2 pr-4">
           {/* Default Grant Policy */}
           <div className="mb-4 p-3 rounded-lg bg-muted/30 border border-border/50">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Settings className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Default Grant of Authority</span>
+              <div className="flex items-center gap-2 min-w-0">
+                <Settings className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <span className="text-sm font-medium truncate">Default Grant of Authority</span>
               </div>
               <Select value={currentPolicy} onValueChange={handlePolicyChange}>
-                <SelectTrigger className="w-[220px] h-8 text-xs">
+                <SelectTrigger className="w-[200px] sm:w-[220px] h-8 text-xs flex-shrink-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
