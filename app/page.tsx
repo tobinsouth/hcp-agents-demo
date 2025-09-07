@@ -198,7 +198,7 @@ export default function HomePage() {
             >
               <span className="text-xs sm:text-xs font-mono tracking-[0.2em] sm:tracking-[0.3em] text-muted-foreground/60 uppercase">
                 <TypewriterText 
-                  text="HUMAN CONTEXT IN AI WORKFLOWS" 
+                  text="PROTECTED AND UNLOCKING CONTEXT FOR AGENTS" 
                   delay={500}
                   speed={40}
                 />
@@ -232,7 +232,7 @@ export default function HomePage() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Human Context &
+                Human Context
               </motion.span>
               <motion.span 
                 className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl mt-4 text-muted-foreground font-normal"
@@ -244,7 +244,7 @@ export default function HomePage() {
                   ease: [0.16, 1, 0.3, 1]
                 }}
               >
-                Delegated Authority
+                to Agent Behavior
               </motion.span>
             </motion.h1>
           </motion.div>
@@ -260,7 +260,7 @@ export default function HomePage() {
             }}
             className="text-sm sm:text-base md:text-lg text-muted-foreground/80 max-w-sm sm:max-w-2xl mx-auto leading-relaxed mb-8"
           >
-            Demonstrating the critical role of delegated authority in AI systems
+            How delegated authority and control unlock the value of personal context in AI interactions
           </motion.p>
 
           {/* Start Demo Button */}
