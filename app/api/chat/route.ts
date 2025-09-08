@@ -1,39 +1,24 @@
 import { streamText, generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import { hcp } from '@/lib/hcp/core'
+import { grantAuthority } from '@/lib/hcp/grant-authority'
+import type { PermissionValue } from '@/lib/hcp/types'
 
-// Enhanced wrapper functions for the HCP API with grant of authority support
+// Direct wrapper functions using HCP modules (no HTTP calls)
 async function getContext() {
-  // Use absolute URL with the request origin
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}/api/hcp?endpoint=context`)
-  if (response.ok) {
-    return await response.json()
-  }
-  return {}
+  return hcp.getContext()
 }
 
 async function getAuthority() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}/api/hcp?endpoint=authority`)
-  if (response.ok) {
-    return await response.json()
-  }
-  return { permissions: {} }
+  return grantAuthority.getAuthority()
 }
 
-async function checkPermission(key: string, operation: 'read' | 'write'): Promise<'Allow' | 'Ask' | 'Never'> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const response = await fetch(`${baseUrl}/api/hcp?endpoint=permission&key=${encodeURIComponent(key)}`)
-  if (response.ok) {
-    const permission = await response.json()
-    return permission[operation] || 'Ask'
-  }
-  return 'Ask'
+async function checkPermission(key: string, operation: 'read' | 'write'): Promise<PermissionValue> {
+  return grantAuthority.checkPermission(key, operation)
 }
 
 async function updateContext(data: any) {
   // Check write permissions for each key being updated
-  const authority = await getAuthority()
   const filteredData: any = {}
   const writeAccess = {
     allowed: [] as string[],
@@ -42,14 +27,14 @@ async function updateContext(data: any) {
   }
   
   for (const [key, value] of Object.entries(data)) {
-    const permission = await checkPermission(key, 'write')
+    const permission = grantAuthority.checkPermission(key, 'write')
     
-    if (permission === 'Allow') {
+    if (grantAuthority.isAllowed(permission)) {
       // Permission granted, include in update
       filteredData[key] = value
       writeAccess.allowed.push(key)
       console.log(`[Context] Write allowed for key: ${key}`)
-    } else if (permission === 'Ask') {
+    } else if (grantAuthority.needsConfirmation(permission)) {
       // Would normally prompt user, but for demo we'll allow with logging
       filteredData[key] = value
       writeAccess.allowed.push(key)
@@ -63,15 +48,7 @@ async function updateContext(data: any) {
   
   // Only update if we have permitted data
   if (Object.keys(filteredData).length > 0) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    await fetch(`${baseUrl}/api/hcp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'update-context',
-        data: filteredData
-      })
-    })
+    hcp.updateContext(filteredData)
   }
   
   return writeAccess
@@ -88,8 +65,8 @@ async function extractPreferencesAndContext(messages: any[]) {
   
   // Filter context based on read permissions before using it for extraction
   for (const [key, value] of Object.entries(fullContext)) {
-    const permission = await checkPermission(key, 'read')
-    if (permission === 'Allow' || permission === 'Ask') {
+    const permission = grantAuthority.checkPermission(key, 'read')
+    if (grantAuthority.isAllowed(permission) || grantAuthority.needsConfirmation(permission)) {
       currentContext[key] = value
     }
   }
@@ -188,11 +165,12 @@ export async function POST(request: Request) {
   // Filter context based on read permissions
   const filteredContext: any = {}
   for (const [key, value] of Object.entries(fullContext)) {
-    const permission = await checkPermission(key, 'read')
-    if (permission === 'Allow') {
+    const permission = grantAuthority.checkPermission(key, 'read')
+    
+    if (grantAuthority.isAllowed(permission)) {
       filteredContext[key] = value
       contextAccess.allowed.push(key)
-    } else if (permission === 'Ask') {
+    } else if (grantAuthority.needsConfirmation(permission)) {
       // Check if user has approved this permission for this session
       if (approvedPermissions.includes(key)) {
         filteredContext[key] = value
