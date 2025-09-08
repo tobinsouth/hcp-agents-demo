@@ -7,9 +7,9 @@
 
 import { createMcpHandler } from 'mcp-handler'
 import { z } from 'zod'
-import { hcp } from '@/lib/hcp/core'
-import { grantAuthority } from '@/lib/hcp/grant-authority'
-import { agentContext } from '@/lib/hcp/agent-context'
+import { hcp } from '@/services/hcp/core/core'
+import { grantAuthority } from '@/services/hcp/auth/grant-authority'
+import { agentContext } from '@/services/hcp/core/agent-context'
 
 const handler = createMcpHandler(
   (server) => {

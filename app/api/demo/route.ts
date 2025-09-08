@@ -5,9 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { hcp } from '@/lib/hcp/core'
-import { grantAuthority } from '@/lib/hcp/grant-authority'
-import { DEMO_CONTEXT, DEMO_PERMISSIONS } from '@/lib/hcp/demo-data'
+import { hcp } from '@/services/hcp/core/core'
+import { grantAuthority } from '@/services/hcp/auth/grant-authority'
+import { DEMO_CONTEXT, DEMO_PERMISSIONS } from '@/demo/data/hcp-demo-data'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

@@ -6,7 +6,7 @@
  * and managing authority grants.
  */
 
-import { createHCPRoute } from '@/lib/hcp/api'
+import { createHCPRoute } from '@/services/hcp/api/handlers'
 
 // Export the unified HCP route handlers
 export const { GET, POST } = createHCPRoute()

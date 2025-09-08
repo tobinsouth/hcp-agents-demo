@@ -1,15 +1,15 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Card } from "@/components/ui/card"
-import { ChatComponent } from "@/components/chat-component"
-import { PreferenceDatabaseUI } from "@/components/preference-database-ui"
-import { AgentNegotiation } from "@/components/agent-negotiation"
-import { GrantAuthorityUI } from "@/components/grant-authority-ui"
-import { OnboardingModal } from "@/components/onboarding-modal"
-import { MCPComponent } from "@/components/mcp-component"
+import { Card } from "@/frontend/components/core/ui/card"
+import { ChatComponent } from "@/services/chat/components/chat-component"
+import { PreferenceDatabaseUI } from "@/frontend/components/hcp/preference-database-ui"
+import { AgentNegotiation } from "@/frontend/components/agents/agent-negotiation"
+import { GrantAuthorityUI } from "@/frontend/components/hcp/grant-authority-ui"
+import { OnboardingModal } from "@/demo/components/onboarding-modal"
+import { MCPComponent } from "@/services/mcp/core/mcp-component"
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion"
 import { ArrowDown, ArrowRight, Sparkles, Archive, Network, Shield, Workflow } from "lucide-react"
-import { useDemoInitialization } from "@/hooks/use-demo-initialization"
+import { useDemoInitialization } from "@/frontend/hooks/use-demo-initialization"
 
 // Typewriter component
 function TypewriterText({ text, delay = 0, speed = 80 }: { text: string; delay?: number; speed?: number }) {
