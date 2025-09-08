@@ -178,9 +178,9 @@ export function GrantAuthorityUI() {
 
   if (!authority) {
     return (
-      <div className="flex flex-col h-full p-3 sm:p-6 bg-gradient-to-b from-slate-50/30 via-white to-slate-50/20">
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="space-y-4 pr-2 sm:pr-4 animate-pulse">
+      <div className="flex flex-col h-full p-2 sm:p-3 md:p-6 bg-gradient-to-b from-slate-50/30 via-white to-slate-50/20 overflow-hidden">
+        <ScrollArea className="flex-1 min-h-0 w-full">
+          <div className="space-y-3 sm:space-y-4 pr-1 sm:pr-2 md:pr-4 w-full min-w-0 animate-pulse">
             {/* Skeleton for default policy */}
             <div className="mb-6 p-5 rounded-xl bg-gradient-to-br from-slate-100/50 to-slate-200/30 border border-slate-200/40">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -437,54 +437,54 @@ export function GrantAuthorityUI() {
                               </div>
                               
                               {/* Action buttons */}
-                              <div className="flex gap-3 pt-2">
+                              <div className="flex gap-2 sm:gap-3 pt-2 min-w-0">
                                 <button
-                                  className="flex-1 h-11 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                                  className="flex-1 h-10 sm:h-11 px-2 sm:px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 hover:-translate-y-0.5 min-w-0"
                                   onClick={saveEditing}
                                 >
-                                  <Check className="w-4 h-4" />
-                                  <span>Save Changes</span>
+                                  <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="text-xs sm:text-sm truncate">Save</span>
                                 </button>
                                 <button
-                                  className="flex-1 h-11 px-4 rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 font-semibold shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5"
+                                  className="flex-1 h-10 sm:h-11 px-2 sm:px-4 rounded-xl bg-gradient-to-r from-slate-100 to-slate-200 hover:from-slate-200 hover:to-slate-300 text-slate-700 font-semibold shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 hover:-translate-y-0.5 min-w-0"
                                   onClick={cancelEditing}
                                 >
-                                  <X className="w-4 h-4" />
-                                  <span>Cancel</span>
+                                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
+                                  <span className="text-xs sm:text-sm truncate">Cancel</span>
                                 </button>
                               </div>
                             </div>
                           ) : (
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3 w-full min-w-0">
                               {/* Permission badges - stacked on mobile, inline on desktop */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className={`flex items-center justify-between p-3 rounded-xl border shadow-sm ${permissionBoxColors[permission.read] || permissionBoxColors.default} ${isOverridden ? 'opacity-70' : ''}`}>
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-md bg-white/60">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 min-w-0">
+                                <div className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl border shadow-sm min-w-0 ${permissionBoxColors[permission.read] || permissionBoxColors.default} ${isOverridden ? 'opacity-70' : ''}`}>
+                                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                    <div className="p-0.5 sm:p-1 rounded-md bg-white/60 flex-shrink-0">
                                       {permissionIcons[permission.read] || permissionIcons.default}
                                     </div>
                                     <span className="text-xs font-semibold text-slate-600">Read</span>
                                   </div>
                                   <Badge 
                                     variant="outline" 
-                                    className={`text-xs font-medium px-2.5 py-1 shadow-sm ${permissionColors[permission.read] || permissionColors.default}`}
+                                    className={`text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 shadow-sm flex-shrink-0 ${permissionColors[permission.read] || permissionColors.default}`}
                                   >
-                                    <span>{permission.read}</span>
+                                    <span className="truncate max-w-[60px] sm:max-w-none">{permission.read}</span>
                                   </Badge>
                                 </div>
                                 
-                                <div className={`flex items-center justify-between p-3 rounded-xl border shadow-sm ${permissionBoxColors[permission.write] || permissionBoxColors.default} ${isOverridden ? 'opacity-70' : ''}`}>
-                                  <div className="flex items-center gap-2">
-                                    <div className="p-1 rounded-md bg-white/60">
+                                <div className={`flex items-center justify-between p-2.5 sm:p-3 rounded-xl border shadow-sm min-w-0 ${permissionBoxColors[permission.write] || permissionBoxColors.default} ${isOverridden ? 'opacity-70' : ''}`}>
+                                  <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                                    <div className="p-0.5 sm:p-1 rounded-md bg-white/60 flex-shrink-0">
                                       {permissionIcons[permission.write] || permissionIcons.default}
                                     </div>
                                     <span className="text-xs font-semibold text-slate-600">Write</span>
                                   </div>
                                   <Badge 
                                     variant="outline" 
-                                    className={`text-xs font-medium px-2.5 py-1 shadow-sm ${permissionColors[permission.write] || permissionColors.default}`}
+                                    className={`text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 shadow-sm flex-shrink-0 ${permissionColors[permission.write] || permissionColors.default}`}
                                   >
-                                    <span>{permission.write}</span>
+                                    <span className="truncate max-w-[60px] sm:max-w-none">{permission.write}</span>
                                   </Badge>
                                 </div>
                               </div>
@@ -505,23 +505,23 @@ export function GrantAuthorityUI() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-shrink-0 mt-6 pt-5 border-t border-gradient-to-r from-transparent via-slate-200/60 to-transparent"
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 flex-shrink-0 mt-4 sm:mt-6 pt-3 sm:pt-5 border-t border-gradient-to-r from-transparent via-slate-200/60 to-transparent min-w-0"
       >
         {lastUpdated && (
-          <div className="flex items-center gap-2 order-2 sm:order-1">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-400 to-green-400 animate-pulse"></div>
-            <Badge variant="secondary" className="text-xs bg-slate-100/60 text-slate-600 border-slate-200/40 px-2.5 py-1">
+          <div className="flex items-center gap-2 order-2 sm:order-1 min-w-0 overflow-hidden">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-emerald-400 to-green-400 animate-pulse flex-shrink-0"></div>
+            <Badge variant="secondary" className="text-xs bg-slate-100/60 text-slate-600 border-slate-200/40 px-2 sm:px-2.5 py-1 truncate">
               Last updated: {lastUpdated.toLocaleTimeString()}
             </Badge>
           </div>
         )}
         <button
           onClick={fetchAuthority}
-          className="group h-10 sm:h-9 px-4 sm:px-3 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200/40 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-xs order-1 sm:order-2 hover:-translate-y-0.5"
+          className="group h-9 sm:h-10 px-3 sm:px-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 hover:from-slate-100 hover:to-slate-200 border border-slate-200/40 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm order-1 sm:order-2 hover:-translate-y-0.5 flex-shrink-0"
           title="Refresh authority"
         >
-          <RefreshCw className="w-4 h-4 sm:w-3 sm:h-3 text-slate-600 group-hover:rotate-180 transition-transform duration-500" />
-          <span className="sm:hidden font-medium">Refresh</span>
+          <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 group-hover:rotate-180 transition-transform duration-500 flex-shrink-0" />
+          <span className="font-medium">Refresh</span>
         </button>
       </motion.div>
     </div>
