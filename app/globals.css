@@ -12,8 +12,8 @@
   --popover: oklch(0.996 0.003 83);
   --popover-foreground: oklch(0.235 0.019 83);
   
-  /* Deep indigo primary with warm undertones */
-  --primary: oklch(0.385 0.127 265);
+  /* Refined primary: subtle Apple-like blue */
+  --primary: oklch(0.65 0.06 220);
   --primary-foreground: oklch(0.996 0.003 83);
   
   /* Soft warm grays */
@@ -31,7 +31,7 @@
   /* Subtle borders */
   --border: oklch(0.885 0.008 83);
   --input: oklch(0.885 0.008 83);
-  --ring: oklch(0.385 0.127 265);
+  --ring: oklch(0.65 0.06 220);
   
   /* Data visualization palette */
   --chart-1: oklch(0.646 0.222 41.116);
@@ -62,8 +62,8 @@
   --popover: oklch(0.195 0.014 265);
   --popover-foreground: oklch(0.935 0.006 83);
   
-  /* Soft blue-white primary */
-  --primary: oklch(0.785 0.093 232);
+  /* Soft primary in dark: tempered blue for accessibility */
+  --primary: oklch(0.78 0.07 220);
   --primary-foreground: oklch(0.165 0.014 265);
   
   /* Dark mode neutrals */
@@ -81,7 +81,7 @@
   /* Dark borders */
   --border: oklch(0.285 0.012 265);
   --input: oklch(0.285 0.012 265);
-  --ring: oklch(0.785 0.093 232);
+  --ring: oklch(0.78 0.07 220);
   
   /* Dark charts */
   --chart-1: oklch(0.488 0.243 264.376);
