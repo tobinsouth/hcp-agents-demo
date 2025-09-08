@@ -43,7 +43,7 @@ export class GrantAuthorityManager {
   private initializeDemo(): void {
     if (!this.initialized) {
       // Lazy load demo data
-      import('./demo-data').then(({ DEMO_PERMISSIONS }) => {
+      import('../../../demo/data/hcp-demo-data').then(({ DEMO_PERMISSIONS }) => {
         if (Object.keys(this.authority.permissions).length === 0) {
           this.authority.permissions = DEMO_PERMISSIONS
           this.authority.metadata = {

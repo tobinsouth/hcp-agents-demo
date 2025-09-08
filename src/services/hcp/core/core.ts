@@ -35,7 +35,7 @@ export class HCPManager {
   private initializeDemo(): void {
     if (!this.initialized) {
       // Lazy load demo data
-      import('./demo-data').then(({ DEMO_CONTEXT }) => {
+      import('../../../demo/data/hcp-demo-data').then(({ DEMO_CONTEXT }) => {
         if (Object.keys(this.context).length === 0) {
           this.context = DEMO_CONTEXT
           console.log('[HCP] Initialized with demo context')
