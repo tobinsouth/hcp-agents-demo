@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, Link2Off, Eye, EyeOff, Check, AlertCircle } from "lucide-react"
+import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, Link2Off, Eye, EyeOff, Check, AlertCircle, RefreshCw } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -340,32 +340,50 @@ export function AgentNegotiation() {
     negotiation_style: true
   })
   const [accessedData, setAccessedData] = useState<Set<string>>(new Set())
+  const [isSyncing, setIsSyncing] = useState(false)
 
-  // Fetch actual permissions on mount
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        const response = await fetch("/api/hcp?endpoint=authority")
-        if (response.ok) {
-          const data = await response.json()
-          if (data.permissions) {
-            // Map permissions to context access based on read permissions
-            setContextAccess({
-              personal: data.permissions['personal']?.read === 'Allow',
-              shopping_preferences: data.permissions['shopping_preferences']?.read === 'Allow',
-              financial: data.permissions['financial']?.read === 'Allow',
-              health: data.permissions['health']?.read === 'Allow',
-              housing_situation: data.permissions['housing_situation']?.read === 'Allow',
-              negotiation_style: true // Not in permissions, default to true
-            })
-          }
+  // Function to fetch and sync permissions
+  const fetchPermissions = async (showSync = false) => {
+    try {
+      if (showSync) setIsSyncing(true)
+      const response = await fetch("/api/hcp?endpoint=authority")
+      if (response.ok) {
+        const data = await response.json()
+        if (data.permissions) {
+          // Map permissions to context access based on read permissions
+          setContextAccess({
+            personal: data.permissions['personal']?.read === 'Allow',
+            shopping_preferences: data.permissions['shopping_preferences']?.read === 'Allow',
+            financial: data.permissions['financial']?.read === 'Allow',
+            health: data.permissions['health']?.read === 'Allow',
+            housing_situation: data.permissions['housing_situation']?.read === 'Allow',
+            negotiation_style: true // Not in permissions, default to true
+          })
         }
-      } catch (error) {
-        console.error("Error fetching permissions:", error)
+      }
+    } catch (error) {
+      console.error("Error fetching permissions:", error)
+    } finally {
+      if (showSync) {
+        setTimeout(() => setIsSyncing(false), 500) // Show sync indicator briefly
       }
     }
+  }
+
+  // Fetch actual permissions on mount and set up polling
+  useEffect(() => {
+    // Initial fetch
     fetchPermissions()
-  }, [])
+    
+    // Poll every 2 seconds to catch changes from other components
+    const interval = setInterval(() => {
+      if (!isNegotiating) { // Don't poll during active negotiation
+        fetchPermissions()
+      }
+    }, 2000)
+    
+    return () => clearInterval(interval)
+  }, [isNegotiating])
 
   // Update everything when scenario changes
   useEffect(() => {
@@ -384,6 +402,9 @@ export function AgentNegotiation() {
       updateGrantAuthority({
         globalRestrictions: scenario.grantAuthoritySettings.globalRestrictions
       })
+      
+      // Re-fetch permissions to ensure we have the latest
+      fetchPermissions(true) // Show sync indicator
     }
   }, [selectedScenario])
 
@@ -582,48 +603,68 @@ export function AgentNegotiation() {
                         <div className="flex items-center gap-2">
                           <Shield className="w-4 h-4 text-primary" />
                           <label className="text-sm font-medium">Human Context Protocol Access</label>
+                          {isSyncing && (
+                            <motion.div
+                              animate={{ rotate: 360 }}
+                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            >
+                              <RefreshCw className="w-3 h-3 text-primary" />
+                            </motion.div>
+                          )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={async () => {
-                            const allEnabled = Object.values(contextAccess).every(v => v)
-                            const newValue = !allEnabled
-                            setContextAccess({
-                              personal: newValue,
-                              shopping_preferences: newValue,
-                              financial: newValue,
-                              health: newValue,
-                              housing_situation: newValue,
-                              negotiation_style: newValue
-                            })
-                            // Update all backend permissions
-                            const keys = ['personal', 'shopping_preferences', 'financial', 'health', 'housing_situation']
-                            for (const key of keys) {
-                              try {
-                                await fetch("/api/hcp", {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({
-                                    action: "set-permission",
-                                    data: { 
-                                      key,
-                                      permission: { 
-                                        read: newValue ? 'Allow' : 'Never',
-                                        write: 'Never'
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => fetchPermissions(true)}
+                            disabled={isSyncing || isNegotiating}
+                            className="h-7 px-2"
+                            title="Sync with Grant Authority"
+                          >
+                            <RefreshCw className={cn("w-3 h-3", isSyncing && "animate-spin")} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              const allEnabled = Object.values(contextAccess).every(v => v)
+                              const newValue = !allEnabled
+                              setContextAccess({
+                                personal: newValue,
+                                shopping_preferences: newValue,
+                                financial: newValue,
+                                health: newValue,
+                                housing_situation: newValue,
+                                negotiation_style: newValue
+                              })
+                              // Update all backend permissions
+                              const keys = ['personal', 'shopping_preferences', 'financial', 'health', 'housing_situation']
+                              for (const key of keys) {
+                                try {
+                                  await fetch("/api/hcp", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                      action: "set-permission",
+                                      data: { 
+                                        key,
+                                        permission: { 
+                                          read: newValue ? 'Allow' : 'Never',
+                                          write: 'Never'
+                                        }
                                       }
-                                    }
+                                    })
                                   })
-                                })
-                              } catch (error) {
-                                console.error("Error updating permission:", error)
+                                } catch (error) {
+                                  console.error("Error updating permission:", error)
+                                }
                               }
-                            }
-                          }}
-                          className="h-7 px-2 text-xs"
-                        >
-                          {Object.values(contextAccess).every(v => v) ? 'Disable All' : 'Enable All'}
-                        </Button>
+                            }}
+                            className="h-7 px-2 text-xs"
+                          >
+                            {Object.values(contextAccess).every(v => v) ? 'Disable All' : 'Enable All'}
+                          </Button>
+                        </div>
                       </div>
                       
                       {/* Access Control Checkboxes */}
