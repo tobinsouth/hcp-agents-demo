@@ -2,20 +2,12 @@ import { streamText, generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { hcp } from '@/lib/hcp/core'
 import { grantAuthority } from '@/lib/hcp/grant-authority'
-import type { PermissionValue } from '@/lib/hcp/types'
 
 // Direct wrapper functions using HCP modules (no HTTP calls)
 async function getContext() {
   return hcp.getContext()
 }
 
-async function getAuthority() {
-  return grantAuthority.getAuthority()
-}
-
-async function checkPermission(key: string, operation: 'read' | 'write'): Promise<PermissionValue> {
-  return grantAuthority.checkPermission(key, operation)
-}
 
 async function updateContext(data: any) {
   // Check write permissions for each key being updated
@@ -153,7 +145,6 @@ export async function POST(request: Request) {
 
   // Get current context for the AI with permission filtering
   const fullContext = await getContext()
-  const authority = await getAuthority()
   
   // Track context access for UI display
   const contextAccess = {

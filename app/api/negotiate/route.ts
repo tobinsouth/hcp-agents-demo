@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+import { hcp } from '@/lib/hcp/core'
 
-// Simple wrapper function for getting context
+// Direct wrapper function using HCP module (no HTTP calls)
 async function getContext() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-  const response = await fetch(baseUrl + '/api/hcp?endpoint=context')
-  if (response.ok) {
-    return await response.json()
-  }
-  return {}
+  return hcp.getContext()
 }
 
 // Analyze which context fields are likely being used based on the response
-function analyzeContextUsage(response: string, contextData: any, scenario: string): string[] {
+function analyzeContextUsage(response: string, _contextData: any, scenario: string): string[] {
   const usedFields: string[] = []
   const responseLower = response.toLowerCase()
   
