@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, LinkOff, Eye, EyeOff, Check, AlertCircle } from "lucide-react"
+import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, Link2Off, Eye, EyeOff, Check, AlertCircle } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -664,7 +664,9 @@ export function AgentNegotiation() {
                                 <config.icon className="w-3 h-3 text-muted-foreground" />
                                 <span className="text-xs font-medium">{config.label}</span>
                                 {accessedData.has(key) && (
-                                  <Eye className="w-3 h-3 text-green-500" title="Accessed during negotiation" />
+                                  <div title="Accessed during negotiation">
+                                    <Eye className="w-3 h-3 text-green-500" />
+                                  </div>
                                 )}
                               </div>
                               <span className="text-[10px] text-muted-foreground">{config.desc}</span>
@@ -966,7 +968,7 @@ export function AgentNegotiation() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="px-3 py-1.5 rounded-full bg-muted/50 border border-border/50 flex items-center gap-2">
-                        <LinkOff className="w-3 h-3 text-muted-foreground" />
+                        <Link2Off className="w-3 h-3 text-muted-foreground" />
                         <span className="text-xs font-medium text-muted-foreground">No HCP Access</span>
                       </div>
                     </div>
