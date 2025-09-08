@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PreferenceDatabaseUI } from "./preference-database-ui"
-import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, LinkOff } from "lucide-react"
+import { Play, Pause, Network, User, Bot, MessageCircle, ChevronDown, ChevronUp, ShoppingCart, Home, Heart, Shield, Link2, LinkOff, Eye, EyeOff, Check, AlertCircle } from "lucide-react"
 import { startNegotiation, type NegotiationMessage } from "@/lib/negotiation/negotiation-manager"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -372,6 +372,15 @@ IMPORTANT: Keep responses helpful and professional - maximum 2-3 sentences. Prov
   }
 ]
 
+interface ContextAccess {
+  personal: boolean
+  financial: boolean
+  housing: boolean
+  preferences: boolean
+  negotiation_priorities: boolean
+  values: boolean
+}
+
 export function AgentNegotiation() {
   const [selectedScenario, setSelectedScenario] = useState<string>("washing-machine")
   const [contextInput, setContextInput] = useState(SCENARIOS[0].context)
@@ -385,6 +394,15 @@ export function AgentNegotiation() {
     opponent: false
   })
   const [expandedContext, setExpandedContext] = useState(false)
+  const [contextAccess, setContextAccess] = useState<ContextAccess>({
+    personal: true,
+    financial: true,
+    housing: true,
+    preferences: true,
+    negotiation_priorities: true,
+    values: true
+  })
+  const [accessedData, setAccessedData] = useState<Set<string>>(new Set())
 
   // Update everything when scenario changes
   useEffect(() => {
@@ -411,15 +429,47 @@ export function AgentNegotiation() {
 
     setIsNegotiating(true)
     setMessages([])
+    setAccessedData(new Set())
+
+    // Filter preferences based on access controls
+    const scenario = SCENARIOS.find(s => s.id === selectedScenario)
+    const filteredPreferences = scenario ? Object.entries(scenario.preferences).reduce((acc, [key, value]) => {
+      if (contextAccess[key as keyof ContextAccess]) {
+        acc[key] = value
+      }
+      return acc
+    }, {} as any) : {}
+
+    // Update preferences with filtered data
+    await updatePreferences(filteredPreferences)
+
+    // Create modified agent prompt based on access
+    const accessRestrictions = Object.entries(contextAccess)
+      .filter(([_, enabled]) => !enabled)
+      .map(([key]) => key)
+    
+    const modifiedAgentPrompt = myAgentSystemPrompt + (accessRestrictions.length > 0 
+      ? `\n\nIMPORTANT: You DO NOT have access to the following context categories: ${accessRestrictions.join(', ')}. Do not reference or use this information.`
+      : '\n\nYou have full access to all user context and preferences.')
 
     try {
       await startNegotiation({
         context: contextInput,
         opponentSystemPrompt: opponentSystemPrompt,
         opponentModel: selectedModel,
-        myAgentSystemPrompt: myAgentSystemPrompt,
+        myAgentSystemPrompt: modifiedAgentPrompt,
         onMessage: (message) => {
           setMessages((prev) => [...prev, message])
+          
+          // Track accessed data based on message content
+          if (message.agent === "my_agent") {
+            Object.keys(contextAccess).forEach(key => {
+              if (contextAccess[key as keyof ContextAccess] && 
+                  message.content.toLowerCase().includes(key.replace('_', ' '))) {
+                setAccessedData(prev => new Set(prev).add(key))
+              }
+            })
+          }
         },
         onComplete: () => {
           setIsNegotiating(false)
@@ -565,19 +615,84 @@ export function AgentNegotiation() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Shield className="w-4 h-4 text-primary" />
-                        <label className="text-sm font-medium">Human Context Protocol Access</label>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4 text-primary" />
+                          <label className="text-sm font-medium">Human Context Protocol Access</label>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const allEnabled = Object.values(contextAccess).every(v => v)
+                            setContextAccess({
+                              personal: !allEnabled,
+                              financial: !allEnabled,
+                              housing: !allEnabled,
+                              preferences: !allEnabled,
+                              negotiation_priorities: !allEnabled,
+                              values: !allEnabled
+                            })
+                          }}
+                          className="h-7 px-2 text-xs"
+                        >
+                          {Object.values(contextAccess).every(v => v) ? 'Disable All' : 'Enable All'}
+                        </Button>
                       </div>
+                      
+                      {/* Access Control Checkboxes */}
+                      <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-muted/10 border border-border/30 mb-3">
+                        {Object.entries({
+                          personal: { label: "Personal Info", icon: User, desc: "Name, occupation, lifestyle" },
+                          financial: { label: "Financial Data", icon: ShoppingCart, desc: "Income, budget, assets" },
+                          housing: { label: "Housing Details", icon: Home, desc: "Location, type, ownership" },
+                          preferences: { label: "Preferences", icon: Heart, desc: "Shopping style, priorities" },
+                          negotiation_priorities: { label: "Negotiation", icon: Network, desc: "Price sensitivity, timeline" },
+                          values: { label: "Values", icon: Shield, desc: "Sustainability, innovation" }
+                        }).map(([key, config]) => (
+                          <div key={key} className="flex items-start gap-2">
+                            <input
+                              type="checkbox"
+                              id={`access-${key}`}
+                              checked={contextAccess[key as keyof ContextAccess]}
+                              onChange={(e) => setContextAccess(prev => ({ ...prev, [key]: e.target.checked }))}
+                              disabled={isNegotiating}
+                              className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                            />
+                            <label htmlFor={`access-${key}`} className="flex-1 cursor-pointer">
+                              <div className="flex items-center gap-1">
+                                <config.icon className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-xs font-medium">{config.label}</span>
+                                {accessedData.has(key) && (
+                                  <Eye className="w-3 h-3 text-green-500" title="Accessed during negotiation" />
+                                )}
+                              </div>
+                              <span className="text-[10px] text-muted-foreground">{config.desc}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                      
                       <div className="h-64 bg-gradient-to-b from-primary/5 to-primary/10 rounded-xl overflow-hidden border border-primary/20 relative">
-                        <div className="absolute top-2 right-2 z-10">
+                        <div className="absolute top-2 right-2 z-10 flex gap-2">
+                          {Object.values(contextAccess).some(v => !v) && (
+                            <div className="px-2 py-1 rounded-md bg-yellow-500/10 backdrop-blur-sm border border-yellow-500/20">
+                              <span className="text-[10px] font-medium text-yellow-600">Partial Access</span>
+                            </div>
+                          )}
                           <div className="px-2 py-1 rounded-md bg-primary/10 backdrop-blur-sm border border-primary/20">
                             <span className="text-[10px] font-medium text-primary">Protected Context</span>
                           </div>
                         </div>
                         <PreferenceDatabaseUI />
                       </div>
-                      <p className="text-xs text-muted-foreground mt-2">Your agent has exclusive access to your personal context and preferences</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {Object.values(contextAccess).every(v => v) 
+                          ? "Full context access enabled - agent can use all your preferences"
+                          : Object.values(contextAccess).some(v => v)
+                          ? "Partial context access - agent will only use selected information"
+                          : "No context access - agent will negotiate without personal information"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -638,6 +753,21 @@ export function AgentNegotiation() {
                       )}
                     </div>
                     
+                    {/* Context Access Warning */}
+                    {!Object.values(contextAccess).every(v => v) && !isNegotiating && (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-xs font-medium text-yellow-600">Limited Context Access</p>
+                          <p className="text-xs text-yellow-600/80 mt-0.5">
+                            {Object.values(contextAccess).some(v => v) 
+                              ? `Your agent will only use selected context categories (${Object.entries(contextAccess).filter(([_, v]) => v).length} of 6 enabled)`
+                              : "Your agent will negotiate without any personal context"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Action Button */}
                     <div className="flex items-center gap-3">
                       <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
@@ -677,11 +807,21 @@ export function AgentNegotiation() {
                     <div className="flex items-center gap-2">
                       <Shield className="w-3 h-3 text-primary" />
                       <span className="text-xs font-medium text-primary">HCP Protected Negotiation</span>
+                      {accessedData.size > 0 && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
+                          <Eye className="w-3 h-3 text-green-600" />
+                          <span className="text-[10px] font-medium text-green-600">
+                            {accessedData.size} context{accessedData.size > 1 ? 's' : ''} accessed
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 text-xs">
                       <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                        <span className="text-muted-foreground">Your Agent: HCP Active</span>
+                        <div className={`w-2 h-2 rounded-full ${Object.values(contextAccess).some(v => v) ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                        <span className="text-muted-foreground">
+                          Your Agent: {Object.values(contextAccess).every(v => v) ? 'Full HCP' : Object.values(contextAccess).some(v => v) ? 'Partial HCP' : 'No HCP'}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-muted"></div>
