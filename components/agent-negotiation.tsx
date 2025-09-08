@@ -113,37 +113,19 @@ Sales Strategy:
 
 IMPORTANT: Keep responses brief and conversational - maximum 2-3 sentences per turn. Focus on finding a solution that works.`,
     preferences: {
-      domains: {
-        appliances: {
-          space_constraints: "27 inches wide x 30 inches deep laundry closet",
-          noise_sensitivity: "high - thin apartment walls",
-          energy_priorities: "high - looking for Energy Star certified",
-          budget_range: "$800-1200",
-          preferred_type: "front-loading",
-          household_size: "2 people",
-          usage_frequency: "weekly loads"
-        },
-        housing: {
-          type: "small San Francisco apartment",
-          location: "San Francisco, CA",
-          living_situation: "rental apartment",
-          space_limitations: "very limited - typical SF apartment"
-        },
-        personal: {
-          income_level: "$95,000/year",
-          occupation: "software developer",
-          lifestyle: "urban professional",
-          shopping_style: "research-driven, value-conscious"
-        }
+      housing_situation: {
+        laundry_constraints: "Apartment has a closet space of exactly 27 inches wide by 30 inches deep with hookups installed. Shared wall with neighbor's bedroom means noise is major concern especially during evening hours.",
+        building_requirements: "1920s building with older electrical system limited to 15-amp circuit for washer. Water pressure fluctuates, and hot water heater is small, so efficiency is crucial.",
+        previous_appliances: "Current 15-year-old top-loader just broke beyond repair, was already too large for space and caused problems. Previously had issues with vibration damaging the old hardwood floors."
       },
-      negotiation_priorities: {
-        price_sensitivity: "medium",
-        timeline_flexibility: "rigid",
-        quality_importance: "important"
+      shopping_preferences: {
+        budget_approach: "Willing to pay more upfront for quality items that will last 5-10 years rather than replacing cheap items frequently. Researches thoroughly before major purchases and reads both professional and user reviews.",
+        environmental_concerns: "Actively seeks Energy Star certified appliances and calculates long-term energy costs. Prefers to buy from companies with transparent sustainability practices and responsible manufacturing.",
+        delivery_requirements: "Needs scheduled delivery windows due to apartment building requirements and prefers white-glove service for large appliances. Building has narrow stairs and no elevator, requiring experienced delivery teams."
       },
-      values: {
-        sustainability: "high",
-        innovation: "proven"
+      negotiation_style: {
+        price_sensitivity: "Will negotiate firmly but fairly, looking for win-win outcomes. More concerned with total value including warranty and service than just lowest initial price.",
+        decision_timeline: "Prefers to take 3-5 days to consider major financial decisions but can move quickly when all requirements are clearly met. Doesn't respond well to high-pressure sales tactics."
       }
     },
     grantAuthoritySettings: {
@@ -217,33 +199,16 @@ Negotiation Strategy:
 
 IMPORTANT: Keep responses professional and concise - maximum 2-3 sentences. Push for commitment but respect their process.`,
     preferences: {
-      domains: {
-        financial: {
-          current_mortgage: "$412,000 balance at 6.8%",
-          home_value: "$650,000",
-          credit_score: "745",
-          payment_history: "perfect - never missed",
-          financial_goals: "reduce monthly payment, cash out for improvements",
-          risk_tolerance: "conservative",
-          monthly_income: "$12,000",
-          total_assets: "$850,000",
-          debt_to_income: "28%"
-        },
-        housing: {
-          type: "single family home",
-          location: "San Francisco Bay Area",
-          ownership_length: "3 years",
-          planned_stay: "10+ years"
-        }
+      financial: {
+        current_mortgage: "Has a 30-year fixed mortgage at 6.8% with Wells Fargo, taken out three years ago for $450,000 when credit score was lower. Currently owes $412,000 with 27 years remaining on the loan.",
+        property_details: "Single-family home in Redwood City worth approximately $650,000 based on recent comparable sales. Planning to stay for at least 10 more years as kids will be in local schools.",
+        financial_goals: "Looking to reduce monthly payment from $2,950 to under $2,600 if possible, and interested in pulling out $30,000 cash for kitchen renovation and solar panel installation.",
+        payment_history: "Perfect payment record on mortgage and all credit accounts for the past five years. Previously had one late payment six years ago during a job transition but has since maintained exemplary credit."
       },
-      decision_making: {
-        risk_tolerance: "conservative",
-        information_needs: "comprehensive",
-        consultation_style: "collaborative"
-      },
-      negotiation_priorities: {
-        price_sensitivity: "high",
-        relationship_focus: "long_term"
+      negotiation_style: {
+        research_approach: "Spends 10-15 hours researching major purchases, reading technical specifications, user forums, and watching YouTube reviews. Creates spreadsheets comparing options before making decisions.",
+        price_sensitivity: "Will negotiate firmly but fairly, looking for win-win outcomes. More concerned with total value including warranty and service than just lowest initial price.",
+        trust_factors: "Values transparency and detailed explanations over sales pitch. Appreciates when salespeople acknowledge product limitations honestly rather than overselling features."
       }
     },
     grantAuthoritySettings: {
@@ -323,29 +288,15 @@ Your Approach:
 
 IMPORTANT: Keep responses helpful and professional - maximum 2-3 sentences. Provide clear information while respecting medical boundaries.`,
     preferences: {
-      domains: {
-        healthcare: {
-          conditions: "BMI 31, pre-diabetes, controlled hypertension",
-          medications_current: "blood pressure medication",
-          physical_limitations: "knee injury - limited high-impact exercise",
-          treatment_goals: "weight loss, diabetes prevention",
-          insurance_status: "covered with prior authorization",
-          concerns: "medication side effects, long-term costs",
-          previous_attempts: "diet and exercise with limited success"
-        },
-        personal: {
-          health_privacy: "very high",
-          medical_decision_style: "requires doctor consultation",
-          information_sharing: "minimal - general categories only"
-        }
+      health: {
+        current_conditions: "BMI of 31 with slow weight gain over past five years, pre-diabetes diagnosis six months ago with A1C of 6.2, and hypertension controlled with lisinopril 10mg daily.",
+        exercise_limitations: "Torn ACL from skiing accident two years ago limits high-impact activities like running. Can do cycling, swimming, and walking but needs to avoid jumping or quick lateral movements.",
+        medical_history: "Family history of Type 2 diabetes on both sides, father had heart attack at age 62. Previous attempts at weight loss through diet alone resulted in yo-yo effect over past three years.",
+        insurance_coverage: "Blue Shield PPO through employer covers weight loss medications with prior authorization after trying lifestyle modifications for 6 months. Has already met $1,500 deductible for the year.",
+        treatment_preferences: "Prefers FDA-approved medications with established safety profiles over newer treatments. Concerned about long-term commitment to medication and wants to understand exit strategy if side effects occur."
       },
-      decision_making: {
-        risk_tolerance: "conservative",
-        information_needs: "comprehensive",
-        consultation_style: "consensus"
-      },
-      values: {
-        transparency: "full"
+      personal: {
+        lifestyle: "Works from home three days a week, enjoys cooking but has a small kitchen, cycles to work when going to the office, and values products that last rather than trendy items."
       }
     },
     grantAuthoritySettings: {
@@ -374,11 +325,11 @@ IMPORTANT: Keep responses helpful and professional - maximum 2-3 sentences. Prov
 
 interface ContextAccess {
   personal: boolean
+  shopping_preferences: boolean
   financial: boolean
-  housing: boolean
-  preferences: boolean
-  negotiation_priorities: boolean
-  values: boolean
+  health: boolean
+  housing_situation: boolean
+  negotiation_style: boolean
 }
 
 export function AgentNegotiation() {
@@ -396,11 +347,11 @@ export function AgentNegotiation() {
   const [expandedContext, setExpandedContext] = useState(false)
   const [contextAccess, setContextAccess] = useState<ContextAccess>({
     personal: true,
+    shopping_preferences: true,
     financial: true,
-    housing: true,
-    preferences: true,
-    negotiation_priorities: true,
-    values: true
+    health: true,
+    housing_situation: true,
+    negotiation_style: true
   })
   const [accessedData, setAccessedData] = useState<Set<string>>(new Set())
 
@@ -627,11 +578,11 @@ export function AgentNegotiation() {
                             const allEnabled = Object.values(contextAccess).every(v => v)
                             setContextAccess({
                               personal: !allEnabled,
+                              shopping_preferences: !allEnabled,
                               financial: !allEnabled,
-                              housing: !allEnabled,
-                              preferences: !allEnabled,
-                              negotiation_priorities: !allEnabled,
-                              values: !allEnabled
+                              health: !allEnabled,
+                              housing_situation: !allEnabled,
+                              negotiation_style: !allEnabled
                             })
                           }}
                           className="h-7 px-2 text-xs"
@@ -643,12 +594,12 @@ export function AgentNegotiation() {
                       {/* Access Control Checkboxes */}
                       <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-muted/10 border border-border/30 mb-3">
                         {Object.entries({
-                          personal: { label: "Personal Info", icon: User, desc: "Name, occupation, lifestyle" },
-                          financial: { label: "Financial Data", icon: ShoppingCart, desc: "Income, budget, assets" },
-                          housing: { label: "Housing Details", icon: Home, desc: "Location, type, ownership" },
-                          preferences: { label: "Preferences", icon: Heart, desc: "Shopping style, priorities" },
-                          negotiation_priorities: { label: "Negotiation", icon: Network, desc: "Price sensitivity, timeline" },
-                          values: { label: "Values", icon: Shield, desc: "Sustainability, innovation" }
+                          personal: { label: "Personal Info", icon: User, desc: "Name, job, lifestyle details" },
+                          shopping_preferences: { label: "Shopping Prefs", icon: ShoppingCart, desc: "Budget, brands, delivery" },
+                          financial: { label: "Financial Data", icon: Shield, desc: "Mortgage, property, goals" },
+                          health: { label: "Health Info", icon: Heart, desc: "Conditions, history, insurance" },
+                          housing_situation: { label: "Housing Details", icon: Home, desc: "Space, building, appliances" },
+                          negotiation_style: { label: "Negotiation", icon: Network, desc: "Research, timing, trust" }
                         }).map(([key, config]) => (
                           <div key={key} className="flex items-start gap-2">
                             <input
