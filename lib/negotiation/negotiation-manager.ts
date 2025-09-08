@@ -10,6 +10,7 @@ export interface NegotiationMessage {
   content: string
   turn: number
   timestamp: Date
+  contextUsed?: string[]
 }
 
 export interface NegotiationConfig {
@@ -18,6 +19,7 @@ export interface NegotiationConfig {
   opponentModel: string
   myAgentSystemPrompt?: string
   maxTurns?: number
+  scenario?: string
   onMessage: (message: NegotiationMessage) => void
   onComplete: () => void
 }
@@ -26,14 +28,14 @@ export interface NegotiationConfig {
  * Starts a negotiation between two AI agents
  */
 export async function startNegotiation(config: NegotiationConfig): Promise<void> {
-  const { context, opponentSystemPrompt, opponentModel, myAgentSystemPrompt, maxTurns = 10, onMessage, onComplete } = config
+  const { context, opponentSystemPrompt, opponentModel, myAgentSystemPrompt, maxTurns = 10, scenario, onMessage, onComplete } = config
 
   const conversationHistory: NegotiationMessage[] = []
   let currentTurn = 1
 
   try {
     // Opponent agent's opening move
-    const opponentResponse = await fetch("/api/negotiate", {
+    const opponentData = await fetch("/api/negotiate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -41,6 +43,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
         context,
         systemPrompt: opponentSystemPrompt,
         model: opponentModel,
+        scenario,
         conversationHistory: [
           {
             role: "user",
@@ -48,11 +51,11 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
           },
         ],
       }),
-    }).then(res => res.json()).then(data => data.text)
+    }).then(res => res.json())
 
     const initialMessage: NegotiationMessage = {
       agent: "opponent_agent",
-      content: opponentResponse,
+      content: opponentData.text,
       turn: currentTurn,
       timestamp: new Date(),
     }
@@ -67,6 +70,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
       const isMyAgentTurn = currentTurn % 2 === 0
 
       let response: string
+      let contextUsed: string[] = []
 
       if (isMyAgentTurn) {
         // My agent's turn
@@ -77,6 +81,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
             agent: "my_agent",
             context,
             systemPrompt: myAgentSystemPrompt,
+            scenario,
             conversationHistory: conversationHistory.map((m) => ({
               role: m.agent === "opponent_agent" ? "user" : "assistant",
               content: m.content,
@@ -85,6 +90,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
         })
         const data = await res.json()
         response = data.text
+        contextUsed = data.contextUsed || []
       } else {
         // Opponent agent's turn
         const res = await fetch("/api/negotiate", {
@@ -95,6 +101,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
             context,
             systemPrompt: opponentSystemPrompt,
             model: opponentModel,
+            scenario,
             conversationHistory: conversationHistory.map((m) => ({
               role: m.agent === "my_agent" ? "user" : "assistant",
               content: m.content,
@@ -110,6 +117,7 @@ export async function startNegotiation(config: NegotiationConfig): Promise<void>
         content: response,
         turn: currentTurn,
         timestamp: new Date(),
+        contextUsed: isMyAgentTurn ? contextUsed : undefined,
       }
 
       conversationHistory.push(message)

@@ -119,13 +119,9 @@ IMPORTANT: Keep responses brief and conversational - maximum 2-3 sentences per t
         previous_appliances: "Current 15-year-old top-loader just broke beyond repair, was already too large for space and caused problems. Previously had issues with vibration damaging the old hardwood floors."
       },
       shopping_preferences: {
-        budget_approach: "Willing to pay more upfront for quality items that will last 5-10 years rather than replacing cheap items frequently. Researches thoroughly before major purchases and reads both professional and user reviews.",
-        environmental_concerns: "Actively seeks Energy Star certified appliances and calculates long-term energy costs. Prefers to buy from companies with transparent sustainability practices and responsible manufacturing.",
+        budget: "Willing to pay more upfront for quality items that will last 5-10 years rather than replacing cheap items frequently. Researches thoroughly before major purchases and reads both professional and user reviews.",
+        brand_preferences: "Strongly prefers companies with good warranty support and customer service reputation. Avoids brands with planned obsolescence and values repairability and long-term parts availability.",
         delivery_requirements: "Needs scheduled delivery windows due to apartment building requirements and prefers white-glove service for large appliances. Building has narrow stairs and no elevator, requiring experienced delivery teams."
-      },
-      negotiation_style: {
-        price_sensitivity: "Will negotiate firmly but fairly, looking for win-win outcomes. More concerned with total value including warranty and service than just lowest initial price.",
-        decision_timeline: "Prefers to take 3-5 days to consider major financial decisions but can move quickly when all requirements are clearly met. Doesn't respond well to high-pressure sales tactics."
       }
     },
     grantAuthoritySettings: {
@@ -204,11 +200,6 @@ IMPORTANT: Keep responses professional and concise - maximum 2-3 sentences. Push
         property_details: "Single-family home in Redwood City worth approximately $650,000 based on recent comparable sales. Planning to stay for at least 10 more years as kids will be in local schools.",
         financial_goals: "Looking to reduce monthly payment from $2,950 to under $2,600 if possible, and interested in pulling out $30,000 cash for kitchen renovation and solar panel installation.",
         payment_history: "Perfect payment record on mortgage and all credit accounts for the past five years. Previously had one late payment six years ago during a job transition but has since maintained exemplary credit."
-      },
-      negotiation_style: {
-        research_approach: "Spends 10-15 hours researching major purchases, reading technical specifications, user forums, and watching YouTube reviews. Creates spreadsheets comparing options before making decisions.",
-        price_sensitivity: "Will negotiate firmly but fairly, looking for win-win outcomes. More concerned with total value including warranty and service than just lowest initial price.",
-        trust_factors: "Values transparency and detailed explanations over sales pitch. Appreciates when salespeople acknowledge product limitations honestly rather than overselling features."
       }
     },
     grantAuthoritySettings: {
@@ -290,13 +281,8 @@ IMPORTANT: Keep responses helpful and professional - maximum 2-3 sentences. Prov
     preferences: {
       health: {
         current_conditions: "BMI of 31 with slow weight gain over past five years, pre-diabetes diagnosis six months ago with A1C of 6.2, and hypertension controlled with lisinopril 10mg daily.",
-        exercise_limitations: "Torn ACL from skiing accident two years ago limits high-impact activities like running. Can do cycling, swimming, and walking but needs to avoid jumping or quick lateral movements.",
         medical_history: "Family history of Type 2 diabetes on both sides, father had heart attack at age 62. Previous attempts at weight loss through diet alone resulted in yo-yo effect over past three years.",
-        insurance_coverage: "Blue Shield PPO through employer covers weight loss medications with prior authorization after trying lifestyle modifications for 6 months. Has already met $1,500 deductible for the year.",
-        treatment_preferences: "Prefers FDA-approved medications with established safety profiles over newer treatments. Concerned about long-term commitment to medication and wants to understand exit strategy if side effects occur."
-      },
-      personal: {
-        lifestyle: "Works from home three days a week, enjoys cooking but has a small kitchen, cycles to work when going to the office, and values products that last rather than trendy items."
+        insurance_coverage: "Blue Shield PPO through employer covers weight loss medications with prior authorization after trying lifestyle modifications for 6 months. Has already met $1,500 deductible for the year."
       }
     },
     grantAuthoritySettings: {
@@ -409,16 +395,16 @@ export function AgentNegotiation() {
         opponentSystemPrompt: opponentSystemPrompt,
         opponentModel: selectedModel,
         myAgentSystemPrompt: modifiedAgentPrompt,
+        scenario: selectedScenario,
         onMessage: (message) => {
           setMessages((prev) => [...prev, message])
           
-          // Track accessed data based on message content
-          if (message.agent === "my_agent") {
-            Object.keys(contextAccess).forEach(key => {
-              if (contextAccess[key as keyof ContextAccess] && 
-                  message.content.toLowerCase().includes(key.replace('_', ' '))) {
-                setAccessedData(prev => new Set(prev).add(key))
-              }
+          // Track accessed data from context usage analysis
+          if (message.agent === "my_agent" && message.contextUsed) {
+            message.contextUsed.forEach(field => {
+              // Extract the top-level category from field path (e.g., "housing_situation" from "housing_situation.laundry_constraints")
+              const category = field.split('.')[0]
+              setAccessedData(prev => new Set(prev).add(category))
             })
           }
         },
@@ -857,6 +843,18 @@ export function AgentNegotiation() {
                                     : "bg-muted/60 text-foreground"
                                 }`}>
                                   <p className="text-sm leading-relaxed">{message.content}</p>
+                                  {message.agent === "my_agent" && message.contextUsed && message.contextUsed.length > 0 && (
+                                    <div className="mt-2 pt-2 border-t border-border/20">
+                                      <div className="flex flex-wrap gap-1">
+                                        <span className="text-[10px] text-muted-foreground mr-1">Context used:</span>
+                                        {message.contextUsed.map((field, idx) => (
+                                          <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary">
+                                            {field.replace(/_/g, ' ').replace(/\./g, ' → ')}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

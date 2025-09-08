@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { createOpenRouter } from "@openrouter/ai-sdk-provider"
+
 // Simple wrapper function for getting context
 async function getContext() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -11,23 +12,87 @@ async function getContext() {
   return {}
 }
 
+// Analyze which context fields are likely being used based on the response
+function analyzeContextUsage(response: string, contextData: any, scenario: string): string[] {
+  const usedFields: string[] = []
+  const responseLower = response.toLowerCase()
+  
+  // Scenario-specific analysis
+  if (scenario === 'washing-machine') {
+    // Check for housing/space references
+    if (responseLower.includes('27') || responseLower.includes('inch') || responseLower.includes('space') || responseLower.includes('closet')) {
+      usedFields.push('housing_situation.laundry_constraints')
+    }
+    if (responseLower.includes('electrical') || responseLower.includes('15-amp') || responseLower.includes('water pressure')) {
+      usedFields.push('housing_situation.building_requirements')
+    }
+    if (responseLower.includes('energy') || responseLower.includes('star') || responseLower.includes('efficient')) {
+      usedFields.push('shopping_preferences.brand_preferences')
+    }
+    if (responseLower.includes('deliver') || responseLower.includes('stairs') || responseLower.includes('install')) {
+      usedFields.push('shopping_preferences.delivery_requirements')
+    }
+    if (responseLower.includes('budget') || responseLower.includes('$') || responseLower.includes('price') || responseLower.includes('cost')) {
+      usedFields.push('shopping_preferences.budget')
+    }
+  } else if (scenario === 'home-loan') {
+    // Check for financial references
+    if (responseLower.includes('mortgage') || responseLower.includes('6.8%') || responseLower.includes('412') || responseLower.includes('wells fargo')) {
+      usedFields.push('financial.current_mortgage')
+    }
+    if (responseLower.includes('650') || responseLower.includes('redwood') || responseLower.includes('property')) {
+      usedFields.push('financial.property_details')
+    }
+    if (responseLower.includes('payment') || responseLower.includes('2950') || responseLower.includes('2600') || responseLower.includes('cash out')) {
+      usedFields.push('financial.financial_goals')
+    }
+    if (responseLower.includes('credit') || responseLower.includes('785') || responseLower.includes('payment history')) {
+      usedFields.push('financial.payment_history')
+    }
+  } else if (scenario === 'healthcare') {
+    // Check for health references
+    if (responseLower.includes('bmi') || responseLower.includes('diabetes') || responseLower.includes('a1c') || responseLower.includes('hypertension')) {
+      usedFields.push('health.current_conditions')
+    }
+    if (responseLower.includes('insurance') || responseLower.includes('blue shield') || responseLower.includes('deductible')) {
+      usedFields.push('health.insurance_coverage')
+    }
+    if (responseLower.includes('family history') || responseLower.includes('weight loss')) {
+      usedFields.push('health.medical_history')
+    }
+  }
+  
+  // Always check for personal info usage
+  if (responseLower.includes('bob') || responseLower.includes('north')) {
+    usedFields.push('personal.name')
+  }
+  if (responseLower.includes('stanford') || responseLower.includes('research fellow')) {
+    usedFields.push('personal.occupation')
+  }
+  if (responseLower.includes('san francisco') || responseLower.includes('mission') || responseLower.includes('apartment')) {
+    usedFields.push('personal.location')
+  }
+  
+  return [...new Set(usedFields)] // Remove duplicates
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { agent, context, systemPrompt, model, conversationHistory } = await req.json()
+    const { agent, context, systemPrompt, model, conversationHistory, scenario } = await req.json()
 
     const openrouter = createOpenRouter({
       apiKey: process.env.OPENROUTER_API_KEY!,
     })
 
     let finalSystemPrompt: string
+    let contextData: any = {}
 
     if (agent === "my_agent") {
       // Use provided system prompt or build from preferences
+      contextData = await getContext()
       if (systemPrompt) {
-        const contextData = await getContext()
         finalSystemPrompt = `${systemPrompt}\n\nCurrent Context:\n${JSON.stringify(contextData, null, 2)}\n\nNegotiation Context: ${context}`
       } else {
-        const contextData = await getContext()
         finalSystemPrompt = buildMyAgentPrompt(contextData, context)
       }
     } else {
@@ -42,7 +107,16 @@ export async function POST(req: NextRequest) {
       temperature: 0.7,
     })
 
-    return NextResponse.json({ text })
+    // Analyze context usage for my_agent responses
+    let contextUsed: string[] = []
+    if (agent === "my_agent") {
+      contextUsed = analyzeContextUsage(text, contextData, scenario || 'washing-machine')
+    }
+
+    return NextResponse.json({ 
+      text,
+      contextUsed 
+    })
   } catch (error) {
     console.error(`[Negotiate] Error for agent:`, error)
     return NextResponse.json(
