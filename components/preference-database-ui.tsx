@@ -4,9 +4,49 @@ import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Archive, RefreshCw, CircleDot } from "lucide-react"
+import { Archive, RefreshCw, CircleDot, MoreHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { cn } from "@/lib/utils"
+
+// Simple inline expandable text component
+const ExpandableText = ({ text, className }: { text: string, className?: string }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const isLongText = text.length > 80
+  const truncatedText = isLongText ? text.slice(0, 80) + '...' : text
+  
+  if (!isLongText) {
+    return (
+      <Badge variant="outline" className="text-xs bg-muted/50">
+        {text}
+      </Badge>
+    )
+  }
+
+  return (
+    <div className={cn("w-full", className)}>
+      <Badge 
+        variant="outline" 
+        className={cn(
+          "text-xs bg-muted/50 hover:bg-muted/70 transition-colors cursor-pointer w-full inline-block",
+          isExpanded ? "whitespace-pre-wrap leading-relaxed p-3 text-left" : "truncate"
+        )}
+        onClick={() => setIsExpanded(!isExpanded)}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
+      >
+        <div className={cn("flex items-center gap-1", isExpanded && "block")}>
+          <span className={cn(!isExpanded && "truncate flex-1")}>
+            {isExpanded ? text : truncatedText}
+          </span>
+          {!isExpanded && (
+            <MoreHorizontal className="w-3 h-3 text-muted-foreground flex-shrink-0 opacity-60" />
+          )}
+        </div>
+      </Badge>
+    </div>
+  )
+}
 
 export function PreferenceDatabaseUI() {
   const [context, setContext] = useState<any>({})
@@ -91,22 +131,18 @@ export function PreferenceDatabaseUI() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: (index * 0.1) + (entryIndex * 0.05) }}
-                  className="flex justify-between items-center text-sm group"
+                  className="flex flex-col gap-1 text-sm group"
                 >
-                  <span className="capitalize text-muted-foreground group-hover:text-foreground transition-colors">
+                  <span className="capitalize text-muted-foreground group-hover:text-foreground transition-colors text-xs">
                     {key.replace(/_/g, ' ')}
                   </span>
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs bg-muted/50 hover:bg-muted transition-colors cursor-default max-w-[200px] truncate"
-                    title={typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                  >
-                    {typeof value === 'object' && value !== null
-                      ? `{${Object.keys(value).length} fields}` 
+                  <ExpandableText 
+                    text={typeof value === 'object' && value !== null
+                      ? JSON.stringify(value, null, 2)
                       : Array.isArray(value) 
                         ? value.join(', ') 
                         : String(value)}
-                  </Badge>
+                  />
                 </motion.div>
               ))
             ) : (
