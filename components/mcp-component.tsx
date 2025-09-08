@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Cpu, ArrowRight, Workflow, Sparkles } from "lucide-react"
@@ -88,10 +89,11 @@ export function MCPComponent() {
               href="https://cursor.com/en/install-mcp?name=human-context-protocol&config=eyJ1cmwiOiJodHRwczovL2hjcC5sb3lhbGFnZW50cy5vcmcvYXBpL21jcC9tY3AifQ%3D%3D"
               className="inline-block transition-transform hover:scale-105 active:scale-95"
             >
-              <img 
+              <Image 
                 src="https://cursor.com/deeplink/mcp-install-dark.svg" 
                 alt="Add human-context-protocol MCP server to Cursor" 
-                height="32"
+                height={32}
+                width={200}
                 className="h-8 sm:h-9"
               />
             </a>
